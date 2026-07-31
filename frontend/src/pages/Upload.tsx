@@ -181,7 +181,23 @@ export const Upload: React.FC = () => {
     }
   }
 
-  const extractTextFromFile = (file: File): Promise<string> => {
+  const extractTextFromFile = async (file: File): Promise<string> => {
+    // 1. Try backend PyMuPDF extraction first
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const res = await api.post('/papers/extract-text', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 4000
+      });
+      if (res.data && res.data.text && res.data.text.trim().length > 20) {
+        return res.data.text;
+      }
+    } catch (err) {
+      console.log('Backend PyMuPDF extraction fallback to client filter');
+    }
+
+    // 2. Client-side fallback with strict PDF metadata filter
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -199,25 +215,19 @@ export const Upload: React.FC = () => {
           rawText = decoder.decode(bytes);
         }
 
-        // Extract clean text blocks from PDF stream or plain file
-        const matches = rawText.match(/[A-Z0-9][A-Za-z0-9\s.,;:'"()\-\/]{5,}/g);
-        if (matches && matches.length > 0) {
-          const cleaned = matches
-            .filter(m => 
-              !m.includes('obj') && 
-              !m.includes('endobj') && 
-              !m.includes('stream') && 
-              !m.includes('FlateDecode') && 
-              !m.includes('Font') && 
-              !m.includes('Catalog') && 
-              !m.includes('MediaBox') &&
-              m.trim().length > 15
-            )
-            .join('\n\n');
-          resolve(cleaned);
-        } else {
-          resolve('');
-        }
+        // Clean out PDF object metadata, stream dictionaries, and hex tokens
+        const lines = rawText.split('\n');
+        const cleanLines = lines.filter(line => {
+          const l = line.trim();
+          if (l.length < 5) return false;
+          if (l.startsWith('/') || l.includes(' 0 R') || l.includes('obj') || l.includes('endobj')) return false;
+          if (l.includes('XYZ') || l.includes('Annots') || l.includes('Producer') || l.includes('MediaBox') || l.includes('Kids') || l.includes('Pages')) return false;
+          if (l.includes('C90178') || l.includes('C99A83') || /^[A-F0-9]{16,}$/i.test(l)) return false;
+          // Must contain readable words
+          return /[a-zA-Z]{3,}/.test(l);
+        });
+
+        resolve(cleanLines.join('\n\n'));
       };
       reader.readAsArrayBuffer(file);
     });

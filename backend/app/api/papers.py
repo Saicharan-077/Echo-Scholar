@@ -25,6 +25,43 @@ from app.services.openai_service import openai_service
 router = APIRouter(prefix="/papers", tags=["Papers"])
 
 
+@router.post("/extract-text")
+async def extract_paper_text(
+    file: UploadFile = File(...)
+):
+    """Extract clean human-readable text from uploaded PDF/DOCX/PPTX file using PyMuPDF."""
+    allowed_exts = ('.pdf', '.docx', '.pptx', '.txt')
+    if not file.filename.lower().endswith(allowed_exts):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Supported formats: PDF, DOCX, PPTX, TXT"
+        )
+    
+    file_content = await file.read()
+    temp_dir = Path("./uploads/temp")
+    temp_dir.mkdir(parents=True, exist_ok=True)
+    temp_path = temp_dir / f"temp_{file.filename}"
+    
+    with open(temp_path, "wb") as f:
+        f.write(file_content)
+        
+    try:
+        raw_text = await pdf_service.extract_text(str(temp_path))
+    finally:
+        if temp_path.exists():
+            temp_path.unlink()
+            
+    # Clean text lines
+    lines = [l.strip() for l in raw_text.split("\n") if l.strip() and not l.strip().isdigit()]
+    text = "\n\n".join(lines)
+    
+    return {
+        "filename": file.filename,
+        "text": text,
+        "paragraphs": lines
+    }
+
+
 @router.post("/upload", response_model=PaperUploadResponse)
 async def upload_paper(
     background_tasks: BackgroundTasks,
