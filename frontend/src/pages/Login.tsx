@@ -10,7 +10,7 @@ export const Login: React.FC = () => {
   const location = useLocation();
 
   // Determine return URL from location state
-  const from = (location.state as any)?.from?.pathname || '/dashboard';
+  const from = (location.state as any)?.from?.pathname || '/';
 
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
