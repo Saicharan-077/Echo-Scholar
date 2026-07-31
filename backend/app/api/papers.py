@@ -54,11 +54,18 @@ async def extract_paper_text(
     # Clean text lines
     lines = [l.strip() for l in raw_text.split("\n") if l.strip() and not l.strip().isdigit()]
     text = "\n\n".join(lines)
+
+    # Generate AI summary using AIModelRouter (Gemma / Ollama)
+    ai_summary = await AIModelRouter.generate_response(
+        prompt=f"Summarize the key sections, technical findings, and main points of this document ({file.filename}) in 3 clear paragraphs:\n\n{text[:2500]}",
+        system_instruction="You are Professor Vox, an expert academic AI mentor analyzing uploaded research papers and resumes."
+    )
     
     return {
         "filename": file.filename,
         "text": text,
-        "paragraphs": lines
+        "paragraphs": lines,
+        "ai_summary": ai_summary
     }
 
 

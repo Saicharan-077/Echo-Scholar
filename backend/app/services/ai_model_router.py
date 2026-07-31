@@ -31,11 +31,43 @@ class AIModelRouter:
         temperature: float = 0.7,
         max_tokens: int = 1500
     ) -> str:
-        """
-        Generate AI response using Ollama -> Gemini -> OpenAI -> Featherless -> Smart Offline Synthesis.
-        """
-        
-        # 1. Try Local Ollama Instance if available
+        # 1. Try OpenRouter API (google/gemma-4-31B-it) if key is present
+        openrouter_key = os.getenv("OPENROUTER_API_KEY") or getattr(settings, "openrouter_api_key", None) or ""
+        openrouter_model = os.getenv("OPENROUTER_MODEL") or "google/gemma-4-31B-it"
+
+        if openrouter_key and len(openrouter_key) > 10:
+            try:
+                url = "https://openrouter.ai/api/v1/chat/completions"
+                headers = {
+                    "Authorization": f"Bearer {openrouter_key}",
+                    "HTTP-Referer": "http://localhost:2679",
+                    "X-Title": "EchoScholar AI",
+                    "Content-Type": "application/json"
+                }
+                payload = {
+                    "model": openrouter_model,
+                    "messages": [
+                        {"role": "system", "content": system_instruction},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "temperature": temperature,
+                    "max_tokens": max_tokens
+                }
+                async with httpx.AsyncClient(timeout=25.0) as client:
+                    res = await client.post(url, headers=headers, json=payload)
+                    if res.status_code == 200:
+                        data = res.json()
+                        choices = data.get("choices", [])
+                        if choices and choices[0].get("message", {}).get("content"):
+                            text = choices[0]["message"]["content"]
+                            print(f"AIModelRouter: Generated response using OpenRouter ({openrouter_model})")
+                            return text
+                    else:
+                        print(f"OpenRouter status {res.status_code}: {res.text}")
+            except Exception as e:
+                print(f"OpenRouter exception: {e}")
+
+        # 2. Try Local Ollama Instance if available
         ollama_host = os.getenv("OLLAMA_HOST") or os.getenv("OLLAMA_BASE_URL") or "http://localhost:11434"
         ollama_model = os.getenv("OLLAMA_MODEL") or "llama3.2"
         use_ollama = os.getenv("USE_OLLAMA", "true").lower() == "true"
