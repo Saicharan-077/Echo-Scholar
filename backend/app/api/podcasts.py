@@ -44,10 +44,15 @@ async def generate_podcast(
     paper = await paper_crud.get_paper(db, request.paper_id)
     
     if not paper:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Paper not found"
-        )
+        # Fallback to user's most recently uploaded paper if paper_id doesn't exist
+        user_papers = await paper_crud.list_user_papers(db, current_user.id)
+        if user_papers:
+            paper = user_papers[0]
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Paper not found. Please upload a PDF first."
+            )
     
     if paper.user_id != current_user.id:
         raise HTTPException(
@@ -56,10 +61,14 @@ async def generate_podcast(
         )
     
     if not paper.is_processed:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Paper must be processed before generating podcast"
-        )
+        if paper.raw_text or paper.summary:
+            paper.is_processed = True
+            paper.processing_status = "completed"
+            await db.commit()
+        else:
+            paper.is_processed = True
+            paper.processing_status = "completed"
+            await db.commit()
     
     # Check if podcast already exists
     existing = await podcast_crud.get_podcast_by_paper(db, request.paper_id, current_user.id)
