@@ -1,0 +1,10 @@
+﻿{
+    "name": "echo-scholar-backend",
+    "version": "1.0.0",
+    "description": "Backend API for Echo Scholar AI",
+    "scripts": {
+        "start": "source venv/bin/activate && uvicorn app.main:app --reload --host 0.0.0.0 --port 6279"
+    },
+    "author": "",
+    "license": "ISC"
+}
