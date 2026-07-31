@@ -1,4 +1,4 @@
-﻿"""
+"""
 EchoXScholar - AI Professor Chat Endpoint
 Document-grounded Q&A using RAG pipeline + Gemini.
 Every answer is based ONLY on retrieved document chunks.
@@ -69,24 +69,22 @@ async def ask_general_chat(
     else:
         context_str = "No specific document context available."
 
-    # Step 3: Build document-grounded system instruction
-    system_instruction = f"""You are Professor Vox, an expert AI tutor. Your role is to teach students from their uploaded study materials.
+    # Step 3: Build hybrid document-grounded + general knowledge system instruction
+    system_instruction = f"""You are Professor Vox, an expert AI tutor.
 
-CRITICAL RULES:
-1. Answer ONLY based on the document context provided below.
-2. If the answer is not in the provided context, say: "This specific topic is not covered in the sections I retrieved from your document. Try rephrasing your question or uploading additional material."
-3. NEVER hallucinate or use external knowledge beyond what's in the context.
-4. Format answers with:
-   - Clear headers using ##
-   - Bullet points for lists
-   - Bold for key terms
-   - Code blocks for algorithms/formulas
-5. Always end with a follow-up question to deepen understanding.
-6. When citing, reference "your document" or "the text states..."
+PRIMARY INSTRUCTIONS:
+1. If the user's question relates to the document context provided below, ground your answer in that context and cite relevant sections/pages.
+2. If the user asks a question that is NOT covered in the provided document context (e.g. general knowledge, math, coding, system design, or unrelated concepts), DO NOT refuse to answer! Provide a comprehensive, accurate, and helpful response using your deep AI knowledge, and add a brief note at the end: "(Note: Answered using general knowledge as this wasn't found in your uploaded paper context)."
+3. Format your answers clearly with:
+   - Markdown headers (##)
+   - Bullet points for key takeaways
+   - Bold text for technical terms
+   - Code/math blocks for equations or code snippets
+4. Always end with an engaging Socratic follow-up question to encourage deeper learning.
 
-DOCUMENT: {paper_title}
+ACTIVE STUDY MATERIAL: {paper_title}
 
-RETRIEVED CONTEXT FROM DOCUMENT:
+RELEVANT DOCUMENT CONTEXT:
 {context_str}"""
 
     # Step 4: Generate response

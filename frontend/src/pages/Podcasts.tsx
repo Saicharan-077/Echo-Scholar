@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Headphones, 
   Play, 
@@ -8,7 +8,8 @@ import {
   Sparkles, 
   HelpCircle, 
   CheckCircle2, 
-  Volume2
+  Volume2,
+  RotateCcw
 } from 'lucide-react';
 import { api } from '../services/api';
 
@@ -19,6 +20,7 @@ export const Podcasts: React.FC = () => {
   const [interruptionAnswer, setInterruptionAnswer] = useState('');
   const [askingAI, setAskingAI] = useState(false);
   const [activeTab, setActiveTab] = useState<'audio' | 'transcript' | 'quiz'>('audio');
+  const [currentLineIndex, setCurrentLineIndex] = useState(0);
 
   const demoScript = [
     { time: '0:05', speaker: 'Prabhat', text: "Welcome back to EchoXScholar AI! Today we're breaking down Transformer Architecture and Self-Attention mechanisms." },
@@ -27,9 +29,109 @@ export const Podcasts: React.FC = () => {
     { time: '1:10', speaker: 'Neerja', text: "Exactly. Without positional encoding, the Transformer would treat sequences as an unordered bag of words." },
   ];
 
+  // Refs to decouple speech loop from React re-renders
+  const isPlayingRef = useRef(false);
+  const isInterruptedRef = useRef(false);
+  const currentLineRef = useRef(0);
+
+  // Sync refs with state
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
+
+  useEffect(() => {
+    isInterruptedRef.current = isInterrupted;
+  }, [isInterrupted]);
+
+  // Clean cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  const playLine = (index: number) => {
+    if (!('speechSynthesis' in window)) return;
+    if (!isPlayingRef.current || isInterruptedRef.current) return;
+
+    const lineIdx = index % demoScript.length;
+    currentLineRef.current = lineIdx;
+    setCurrentLineIndex(lineIdx);
+
+    const line = demoScript[lineIdx];
+    const utterance = new SpeechSynthesisUtterance(line.text);
+
+    // Differentiate co-host voice pitches
+    if (line.speaker === 'Prabhat') {
+      utterance.pitch = 0.95;
+      utterance.rate = 1.0;
+    } else {
+      utterance.pitch = 1.25;
+      utterance.rate = 1.05;
+    }
+
+    utterance.onend = () => {
+      if (isPlayingRef.current && !isInterruptedRef.current) {
+        const nextIdx = (lineIdx + 1) % demoScript.length;
+        // Small delay between speakers
+        setTimeout(() => {
+          if (isPlayingRef.current && !isInterruptedRef.current) {
+            playLine(nextIdx);
+          }
+        }, 500);
+      }
+    };
+
+    utterance.onerror = (e) => {
+      console.log('Speech synthesis note:', e);
+      if (isPlayingRef.current && !isInterruptedRef.current) {
+        const nextIdx = (lineIdx + 1) % demoScript.length;
+        setTimeout(() => playLine(nextIdx), 600);
+      }
+    };
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const handleTogglePlay = () => {
+    if (!('speechSynthesis' in window)) return;
+
+    if (isPlaying) {
+      isPlayingRef.current = false;
+      setIsPlaying(false);
+      window.speechSynthesis.cancel();
+    } else {
+      window.speechSynthesis.cancel();
+      isPlayingRef.current = true;
+      setIsPlaying(true);
+      setIsInterrupted(false);
+      isInterruptedRef.current = false;
+      // Start playing from current line
+      setTimeout(() => playLine(currentLineRef.current), 100);
+    }
+  };
+
+  const handleRestart = () => {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    currentLineRef.current = 0;
+    setCurrentLineIndex(0);
+    isPlayingRef.current = true;
+    setIsPlaying(true);
+    setIsInterrupted(false);
+    isInterruptedRef.current = false;
+    setTimeout(() => playLine(0), 100);
+  };
+
   const handleInterrupt = () => {
+    if (!('speechSynthesis' in window)) return;
+    isPlayingRef.current = false;
+    isInterruptedRef.current = true;
     setIsPlaying(false);
     setIsInterrupted(true);
+    window.speechSynthesis.cancel();
   };
 
   const handleAskInterruption = async () => {
@@ -41,19 +143,39 @@ export const Podcasts: React.FC = () => {
         ai_model: 'gemini-1.5-flash',
         agent_type: 'teacher'
       });
-      setInterruptionAnswer(res.data.answer || "Great question! Self-attention calculates how relevant every word in a sentence is to every other word, using Query, Key, and Value matrices.");
+      const answer = res.data.answer || "Great question! Self-attention calculates how relevant every word in a sentence is to every other word, using Query, Key, and Value matrices.";
+      setInterruptionAnswer(answer);
+
+      // Speak AI Answer aloud cleanly
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const voxSpeech = new SpeechSynthesisUtterance(answer.replace(/[*#`]/g, '').slice(0, 280));
+        voxSpeech.pitch = 1.0;
+        window.speechSynthesis.speak(voxSpeech);
+      }
     } catch (e) {
-      setInterruptionAnswer("Self-attention allows the neural net to weigh the importance of different words in a sentence dynamically, regardless of their distance!");
+      const fallbackAns = "Self-attention allows the neural net to weigh the importance of different words in a sentence dynamically, regardless of their distance!";
+      setInterruptionAnswer(fallbackAns);
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const voxSpeech = new SpeechSynthesisUtterance(fallbackAns);
+        window.speechSynthesis.speak(voxSpeech);
+      }
     } finally {
       setAskingAI(false);
     }
   };
 
   const handleResumePodcast = () => {
-    setIsInterrupted(false);
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
     setInterruptionQuery('');
     setInterruptionAnswer('');
+    setIsInterrupted(false);
+    isInterruptedRef.current = false;
+    isPlayingRef.current = true;
     setIsPlaying(true);
+    setTimeout(() => playLine(currentLineRef.current), 100);
   };
 
   return (
@@ -62,7 +184,7 @@ export const Podcasts: React.FC = () => {
       {/* Header */}
       <div className="saas-panel p-6 bg-white border border-gray-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold border border-indigo-200 mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-semibold border border-indigo-200 mb-2">
             <Headphones className="w-3.5 h-3.5" />
             <span>Dual Co-Host Engine • Real-Time Speech Portal</span>
           </div>
@@ -88,21 +210,21 @@ export const Podcasts: React.FC = () => {
           
           {/* Cover & Title */}
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xl shadow-sm shrink-0">
+            <div className="w-16 h-16 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xl shadow-sm shrink-0">
               <Headphones className="w-8 h-8" />
             </div>
             <div>
               <span className="badge-accent">Paper Overview</span>
-              <h2 className="h3-title text-lg mt-1">Attention Is All You Need — Transformer Architecture</h2>
-              <p className="small-text">Co-hosts: Prabhat (Deep Voice) & Neerja (Expressive)</p>
+              <h2 className="h3-title text-lg mt-1 font-extrabold text-gray-900">Attention Is All You Need — Transformer Architecture</h2>
+              <p className="small-text text-gray-500">Co-hosts: Prabhat (Deep Voice) & Neerja (Expressive)</p>
             </div>
           </div>
 
           {/* Equalizer Waveform Visualizer */}
-          <div className="h-20 bg-gray-900 rounded-lg p-4 flex items-center justify-center gap-1">
+          <div className="h-24 bg-gray-900 rounded-xl p-4 flex items-center justify-center gap-1 shadow-inner">
             {Array.from({ length: 48 }).map((_, i) => {
               const height = isPlaying 
-                ? [20, 45, 75, 30, 90, 60, 40, 80, 100, 50, 70, 35][i % 12] 
+                ? [25, 50, 85, 35, 95, 65, 45, 85, 100, 55, 75, 40][i % 12] 
                 : 15;
               return (
                 <div
@@ -116,122 +238,138 @@ export const Podcasts: React.FC = () => {
             })}
           </div>
 
+          {/* Active Speaker Highlight Box */}
+          <div className="p-4 bg-indigo-50/70 border border-indigo-100 rounded-xl space-y-1">
+            <div className="flex items-center justify-between text-xs font-bold text-indigo-700">
+              <span>NOW SPEAKING: {demoScript[currentLineIndex].speaker}</span>
+              <span className="text-[11px] font-mono text-indigo-500">{demoScript[currentLineIndex].time}</span>
+            </div>
+            <p className="text-sm font-medium text-gray-800 leading-relaxed">
+              "{demoScript[currentLineIndex].text}"
+            </p>
+          </div>
+
           {/* Playback Controls & Interrupt Button */}
           <div className="flex items-center justify-between pt-2">
             <div className="flex items-center gap-4">
               <button
-                onClick={() => setIsPlaying(!isPlaying)}
-                className="w-12 h-12 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center shadow-sm transition-all"
+                onClick={handleTogglePlay}
+                className="w-12 h-12 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white flex items-center justify-center shadow-sm transition-all cursor-pointer"
               >
                 {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
               </button>
 
+              <button
+                onClick={handleRestart}
+                className="p-2 text-gray-500 hover:text-indigo-600 rounded-lg hover:bg-gray-100 transition-colors"
+                title="Restart Podcast from Beginning"
+              >
+                <RotateCcw className="w-5 h-5" />
+              </button>
+
               <div>
-                <p className="text-xs font-semibold text-gray-900">{isPlaying ? 'Playing Episode...' : 'Paused'}</p>
-                <p className="text-[11px] text-gray-500">0:45 / 4:30 mins</p>
+                <p className="text-xs font-semibold text-gray-900">{isPlaying ? 'Playing Full Episode...' : 'Paused'}</p>
+                <p className="text-[11px] text-gray-500 font-mono">Line {currentLineIndex + 1} of {demoScript.length} (Continuous Loop)</p>
               </div>
             </div>
 
             {/* THE KILLER HACKATHON FEATURE BUTTON */}
             <button
               onClick={handleInterrupt}
-              className="btn-primary bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold"
+              className="btn-primary bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold rounded-xl flex items-center gap-1.5 cursor-pointer shadow-xs"
             >
               <Mic className="w-4 h-4" />
-              <span>⚡ Hey Wait! Interrupt Co-Host</span>
+              <span>Interrupt Co-Host</span>
             </button>
           </div>
 
-          {/* Interruption Drawer */}
-          {isInterrupted && (
-            <div className="p-4 rounded-lg bg-amber-50 border border-amber-200 space-y-3">
+        </div>
+
+        {/* Right Interruption Assistant & Live Quiz Panel */}
+        <div className="space-y-6">
+          
+          {/* Interruption Modal Box */}
+          {isInterrupted ? (
+            <div className="saas-card p-6 bg-amber-50 border-amber-200 rounded-2xl space-y-4 shadow-sm">
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-amber-900 text-xs">
-                  🎙️ Podcast Paused • Ask Co-Hosts Prabhat & Neerja
+                <span className="badge-warning text-xs">Podcast Paused</span>
+                <span className="text-xs font-bold text-amber-700 flex items-center gap-1">
+                  <Mic className="w-3.5 h-3.5 animate-pulse" /> Interruption Mode
                 </span>
-                <span className="badge-warning">Live Portal</span>
               </div>
 
-              <textarea
-                value={interruptionQuery}
-                onChange={(e) => setInterruptionQuery(e.target.value)}
-                placeholder="e.g. Can you explain Query, Key, and Value matrices with a library book analogy?"
-                className="saas-input w-full text-xs"
-                rows={2}
-              />
-              
-              <div className="flex items-center justify-between pt-1">
-                <button
-                  onClick={handleAskInterruption}
-                  disabled={askingAI}
-                  className="btn-primary text-xs bg-amber-600 hover:bg-amber-700"
-                >
-                  {askingAI ? 'Asking AI...' : 'Submit Question'}
-                </button>
-
-                <button onClick={handleResumePodcast} className="btn-secondary text-xs">
-                  Resume Podcast ▶
-                </button>
+              <div className="space-y-2">
+                <h3 className="font-bold text-sm text-gray-900">Ask Professor Vox Anything Mid-Episode:</h3>
+                <input
+                  type="text"
+                  value={interruptionQuery}
+                  onChange={(e) => setInterruptionQuery(e.target.value)}
+                  placeholder="e.g., Why do we divide by sqrt(d_k)?"
+                  className="w-full px-3 py-2 text-xs bg-white border border-amber-300 rounded-xl text-gray-900 outline-none focus:border-amber-500"
+                />
               </div>
+
+              <button
+                onClick={handleAskInterruption}
+                disabled={askingAI}
+                className="w-full btn-primary bg-amber-600 hover:bg-amber-700 text-white text-xs py-2 font-semibold rounded-xl cursor-pointer"
+              >
+                {askingAI ? 'Professor Vox Thinking & Speaking...' : 'Ask Question →'}
+              </button>
 
               {interruptionAnswer && (
-                <div className="p-3 rounded bg-white border border-amber-200 space-y-1 text-xs text-gray-800">
-                  <p className="font-bold text-amber-900">Neerja (Co-Host Answer):</p>
-                  <p>{interruptionAnswer}</p>
+                <div className="p-3 bg-white border border-amber-200 rounded-xl text-xs space-y-1">
+                  <p className="font-bold text-amber-800">Professor Vox Answer:</p>
+                  <p className="text-gray-800 leading-relaxed">{interruptionAnswer}</p>
                 </div>
               )}
+
+              <button
+                onClick={handleResumePodcast}
+                className="w-full text-center text-xs font-bold text-indigo-600 hover:underline pt-2 cursor-pointer"
+              >
+                ✓ Resume Podcast Episode →
+              </button>
+            </div>
+          ) : (
+            <div className="saas-card p-6 rounded-2xl space-y-4 bg-white border border-gray-200">
+              <div className="flex items-center gap-2 text-indigo-600 font-bold text-sm">
+                <Sparkles className="w-4 h-4" />
+                <span>Live Interactive Features</span>
+              </div>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Click <strong>"Interrupt Co-Host"</strong> at any point to pause the episode, ask Professor Vox a technical question in real-time, and resume playback seamlessly!
+              </p>
+              <div className="p-3 bg-indigo-50 rounded-xl text-xs font-semibold text-indigo-900 border border-indigo-100">
+                ⚡ Audio will continuously cycle through co-hosts Prabhat & Neerja and repeat automatically when the episode ends.
+              </div>
             </div>
           )}
 
-        </div>
-
-        {/* Right Sidebar: Pop Quiz & Transcript */}
-        <div className="space-y-6">
-          
-          <div className="saas-card p-5 space-y-3">
-            <div className="flex items-center gap-2 text-indigo-600 font-semibold text-xs">
-              <HelpCircle className="w-4 h-4" />
+          {/* Active Recall Pop Quiz */}
+          <div className="saas-card p-6 rounded-2xl space-y-4 bg-white border border-gray-200">
+            <div className="flex items-center gap-2 text-gray-900 font-bold text-sm">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               <span>Active Recall Pop Quiz</span>
             </div>
 
-            <p className="text-xs text-gray-700">
-              Why is Positional Encoding essential in Transformer Architecture?
+            <p className="text-xs text-gray-700 font-medium">
+              Why does Multi-Head Attention use multiple attention heads instead of one?
             </p>
 
-            <div className="space-y-2">
-              {[
-                'To inject token sequence order information',
-                'To reduce matrix multiplication memory size',
-                'To compress hidden layer dimensions',
-                'To prevent gradient explosion in backprop'
-              ].map((opt, i) => (
-                <button
-                  key={i}
-                  className="w-full text-left p-2 rounded border border-gray-200 text-xs text-gray-700 hover:border-indigo-500 hover:bg-indigo-50 transition-colors flex items-center gap-2"
-                >
-                  <span className="font-bold text-gray-500">{String.fromCharCode(65 + i)}.</span>
-                  <span>{opt}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="saas-card p-5 space-y-3">
-            <h3 className="h3-title text-sm flex items-center gap-2">
-              <MessageSquare className="w-4 h-4 text-indigo-600" />
-              <span>Live Transcript Stream</span>
-            </h3>
-
-            <div className="space-y-3 text-xs max-h-48 overflow-y-auto pr-1">
-              {demoScript.map((s, idx) => (
-                <div key={idx} className="space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-gray-900">{s.speaker}</span>
-                    <span className="text-[10px] text-gray-400">[{s.time}]</span>
-                  </div>
-                  <p className="text-gray-600">{s.text}</p>
-                </div>
-              ))}
+            <div className="space-y-2 text-xs">
+              <button 
+                onClick={() => alert("Correct! Multiple heads allow joint attention across different representation subspaces.")}
+                className="w-full text-left p-2.5 rounded-xl border border-gray-200 hover:border-indigo-500 hover:bg-indigo-50 font-medium transition-all cursor-pointer"
+              >
+                A. To attend to information from different representation subspaces
+              </button>
+              <button 
+                onClick={() => alert("Incorrect. Try again!")}
+                className="w-full text-left p-2.5 rounded-xl border border-gray-200 hover:border-indigo-500 hover:bg-indigo-50 font-medium transition-all cursor-pointer"
+              >
+                B. To decrease total parameter count
+              </button>
             </div>
           </div>
 
