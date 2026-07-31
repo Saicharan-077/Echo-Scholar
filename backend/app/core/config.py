@@ -24,6 +24,17 @@ class Settings(BaseSettings):
     
     # Database
     database_url: str = "sqlite+aiosqlite:///./EchoXScholar.db"
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def sanitize_database_url(cls, v):
+        if isinstance(v, str):
+            v = v.strip().replace("\r", "").replace("\n", "")
+            if v.startswith("postgres://"):
+                v = v.replace("postgres://", "postgresql+asyncpg://", 1)
+            elif v.startswith("postgresql://") and not v.startswith("postgresql+asyncpg://"):
+                v = v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return v
     
     # Supabase (Optional APIs and DB Configuration)
     supabase_url: str = ""
