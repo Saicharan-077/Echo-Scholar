@@ -325,18 +325,17 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
       <div className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           {onBack && (
-            <button onClick={onBack} className="text-xs font-bold text-indigo-600 hover:text-indigo-800 mb-1 block">
-              ← Back to Paper Reader
+            <button onClick={onBack} className="text-[11px] font-bold text-gray-400 hover:text-gray-700 uppercase tracking-widest mb-2 block transition-colors">
+              ← Return to Reader
             </button>
           )}
-          <div className="flex items-center gap-2 mb-1">
-            <span className="badge-accent text-[11px] font-bold uppercase tracking-wider">
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="badge-accent text-[10px] font-bold uppercase tracking-widest bg-indigo-50 text-indigo-700 border border-indigo-100 px-2 py-0.5 rounded">
               Official Assessment
             </span>
-            <span className="text-xs text-gray-400 font-medium">Difficulty: Medium</span>
+            <span className="text-[11px] text-gray-400 font-medium">Medium Difficulty</span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-gray-900 tracking-tight">Socratic Concept Check</h2>
-          <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">{paperTitle}</p>
+          <h2 className="text-lg font-bold text-gray-900 tracking-tight">Concept Check: {paperTitle}</h2>
         </div>
 
         {/* Timer & Question Progress Counter */}
@@ -362,11 +361,11 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
       {/* Main Question Card */}
       <div className="p-6 sm:p-8 bg-white border border-gray-200/80 rounded-2xl space-y-6 shadow-xs">
         
-        <div className="space-y-2">
-          <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider flex items-center gap-1.5">
-            <Brain className="w-4 h-4" /> Active Recall Challenge {currentIdx + 1}
+        <div className="space-y-3">
+          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1.5">
+            <Brain className="w-3.5 h-3.5 text-indigo-500" /> Active Recall Challenge {currentIdx + 1}
           </span>
-          <h3 className="text-lg sm:text-xl font-extrabold text-gray-900 leading-snug">
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 leading-relaxed max-w-2xl">
             {currentQ.q}
           </h3>
         </div>
@@ -394,10 +393,10 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
                 key={optIdx}
                 disabled={isCurrentSubmitted}
                 onClick={() => handleSelectOption(optIdx)}
-                className={`p-4 rounded-xl border transition-all text-left flex items-start justify-between gap-3 text-sm font-medium leading-relaxed ${styleClass}`}
+                className={`p-3.5 rounded-xl border transition-all text-left flex items-start justify-between gap-3 text-sm font-medium leading-relaxed ${styleClass}`}
               >
                 <div className="flex items-start gap-3">
-                  <span className="w-6 h-6 rounded-lg bg-gray-100 text-gray-700 font-bold text-xs flex items-center justify-center shrink-0 border border-gray-200 mt-0.5">
+                  <span className="w-5 h-5 rounded-[4px] bg-gray-100 text-gray-500 font-bold text-[10px] flex items-center justify-center shrink-0 border border-gray-200 mt-0.5">
                     {String.fromCharCode(65 + optIdx)}
                   </span>
                   <span className="pt-0.5">{opt}</span>

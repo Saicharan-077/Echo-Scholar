@@ -154,7 +154,7 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
   const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'assistant'; text: string; citation?: string }[]>(() => [
     {
       role: 'assistant',
-      text: `Welcome back, Manikanth!\n\nDocument Loaded: **${activePaper.title}**\n\nToday's Focus: **Section 2: Key Vector Chunk Extracts**.\nVector Indexing: **Active & Grounded**.`
+      text: `Hello Manikanth!\n\nYour workstation for **${activePaper.title}** is ready.\n\nToday's Focus: **Section 2: Vector Chunks**.\nStatus: **Active & Grounded**.`
     }
   ]);
   const [userQuery, setUserQuery] = useState('');
@@ -614,19 +614,19 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
             />
 
             {/* Q&A Assistant Chat */}
-            <div className="flex-1 p-3 overflow-y-auto space-y-3 bg-gray-50/30">
+            <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-gray-50/50">
               {chatMessages.map((msg, idx) => (
                 <div key={idx} className={`flex flex-col w-full ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
                   <div
-                    className={`max-w-[90%] px-3.5 py-2.5 rounded-xl text-xs leading-relaxed whitespace-pre-line break-words ${
+                    className={`max-w-[92%] px-4 py-3 rounded-2xl text-xs leading-relaxed whitespace-pre-line break-words shadow-xs ${
                       msg.role === 'user'
-                        ? 'bg-indigo-600 text-white rounded-tr-xs font-medium shadow-xs'
-                        : 'bg-white text-gray-800 border border-gray-200/80 rounded-tl-xs shadow-xs'
+                        ? 'bg-indigo-600 text-white rounded-tr-sm font-medium'
+                        : 'bg-white text-gray-800 border border-gray-100 rounded-tl-sm'
                     }`}
                   >
                     <FormattedChatMessage text={msg.text} className={msg.role === 'user' ? 'text-white' : 'text-gray-800'} />
                     {msg.citation && (
-                      <div className="mt-2 pt-1.5 border-t border-gray-100 flex items-center gap-1 text-[10px] font-semibold text-indigo-600">
+                      <div className="mt-2.5 pt-2 border-t border-gray-100/50 flex items-center gap-1.5 text-[10px] font-bold text-indigo-500 uppercase tracking-wide">
                         <Sparkles className="w-3 h-3" />
                         <span>{msg.citation}</span>
                       </div>
@@ -636,23 +636,23 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
               ))}
 
               {isThinking && (
-                <div className="flex items-center gap-2 text-xs text-gray-500 font-medium bg-white p-2.5 rounded-lg border border-gray-200/80 max-w-[180px]">
-                  <Sparkles className="w-3.5 h-3.5 text-indigo-600 animate-spin" />
-                  <span>Thinking...</span>
+                <div className="flex items-center gap-2 text-xs text-gray-500 font-medium bg-white px-4 py-3 rounded-2xl border border-gray-100 shadow-xs max-w-[180px]">
+                  <Sparkles className="w-3.5 h-3.5 text-indigo-500 animate-pulse" />
+                  <span>Vox is typing...</span>
                 </div>
               )}
             </div>
 
             {/* Chat Input */}
-            <form onSubmit={handleSendMessage} className="p-2.5 bg-white border-t border-gray-200 flex gap-2 shrink-0">
+            <form onSubmit={handleSendMessage} className="p-3 bg-white border-t border-gray-100 flex items-center gap-2 shrink-0">
               <input
                 type="text"
                 value={userQuery}
                 onChange={(e) => setUserQuery(e.target.value)}
                 placeholder="Ask Vox..."
-                className="saas-input flex-1 text-xs py-1.5"
+                className="flex-1 text-xs py-2 px-3 bg-gray-50 hover:bg-gray-100 focus:bg-white border border-transparent focus:border-indigo-200 rounded-xl outline-none transition-all placeholder:text-gray-400"
               />
-              <button type="submit" disabled={!userQuery.trim() || isThinking} className="btn-primary text-xs px-3 py-1.5 font-semibold rounded-lg">
+              <button type="submit" disabled={!userQuery.trim() || isThinking} className="p-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-200 disabled:text-gray-400 text-white rounded-xl transition-colors shadow-xs">
                 <Send className="w-3.5 h-3.5" />
               </button>
             </form>
