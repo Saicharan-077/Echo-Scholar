@@ -1,4 +1,4 @@
-﻿"""
+"""
 EchoXScholar - Local Vector RAG Engine
 Implements: chunking → embedding → storage → cosine similarity search
 Uses Google Gemini text-embedding-004 model (available in v1beta).
@@ -276,3 +276,43 @@ class RAGService:
                 result = [{"id": c["id"], "text": c["text"], "score": 0.1}
                          for c in paper.embeddings[:top_k]]
             return result
+
+    @classmethod
+    async def retrieve_context(
+        cls,
+        db: AsyncSession,
+        paper_id: int,
+        query: str,
+        top_k: int = 4,
+        threshold: float = 0.0
+    ) -> Dict[str, Any]:
+        """
+        High-level RAG context retrieval.
+        Returns a dict with:
+          - formatted_context: string ready to inject into AI prompt
+          - citations: list of dicts with chunk_id and score
+        """
+        chunks = await cls.vector_search(db, paper_id, query, top_k=top_k)
+
+        # Filter by threshold if specified
+        if threshold > 0:
+            chunks = [c for c in chunks if c.get("score", 0) >= threshold]
+
+        if not chunks:
+            return {"formatted_context": "", "citations": []}
+
+        formatted_context = "\n\n---\n\n".join([
+            f"[Document Chunk {c['id']}]\n{c['text']}"
+            for c in chunks
+        ])
+
+        citations = [
+            {"chunk_id": c["id"], "score": c.get("score", 0.0)}
+            for c in chunks
+        ]
+
+        return {
+            "formatted_context": formatted_context,
+            "citations": citations
+        }
+

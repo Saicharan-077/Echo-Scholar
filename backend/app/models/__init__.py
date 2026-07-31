@@ -1,6 +1,7 @@
 # Database models
 from app.models.user import User, UserRole
 from app.models.paper import Paper
+from app.models.artifact import Artifact
 from app.models.podcast import Podcast, TranscriptEntry, PodcastStatus
 from app.models.note import Note, ChatMessage
 from app.models.activity_log import ActivityLog
