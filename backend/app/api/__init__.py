@@ -19,6 +19,7 @@ from app.api import (
     lecture,
     learning_path,
     gamification,
+    studio,
 )
 
 api_router = APIRouter(prefix="/api")
@@ -44,3 +45,4 @@ api_router.include_router(placement.router)
 api_router.include_router(lecture.router)
 api_router.include_router(learning_path.router)
 api_router.include_router(gamification.router)
+api_router.include_router(studio.router)

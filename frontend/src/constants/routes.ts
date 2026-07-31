@@ -1,0 +1,16 @@
+export const ROUTES = {
+  HOME: '/',
+  DISCOVER: '/discover',
+  RESEARCH: '/research',
+  UPLOAD: '/upload',
+  WORKSPACE: '/workspace',
+  WORKSPACE_DETAIL: (id: string) => `/workspace/${id}`,
+  COMMUNITY: '/community',
+  PROFILE: '/profile',
+  PODCASTS: '/podcasts',
+  PROFESSOR: '/professor',
+  GRAPH: '/graph',
+  PLACEMENT: '/placement',
+  ANALYTICS: '/analytics',
+  ABOUT: '/about',
+} as const;

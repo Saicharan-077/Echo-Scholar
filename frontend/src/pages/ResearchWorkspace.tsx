@@ -1,5 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { PaperTabs } from '../features/workspace/components/PaperTabs';
+import { LearningJourney } from '../features/workspace/components/LearningJourney';
+import { VoxHeader } from '../features/vox/components/VoxHeader';
+import { VoxGoalCard } from '../features/vox/components/VoxGoalCard';
+import { Navbar } from '../components/Navbar';
+import { Button } from '../shared/ui/Button';
+import { Badge } from '../shared/ui/Badge';
+import { Breadcrumbs } from '../shared/ui/Breadcrumbs';
+import { WorkspaceToolbar } from '../shared/ui/WorkspaceToolbar';
+import { ToolbarGroup } from '../shared/ui/ToolbarGroup';
+import { ToolbarButton } from '../shared/ui/ToolbarButton';
+import { FormattedChatMessage } from '../shared/ui/FormattedChatMessage';
 import { 
   BookOpen, 
   Brain, 
@@ -39,41 +51,45 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  // Active workspace state
-  const [activePaperIndex, setActivePaperIndex] = useState(0);
-  const [activeDockPanel, setActiveDockPanel] = useState<'graph' | 'podcast' | 'quiz' | 'notes' | null>(null);
-  const [isFocusMode, setIsFocusMode] = useState(false);
-  const [readingProgress, setReadingProgress] = useState(72);
-  const [isRelatedOpen, setIsRelatedOpen] = useState(false);
-
-  // Floating AI Selection Context Menu state
-  const [selectedText, setSelectedText] = useState('');
-  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
-  const [showMoreActions, setShowMoreActions] = useState(false);
-
-  // Professor Vox Assistant state
-  const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'assistant'; text: string; citation?: string }[]>([
-    {
-      role: 'assistant',
-      text: `Welcome back, Manikanth!\n\nYesterday you finished **Section 2: Self-Attention Mechanics**.\n\nToday's Focus: **Section 3: Multi-Head Attention**.\nEst. Reading Time: **18 minutes**.`
+  // 1. Dynamically load user uploaded papers from localStorage or fallback
+  const savedUserPapers = (() => {
+    const savedPapers = localStorage.getItem('echoscholar_user_papers');
+    if (savedPapers) {
+      try {
+        const parsed = JSON.parse(savedPapers);
+        return parsed.map((p: any) => ({
+          id: p.id,
+          title: p.title,
+          authors: `Uploaded PDF: ${p.filename} • ${p.size || '1.5 MB'} • ${p.chunks || 36} Vector Chunks`,
+          category: p.category || 'Uploaded Research Document',
+          sections: p.customSections || [
+            {
+              id: 'sec-1',
+              status: 'completed',
+              title: `1. Executive Summary & Overview of ${p.title}`,
+              content: `This workspace section contains vectorized text content extracted from ${p.filename}.\n\nDocument Summary: ${p.summary || 'Uploaded document indexed into high-dimensional vector embeddings.'}\n\nThe document has been parsed into ${p.chunks || 36} vector chunks and synchronized with Professor Vox cognitive twin mentor and AI Learning Studio modes.`
+            },
+            {
+              id: 'sec-2',
+              status: 'active',
+              title: `2. Vector Chunk Extracts & Key Findings`,
+              content: `Extracted Key Concepts from ${p.title}:\n\n- Primary Domain: ${p.category || 'Artificial Intelligence'}\n- Structured Vector Embeddings: ${p.chunks || 36} chunks loaded in memory.\n- AI Learning Studio Integration: Ready for Socratic Active Recall, Audio Podcast Generation, and Knowledge Graph synthesis.`
+            },
+            {
+              id: 'sec-3',
+              status: 'upcoming',
+              title: `3. Interactive AI Learning Studio Synthesis`,
+              content: `Use the top toolbar options (Reader, Graph, Podcast, Quiz, Notes) or ask Professor Vox in the right sidebar to generate interactive learning experiences specifically tailored to ${p.title}.`
+            }
+          ]
+        }));
+      } catch (e) {}
     }
-  ]);
-  const [userQuery, setUserQuery] = useState('');
-  const [isThinking, setIsThinking] = useState(false);
+    return [];
+  })();
 
-  // ESC Key listener for Focus Mode
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isFocusMode) {
-        setIsFocusMode(false);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isFocusMode]);
-
-  // Pre-seeded multi-paper workspace papers
-  const papers = [
+  // 2. Default pre-seeded papers
+  const defaultPapers = [
     {
       id: 'transformer-1',
       title: 'Attention Is All You Need',
@@ -96,7 +112,50 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
     }
   ];
 
+  // Combined papers list (uploaded papers first)
+  const papers = [...savedUserPapers, ...defaultPapers];
+
+  // Match paper by route id or session
+  const matchedIndex = papers.findIndex((p: any) => {
+    if (!id) return false;
+    if (p.id === id) return true;
+    const savedSessions = localStorage.getItem('echoscholar_learning_sessions');
+    if (savedSessions) {
+      try {
+        const sessions = JSON.parse(savedSessions);
+        const matchSession = sessions.find((s: any) => s.id === id);
+        if (matchSession && matchSession.documentId === p.id) return true;
+      } catch (e) {}
+    }
+    return false;
+  });
+
+  const activePaperIndex = matchedIndex >= 0 ? matchedIndex : 0;
   const activePaper = papers[activePaperIndex] || papers[0];
+
+  // Active workspace state
+  const [selectedPaperIdx, setSelectedPaperIdx] = useState(activePaperIndex);
+  const [activeDockPanel, setActiveDockPanel] = useState<'graph' | 'podcast' | 'quiz' | 'notes' | null>(null);
+  const [isFocusMode, setIsFocusMode] = useState(false);
+  const [readingProgress, setReadingProgress] = useState(72);
+  const [isRelatedOpen, setIsRelatedOpen] = useState(false);
+
+  // Floating AI Selection Context Menu state
+  const [selectedText, setSelectedText] = useState('');
+  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
+  const [showMoreActions, setShowMoreActions] = useState(false);
+
+  // Professor Vox Assistant state
+  const [activeStepIndex, setActiveStepIndex] = useState(2);
+  const [selectedRelatedPaper, setSelectedRelatedPaper] = useState<any | null>(null);
+  const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'assistant'; text: string; citation?: string }[]>(() => [
+    {
+      role: 'assistant',
+      text: `Welcome back, Manikanth!\n\nDocument Loaded: **${activePaper.title}**\n\nToday's Focus: **Section 2: Key Vector Chunk Extracts**.\nVector Indexing: **Active & Grounded**.`
+    }
+  ]);
+  const [userQuery, setUserQuery] = useState('');
+  const [isThinking, setIsThinking] = useState(false);
 
   const relatedPapers = [
     { title: 'BERT: Pre-training of Deep Bidirectional Transformers', topic: 'Pre-training' },
@@ -180,59 +239,83 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
   return (
     <div className="h-screen w-screen bg-white text-gray-900 font-sans flex flex-col overflow-hidden fixed inset-0 z-50">
       
-      {/* 1. IMMERSIVE COMPACT WORKSPACE HEADER (No Website Navbar) */}
-      <header className="h-13 border-b border-gray-200/80 px-5 flex items-center justify-between shrink-0 bg-white select-none">
-        <div className="flex items-center gap-3">
-          <Link to="/research" className="text-xs font-semibold text-gray-500 hover:text-gray-900 transition-colors">
-            ← My Research
-          </Link>
-          <span className="text-gray-300">/</span>
-          <span className="text-xs font-bold text-gray-900">LLM Study</span>
-          <span className="text-gray-300">•</span>
-          <span className="text-xs text-gray-500 font-medium">{activePaper.title}</span>
-        </div>
+      {/* 1. PRIMARY APPLICATION NAVBAR (Exact Match to Landing Page & Library Navigation) */}
+      {!isFocusMode && <Navbar onOpenSearch={onOpenSearch} />}
 
-        {/* Center Paper Switcher Tabs */}
-        <div className="hidden md:flex items-center gap-1 bg-gray-100/80 p-1 rounded-xl border border-gray-200">
-          {papers.map((paper, idx) => (
-            <button
-              key={paper.id}
-              onClick={() => setActivePaperIndex(idx)}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                activePaperIndex === idx ? 'btn-primary shadow-xs' : 'btn-secondary border-none hover:bg-white text-gray-600'
-              }`}
-            >
-              {paper.title}
-            </button>
-          ))}
-        </div>
+      {/* 2. REUSABLE WORKSPACE TOOLBAR & BREADCRUMBS */}
+      <WorkspaceToolbar>
+        <Breadcrumbs
+          items={[
+            { label: 'My Research', href: '/upload' },
+            { label: activePaper.category, href: '/upload?tab=collections' },
+            { label: activePaper.title }
+          ]}
+        />
+
+        {/* Center Workspace Tool Selector Tabs (Linear/Vercel/Notion Standardized Primitives) */}
+        <ToolbarGroup className="hidden md:flex">
+          <ToolbarButton
+            icon={<BookOpen className="w-4 h-4" />}
+            label="Reader"
+            isActive={!activeDockPanel}
+            onClick={() => setActiveDockPanel(null)}
+          />
+
+          <ToolbarButton
+            icon={<Layers className="w-4 h-4" />}
+            label="Graph"
+            isActive={activeDockPanel === 'graph'}
+            onClick={() => setActiveDockPanel('graph')}
+          />
+
+          <ToolbarButton
+            icon={<Headphones className="w-4 h-4" />}
+            label="Podcast"
+            isActive={activeDockPanel === 'podcast'}
+            onClick={() => setActiveDockPanel('podcast')}
+          />
+
+          <ToolbarButton
+            icon={<HelpCircle className="w-4 h-4" />}
+            label="Quiz"
+            isActive={activeDockPanel === 'quiz'}
+            onClick={() => setActiveDockPanel('quiz')}
+          />
+
+          <ToolbarButton
+            icon={<FileText className="w-4 h-4" />}
+            label="Notes"
+            isActive={activeDockPanel === 'notes'}
+            onClick={() => setActiveDockPanel('notes')}
+          />
+        </ToolbarGroup>
 
         {/* Right Tools & Progress */}
         <div className="flex items-center gap-3">
-          <span className="badge-accent text-xs px-3 py-1">{readingProgress}% Complete</span>
+          <Badge variant="accent">{readingProgress}% Complete</Badge>
 
-          <button
+          <Button
+            variant="secondary"
+            size="sm"
             onClick={onOpenSearch}
-            className="btn-secondary text-xs px-3 py-1.5 flex items-center gap-1.5 transition-all"
+            className="flex items-center gap-1.5"
           >
             <Search className="w-3.5 h-3.5 text-indigo-600" />
             <kbd className="font-mono text-[10px] text-gray-500">⌘K</kbd>
-          </button>
+          </Button>
 
-          <button
+          <Button
+            variant={isFocusMode ? 'primary' : 'secondary'}
+            size="sm"
             onClick={() => setIsFocusMode(!isFocusMode)}
-            className={`text-xs font-semibold px-3 py-1.5 transition-all flex items-center gap-1.5 ${
-              isFocusMode
-                ? 'btn-primary'
-                : 'btn-secondary'
-            }`}
+            className="flex items-center gap-1.5"
             title="Focus Mode (ESC to exit)"
           >
             {isFocusMode ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
             <span className="hidden sm:inline">{isFocusMode ? 'Exit Focus' : 'Focus'}</span>
-          </button>
+          </Button>
         </div>
-      </header>
+      </WorkspaceToolbar>
 
       {/* 2. MAIN THREE-PANE WORKSPACE BODY */}
       <div className="flex-1 flex overflow-hidden relative" onMouseUp={handleTextSelection}>
@@ -243,36 +326,18 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
             <div className="p-4 space-y-6 overflow-y-auto">
               
               {/* Learning Journey Stepper */}
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Learning Journey</p>
-                  <span className="text-xs font-bold text-indigo-600">{readingProgress}%</span>
-                </div>
-
-                <div className="space-y-1">
-                  {activePaper.sections.map((sec) => (
-                    <div
-                      key={sec.id}
-                      className={`p-2 rounded-lg text-xs font-medium transition-all flex items-start gap-2 ${
-                        sec.status === 'completed'
-                          ? 'text-gray-400 line-through'
-                          : sec.status === 'active'
-                          ? 'text-indigo-950 font-bold bg-indigo-50 border-l-2 border-l-indigo-600'
-                          : 'text-gray-500'
-                      }`}
-                    >
-                      {sec.status === 'completed' ? (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
-                      ) : sec.status === 'active' ? (
-                        <span className="w-2 h-2 rounded-full bg-indigo-600 shrink-0 mt-1.5" />
-                      ) : (
-                        <span className="w-2 h-2 rounded-full bg-gray-300 shrink-0 mt-1.5" />
-                      )}
-                      <span className="leading-snug line-clamp-2">{sec.title}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              <LearningJourney
+                sections={activePaper.sections.map((s, idx) => ({ id: idx + 1, title: s.title }))}
+                activeStep={activeStepIndex}
+                progress={readingProgress}
+                onSelectStep={(stepId) => {
+                  setActiveStepIndex(stepId);
+                  const newProgress = Math.round((stepId / activePaper.sections.length) * 100);
+                  setReadingProgress(newProgress);
+                  const el = document.getElementById(`section-${stepId}`);
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
+              />
 
               {/* Collapsible Related Research Drawer */}
               <div className="pt-4 border-t border-gray-100 space-y-2">
@@ -287,9 +352,13 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
                 {isRelatedOpen && (
                   <div className="space-y-1.5 pt-1">
                     {relatedPapers.map((rel) => (
-                      <div key={rel.title} className="p-2 rounded-lg bg-gray-50 hover:bg-indigo-50/50 transition-colors text-[11px] cursor-pointer">
-                        <span className="font-semibold text-gray-800 block line-clamp-1">{rel.title}</span>
-                        <span className="text-gray-400 font-mono text-[10px]">{rel.topic}</span>
+                      <div
+                        key={rel.title}
+                        onClick={() => setSelectedRelatedPaper(rel)}
+                        className="p-2.5 rounded-xl bg-gray-50 hover:bg-indigo-50/80 hover:border-indigo-200 border border-gray-200/50 transition-all text-[11px] cursor-pointer shadow-2xs group"
+                      >
+                        <span className="font-semibold text-gray-800 group-hover:text-indigo-900 block line-clamp-1">{rel.title}</span>
+                        <span className="text-indigo-600 font-mono text-[10px]">{rel.topic}</span>
                       </div>
                     ))}
                   </div>
@@ -305,81 +374,265 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
           </aside>
         )}
 
-        {/* CENTER PANE (60% HERO ACADEMIC READER - Zero Border Cards, Pure Notion/Apple Typography) */}
-        <main className={`flex-1 bg-white overflow-y-auto ${isFocusMode ? 'px-6 sm:px-12 py-12 max-w-3xl mx-auto' : 'px-8 sm:px-16 py-12 max-w-4xl mx-auto'}`}>
+        {/* CENTER PANE (60% HERO ACADEMIC READER / FULL-SCREEN INTERACTIVE TOOL VIEW) */}
+        <main className={`flex-1 bg-white overflow-y-auto ${isFocusMode ? 'px-6 sm:px-12 py-12 max-w-3xl mx-auto' : 'px-8 sm:px-12 py-8 max-w-5xl mx-auto'}`}>
           
-          {/* Paper Title Header */}
-          <div className="space-y-4 mb-12">
-            <span className="badge-accent text-xs px-3 py-1">{activePaper.category}</span>
-            <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight leading-[1.15]">
-              {activePaper.title}
-            </h1>
-            <p className="text-sm font-mono text-gray-500 leading-relaxed">
-              {activePaper.authors}
-            </p>
-            <div className="h-px bg-gray-200/80 w-full pt-4" />
-          </div>
-
-          {/* Academic Paper Sections Flow */}
-          <div className="space-y-10 text-[19px] leading-[1.85] font-serif text-gray-800 select-text">
-            {activePaper.sections.map((sec) => (
-              <div key={sec.id} className="space-y-4">
-                <h2 className="text-2xl font-bold font-sans text-gray-900 tracking-tight pt-4">
-                  {sec.title}
-                </h2>
-                
-                {/* Clean Paragraph Paragraph Flow */}
-                {sec.content.split('\n\n').map((paragraph, pIdx) => {
-                  if (paragraph.startsWith('Attention(')) {
-                    return (
-                      <div key={pIdx} className="p-5 my-6 bg-gray-50/80 border-l-4 border-indigo-600 rounded-r-2xl font-mono text-base text-indigo-950 shadow-xs">
-                        {paragraph}
-                      </div>
-                    );
-                  }
-                  return (
-                    <p key={pIdx} className="font-normal text-gray-800">
-                      {paragraph}
-                    </p>
-                  );
-                })}
+          {/* A. FULL-SCREEN KNOWLEDGE GRAPH SCREEN */}
+          {activeDockPanel === 'graph' && (
+            <div className="space-y-6 animate-fadeIn">
+              <div className="flex items-center justify-between border-b pb-4">
+                <div>
+                  <button onClick={() => setActiveDockPanel(null)} className="text-xs font-bold text-indigo-600 hover:text-indigo-800 mb-1 block">
+                    ← Back to Paper Reader
+                  </button>
+                  <h2 className="text-2xl font-extrabold text-gray-900">Knowledge Graph & Prerequisite DAG</h2>
+                  <p className="text-xs text-gray-500">Interactive concept dependency map for {activePaper.title}</p>
+                </div>
+                <Badge variant="accent" size="sm">3 Concepts Mastered • 1 Knowledge Gap</Badge>
               </div>
-            ))}
-          </div>
 
-          {/* PROACTIVE "NEXT RECOMMENDED STEP" PROMPT */}
-          <div className="mt-16 pt-8 border-t border-gray-200 space-y-4">
-            <div className="flex items-center gap-2 text-gray-900 font-bold text-sm">
-              <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-              <span>Section 2 Completed! Next recommended action:</span>
+              <div className="p-8 bg-gray-50/80 rounded-2xl border border-gray-200 space-y-6">
+                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Concept Mastery Breakdown</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 rounded-xl bg-white border border-emerald-200 shadow-xs space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-xs text-gray-900">1. Recurrent Neural Networks</span>
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    </div>
+                    <p className="text-xs text-gray-500">Prerequisite concept for sequential data processing.</p>
+                    <span className="text-[11px] font-bold text-emerald-600 block">Mastery: 90%</span>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-white border border-emerald-200 shadow-xs space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-xs text-gray-900">2. Long Short-Term Memory</span>
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    </div>
+                    <p className="text-xs text-gray-500">Gated memory mechanics and vanishing gradient mitigation.</p>
+                    <span className="text-[11px] font-bold text-emerald-600 block">Mastery: 85%</span>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-white border border-rose-200 shadow-xs space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-xs text-gray-900">3. Softmax Scaling (d_k)</span>
+                      <XCircle className="w-4 h-4 text-rose-600" />
+                    </div>
+                    <p className="text-xs text-gray-500">Dot-product scaling factor to prevent small gradient flow.</p>
+                    <span className="text-[11px] font-bold text-rose-600 block">Knowledge Gap • 45%</span>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t flex justify-end">
+                  <Button variant="primary" size="sm" onClick={() => handleAIContextAction('Explain Softmax Scaling')}>
+                    ⚡ Remediate Knowledge Gap with Prof. Vox
+                  </Button>
+                </div>
+              </div>
             </div>
+          )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <button
-                onClick={() => setReadingProgress(85)}
-                className="p-4 bg-gray-50 hover:bg-indigo-600 hover:text-white border border-gray-200/80 rounded-xl text-left transition-all text-xs font-semibold text-gray-900 group shadow-xs cursor-pointer"
-              >
-                <span className="block font-bold text-sm">1. Read Section 3 →</span>
-                <span className="text-[11px] text-gray-500 group-hover:text-indigo-100 mt-1 block">Multi-Head Attention (18 min)</span>
-              </button>
+          {/* B. FULL-SCREEN AI PODCAST AUDIO STUDIO SCREEN */}
+          {activeDockPanel === 'podcast' && (
+            <div className="space-y-6 animate-fadeIn">
+              <div className="flex items-center justify-between border-b pb-4">
+                <div>
+                  <button onClick={() => setActiveDockPanel(null)} className="text-xs font-bold text-indigo-600 hover:text-indigo-800 mb-1 block">
+                    ← Back to Paper Reader
+                  </button>
+                  <h2 className="text-2xl font-extrabold text-gray-900">AI Podcast Studio</h2>
+                  <p className="text-xs text-gray-500">Dual Co-Host Audio Overview: Transformers Explained</p>
+                </div>
+                <Badge variant="accent" size="sm">Co-Hosts Prabhat & Neerja</Badge>
+              </div>
 
-              <button
-                onClick={() => setActiveDockPanel('quiz')}
-                className="p-4 bg-gray-50 hover:bg-indigo-600 hover:text-white border border-gray-200/80 rounded-xl text-left transition-all text-xs font-semibold text-gray-900 group shadow-xs cursor-pointer"
-              >
-                <span className="block font-bold text-sm">2. Take Quick Quiz →</span>
-                <span className="text-[11px] text-gray-500 group-hover:text-indigo-100 mt-1 block">3 Active recall questions</span>
-              </button>
+              <div className="p-8 bg-indigo-950 text-white rounded-2xl space-y-6 shadow-xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <button className="w-14 h-14 bg-white text-indigo-950 rounded-full flex items-center justify-center font-bold shadow-lg hover:bg-gray-100 transition-transform hover:scale-105 cursor-pointer">
+                      <Play className="w-6 h-6 ml-1 text-indigo-950" />
+                    </button>
+                    <div>
+                      <h3 className="text-lg font-bold text-white">Attention Is All You Need — Audio Breakdown</h3>
+                      <p className="text-xs text-indigo-200">Episode 1 • 14 min 30 sec</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-mono bg-indigo-900 px-3 py-1 rounded-full border border-indigo-700">1.0x Speed</span>
+                </div>
 
-              <button
-                onClick={() => setActiveDockPanel('podcast')}
-                className="p-4 bg-gray-50 hover:bg-indigo-600 hover:text-white border border-gray-200/80 rounded-xl text-left transition-all text-xs font-semibold text-gray-900 group shadow-xs cursor-pointer"
-              >
-                <span className="block font-bold text-sm">3. Listen to Podcast →</span>
-                <span className="text-[11px] text-gray-500 group-hover:text-indigo-100 mt-1 block">14-min Audio Summary</span>
-              </button>
+                <div className="space-y-2">
+                  <div className="w-full bg-indigo-900 rounded-full h-2 overflow-hidden border border-indigo-800">
+                    <div className="bg-amber-400 h-full rounded-full" style={{ width: '35%' }} />
+                  </div>
+                  <div className="flex justify-between text-[11px] text-indigo-300 font-mono">
+                    <span>05:04</span>
+                    <span>14:30</span>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-indigo-900/60 rounded-xl space-y-2 border border-indigo-800">
+                  <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider">Live Co-Host Transcript</span>
+                  <p className="text-xs text-indigo-100 leading-relaxed italic">
+                    "Welcome back to VoxScholar! Today we are dissecting the famous 2017 Transformer paper. Neerja, why did self-attention completely replace recurrent networks?"
+                  </p>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* C. FULL-SCREEN SOCRATIC ACTIVE RECALL QUIZ SCREEN */}
+          {activeDockPanel === 'quiz' && (
+            <div className="space-y-6 animate-fadeIn">
+              <div className="flex items-center justify-between border-b pb-4">
+                <div>
+                  <button onClick={() => setActiveDockPanel(null)} className="text-xs font-bold text-indigo-600 hover:text-indigo-800 mb-1 block">
+                    ← Back to Paper Reader
+                  </button>
+                  <h2 className="text-2xl font-extrabold text-gray-900">Socratic Active Recall Quiz</h2>
+                  <p className="text-xs text-gray-500">Test your mastery of Transformer self-attention mechanics</p>
+                </div>
+                <Badge variant="success" size="sm">Question 1 of 3</Badge>
+              </div>
+
+              <div className="p-8 bg-white border border-gray-200/80 rounded-2xl space-y-6 shadow-xs">
+                <div className="space-y-2">
+                  <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider">Active Recall Challenge</span>
+                  <h3 className="text-xl font-extrabold text-gray-900">
+                    Why does Self-Attention calculate Queries (Q), Keys (K), and Values (V) dot-products in parallel?
+                  </h3>
+                </div>
+
+                <div className="grid grid-cols-1 gap-3">
+                  <button 
+                    onClick={() => alert('Correct! Parallel dot-products eliminate sequential RNN recurrence, dramatically speeding up GPU training.')}
+                    className="p-4 rounded-xl border border-gray-200 hover:border-indigo-600 hover:bg-indigo-50/70 text-left transition-all font-semibold text-sm text-gray-900 shadow-2xs cursor-pointer"
+                  >
+                    A. To eliminate sequential RNN computation bottlenecks and parallelize matrix multiplication across GPU cores.
+                  </button>
+
+                  <button 
+                    onClick={() => alert('Incorrect. Positional encodings preserve order, not dot-products.')}
+                    className="p-4 rounded-xl border border-gray-200 hover:border-indigo-600 hover:bg-indigo-50/70 text-left transition-all font-semibold text-sm text-gray-900 shadow-2xs cursor-pointer"
+                  >
+                    B. To compress embedding dimensions by 50% without loss of sequence order information.
+                  </button>
+
+                  <button 
+                    onClick={() => alert('Incorrect. Self-attention works for all sequence lengths.')}
+                    className="p-4 rounded-xl border border-gray-200 hover:border-indigo-600 hover:bg-indigo-50/70 text-left transition-all font-semibold text-sm text-gray-900 shadow-2xs cursor-pointer"
+                  >
+                    C. To prevent sequence transduction on short sequences.
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* D. FULL-SCREEN WORKSPACE STUDY NOTES SCREEN */}
+          {activeDockPanel === 'notes' && (
+            <div className="space-y-6 animate-fadeIn">
+              <div className="flex items-center justify-between border-b pb-4">
+                <div>
+                  <button onClick={() => setActiveDockPanel(null)} className="text-xs font-bold text-indigo-600 hover:text-indigo-800 mb-1 block">
+                    ← Back to Paper Reader
+                  </button>
+                  <h2 className="text-2xl font-extrabold text-gray-900">Workspace Study Notes</h2>
+                  <p className="text-xs text-gray-500">Live markdown editor & AI note synthesis</p>
+                </div>
+                <Button variant="primary" size="sm" onClick={() => alert('Exporting PDF notes...')}>
+                  <Download className="w-4 h-4" />
+                  <span>Export PDF</span>
+                </Button>
+              </div>
+
+              <div className="p-6 bg-white border border-gray-200/80 rounded-2xl space-y-4 shadow-xs">
+                <textarea
+                  rows={14}
+                  defaultValue={`# Workspace Notes: Attention Is All You Need\n\n## 1. Key Takeaways\n- Eschews recurrent neural networks (RNN) and convolutions entirely.\n- Replaces sequential training with parallel matrix multiplication.\n\n## 2. Core Formula\n- Attention(Q, K, V) = softmax( (Q * K^T) / sqrt(d_k) ) * V\n- d_k scaling factor prevents small gradients when vector dimensions grow large.\n\n## 3. Multi-Head Attention\n- Linearly projects Q, K, V h times to d_k, d_k, d_v dimensions.`}
+                  className="w-full text-sm font-mono p-4 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-indigo-600 leading-relaxed"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* E. DEFAULT: ACADEMIC PAPER READER VIEW */}
+          {!activeDockPanel && (
+            <>
+              {/* Paper Title Header */}
+              <div className="space-y-4 mb-12">
+                <span className="badge-accent text-xs px-3 py-1">{activePaper.category}</span>
+                <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight leading-[1.15]">
+                  {activePaper.title}
+                </h1>
+                <p className="text-sm font-mono text-gray-500 leading-relaxed">
+                  {activePaper.authors}
+                </p>
+                <div className="h-px bg-gray-200/80 w-full pt-4" />
+              </div>
+
+              {/* Academic Paper Sections Flow */}
+              <div className="space-y-10 text-[19px] leading-[1.85] font-serif text-gray-800 select-text">
+                {activePaper.sections.map((sec, secIdx) => (
+                  <div key={sec.id} id={`section-${secIdx + 1}`} className="space-y-4 scroll-mt-6">
+                    <h2 className="text-2xl font-bold font-sans text-gray-900 tracking-tight pt-4">
+                      {sec.title}
+                    </h2>
+                    
+                    {/* Clean Paragraph Flow */}
+                    {sec.content.split('\n\n').map((paragraph, pIdx) => {
+                      if (paragraph.startsWith('Attention(')) {
+                        return (
+                          <div key={pIdx} className="p-5 my-6 bg-gray-50/80 border-l-4 border-indigo-600 rounded-r-2xl font-mono text-base text-indigo-950 shadow-xs">
+                            {paragraph}
+                          </div>
+                        );
+                      }
+                      return (
+                        <p key={pIdx} className="font-normal text-gray-800">
+                          {paragraph}
+                        </p>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+
+              {/* PROACTIVE "NEXT RECOMMENDED STEP" PROMPT */}
+              <div className="mt-16 pt-8 border-t border-gray-200 space-y-4">
+                <div className="flex items-center gap-2 text-gray-900 font-bold text-sm">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                  <span>Section 2 Completed! Next recommended action:</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <button
+                    onClick={() => setReadingProgress(85)}
+                    className="p-4 bg-gray-50 hover:bg-indigo-600 hover:text-white border border-gray-200/80 rounded-xl text-left transition-all text-xs font-semibold text-gray-900 group shadow-xs cursor-pointer"
+                  >
+                    <span className="block font-bold text-sm">1. Read Next Section →</span>
+                    <span className="text-[11px] text-gray-500 group-hover:text-indigo-100 mt-1 block line-clamp-1">
+                      {activePaper.sections?.[2]?.title || activePaper.sections?.[1]?.title || 'Section 2: Extracted Content'}
+                    </span>
+                  </button>
+
+                  <button
+                    onClick={() => setActiveDockPanel('quiz')}
+                    className="p-4 bg-gray-50 hover:bg-indigo-600 hover:text-white border border-gray-200/80 rounded-xl text-left transition-all text-xs font-semibold text-gray-900 group shadow-xs cursor-pointer"
+                  >
+                    <span className="block font-bold text-sm">2. Take Quick Quiz →</span>
+                    <span className="text-[11px] text-gray-500 group-hover:text-indigo-100 mt-1 block">3 Active recall questions</span>
+                  </button>
+
+                  <button
+                    onClick={() => setActiveDockPanel('podcast')}
+                    className="p-4 bg-gray-50 hover:bg-indigo-600 hover:text-white border border-gray-200/80 rounded-xl text-left transition-all text-xs font-semibold text-gray-900 group shadow-xs cursor-pointer"
+                  >
+                    <span className="block font-bold text-sm">3. Listen to Podcast →</span>
+                    <span className="text-[11px] text-gray-500 group-hover:text-indigo-100 mt-1 block">14-min Audio Summary</span>
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
 
         </main>
 
@@ -388,56 +641,16 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
           <aside className="w-[22%] min-w-[260px] max-w-[320px] bg-white border-l border-gray-200/80 flex flex-col shrink-0">
             
             {/* Mentor Header */}
-            <div className="p-4 bg-indigo-600 text-white flex items-center justify-between shrink-0 shadow-xs">
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-indigo-700 flex items-center justify-center font-bold">
-                  <Brain className="w-4 h-4 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-xs">Professor Vox</h3>
-                  <p className="text-[10px] text-indigo-100">Cognitive Twin Mentor</p>
-                </div>
-              </div>
-              <span className="badge-accent text-[10px] px-2 py-0.5 bg-indigo-700 text-white border-indigo-500">Active</span>
-            </div>
+            <VoxHeader status="Active" />
 
             {/* Proactive Action-Oriented Mentor Card */}
-            <div className="p-4 bg-indigo-50/50 border-b border-gray-200/80 space-y-3 shrink-0">
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">Today's Goal</span>
-                <h4 className="font-bold text-sm text-gray-900">Multi-Head Attention</h4>
-                <p className="text-xs text-gray-500 flex items-center gap-1">
-                  <Clock className="w-3 h-3 text-indigo-600" />
-                  <span>Est. Time: 18 min</span>
-                </p>
-              </div>
-
-              <div className="space-y-2 pt-1">
-                <button
-                  onClick={() => setReadingProgress(85)}
-                  className="btn-primary w-full py-2.5 text-xs font-semibold rounded-xl flex items-center justify-between shadow-xs cursor-pointer"
-                >
-                  <span>✓ Continue Reading</span>
-                  <span>→</span>
-                </button>
-
-                <button
-                  onClick={() => handleAIContextAction('Explain Concept')}
-                  className="btn-secondary w-full py-2.5 text-xs font-semibold rounded-xl flex items-center justify-between cursor-pointer"
-                >
-                  <span>⚡ 5-Min Recap</span>
-                  <span>→</span>
-                </button>
-
-                <button
-                  onClick={() => setActiveDockPanel('quiz')}
-                  className="btn-secondary w-full py-2.5 text-xs font-semibold rounded-xl flex items-center justify-between cursor-pointer"
-                >
-                  <span>🎯 Take Quick Quiz</span>
-                  <span>→</span>
-                </button>
-              </div>
-            </div>
+            <VoxGoalCard
+              goalTitle="Multi-Head Attention"
+              estTime="18 min"
+              onContinueReading={() => setReadingProgress(85)}
+              onRecap={() => handleAIContextAction('Explain Concept')}
+              onQuiz={() => setActiveDockPanel('quiz')}
+            />
 
             {/* Q&A Assistant Chat */}
             <div className="flex-1 p-3 overflow-y-auto space-y-3 bg-gray-50/30">
@@ -450,7 +663,7 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
                         : 'bg-white text-gray-800 border border-gray-200/80 rounded-tl-xs shadow-xs'
                     }`}
                   >
-                    <div>{msg.text}</div>
+                    <FormattedChatMessage text={msg.text} className={msg.role === 'user' ? 'text-white' : 'text-gray-800'} />
                     {msg.citation && (
                       <div className="mt-2 pt-1.5 border-t border-gray-100 flex items-center gap-1 text-[10px] font-semibold text-indigo-600">
                         <Sparkles className="w-3 h-3" />
@@ -561,137 +774,55 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
         </div>
       )}
 
-      {/* 4. BOTTOM DOCKABLE TOOL PANELS (VS CODE / FIGMA STYLE) */}
-      {!isFocusMode && activeDockPanel && (
-        <div className="bg-white border-t border-gray-200/80 shrink-0 shadow-lg z-20">
-          
-          {/* Dock Tabs Header */}
-          <div className="px-5 h-10 bg-gray-50 flex items-center justify-between border-b border-gray-200/80">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setActiveDockPanel(activeDockPanel === 'graph' ? null : 'graph')}
-                className={`px-3 py-1 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                  activeDockPanel === 'graph' ? 'bg-indigo-600 text-white shadow-xs' : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <Layers className="w-3.5 h-3.5" /> Knowledge Graph
-              </button>
 
-              <button
-                onClick={() => setActiveDockPanel(activeDockPanel === 'podcast' ? null : 'podcast')}
-                className={`px-3 py-1 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                  activeDockPanel === 'podcast' ? 'bg-indigo-600 text-white shadow-xs' : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <Headphones className="w-3.5 h-3.5" /> AI Podcast Audio
-              </button>
 
+      {/* RELATED PAPER PREVIEW MODAL */}
+      {selectedRelatedPaper && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 max-w-lg w-full space-y-4 shadow-2xl border border-gray-200">
+            <div className="flex items-center justify-between border-b pb-3">
+              <span className="badge-accent text-xs px-2.5 py-0.5">{selectedRelatedPaper.topic}</span>
               <button
-                onClick={() => setActiveDockPanel(activeDockPanel === 'quiz' ? null : 'quiz')}
-                className={`px-3 py-1 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                  activeDockPanel === 'quiz' ? 'bg-indigo-600 text-white shadow-xs' : 'text-gray-600 hover:text-gray-900'
-                }`}
+                onClick={() => setSelectedRelatedPaper(null)}
+                className="text-gray-400 hover:text-gray-600 font-bold text-xs"
               >
-                <HelpCircle className="w-3.5 h-3.5" /> Active Quiz
-              </button>
-
-              <button
-                onClick={() => setActiveDockPanel(activeDockPanel === 'notes' ? null : 'notes')}
-                className={`px-3 py-1 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-all ${
-                  activeDockPanel === 'notes' ? 'bg-indigo-600 text-white shadow-xs' : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                <FileText className="w-3.5 h-3.5" /> Study Notes
+                ✕ Close
               </button>
             </div>
 
-            <button onClick={() => setActiveDockPanel(null)} className="text-xs text-gray-400 hover:text-gray-600 font-medium">
-              Close Panel ✕
-            </button>
+            <div className="space-y-2">
+              <h3 className="font-extrabold text-lg text-gray-900 leading-snug">{selectedRelatedPaper.title}</h3>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                Foundational research paper cited in the current Transformer architecture. Explores bidirectional context, pre-training objectives, and downstream transfer learning.
+              </p>
+            </div>
+
+            <div className="pt-2 flex items-center justify-between border-t border-gray-100">
+              <span className="text-[11px] text-gray-500 font-mono">Citations: 45,210 • Published: 2019</span>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    handleAIContextAction(`Explain ${selectedRelatedPaper.title}`);
+                    setSelectedRelatedPaper(null);
+                  }}
+                >
+                  Ask Prof. Vox
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedRelatedPaper(null);
+                    alert(`Loaded ${selectedRelatedPaper.title} into Workspace!`);
+                  }}
+                >
+                  Open Paper →
+                </Button>
+              </div>
+            </div>
           </div>
-
-          {/* Active Dock Panel Content */}
-          <div className="p-5 h-48 overflow-y-auto bg-white">
-            
-            {activeDockPanel === 'graph' && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-bold text-sm text-gray-900">Workspace Prerequisite Concept DAG</h4>
-                  <span className="badge-accent text-xs">3 Concepts Mastered • 1 Knowledge Gap</span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
-                  <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs space-y-1">
-                    <span className="font-bold text-emerald-950 flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Recurrent Neural Networks (RNN)
-                    </span>
-                    <p className="text-[11px] text-emerald-700">Mastered • 90% score</p>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs space-y-1">
-                    <span className="font-bold text-emerald-950 flex items-center gap-1">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Long Short-Term Memory (LSTM)
-                    </span>
-                    <p className="text-[11px] text-emerald-700">Mastered • 85% score</p>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs space-y-1">
-                    <span className="font-bold text-rose-950 flex items-center gap-1">
-                      <XCircle className="w-3.5 h-3.5 text-rose-600" /> Cross-Attention Softmax Scaling
-                    </span>
-                    <p className="text-[11px] text-rose-700">Knowledge Gap Alert • 45% score</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeDockPanel === 'podcast' && (
-              <div className="space-y-3 max-w-xl mx-auto text-center py-1">
-                <div className="flex items-center justify-center gap-3">
-                  <button className="p-3 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-colors shadow-md">
-                    <Play className="w-5 h-5 ml-0.5" />
-                  </button>
-                  <div className="text-left">
-                    <h4 className="font-bold text-sm text-gray-900">Dual Co-Host Overview: Transformers Explained</h4>
-                    <p className="text-xs text-gray-500">Co-Hosts Prabhat & Neerja • 14 min 30 sec</p>
-                  </div>
-                </div>
-                <div className="w-full bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                  <div className="bg-indigo-600 h-1.5 rounded-full" style={{ width: '35%' }} />
-                </div>
-              </div>
-            )}
-
-            {activeDockPanel === 'quiz' && (
-              <div className="space-y-3 max-w-2xl mx-auto">
-                <span className="badge-warning text-[10px]">Active Recall</span>
-                <h4 className="font-bold text-sm text-gray-900">Why does Self-Attention calculate Q, K, V dot-products in parallel?</h4>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <button className="p-2.5 rounded-lg border border-gray-200 hover:border-indigo-500 text-left bg-white font-medium">
-                    A. To eliminate sequential RNN computation bottlenecks
-                  </button>
-                  <button className="p-2.5 rounded-lg border border-gray-200 hover:border-indigo-500 text-left bg-white font-medium">
-                    B. To compress embedding dimensions by 50%
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {activeDockPanel === 'notes' && (
-              <div className="space-y-2 max-w-3xl mx-auto">
-                <div className="flex justify-between items-center">
-                  <h4 className="font-bold text-sm text-gray-900">Workspace Research Notes</h4>
-                  <span className="text-xs text-indigo-600 font-semibold cursor-pointer">Export PDF →</span>
-                </div>
-                <textarea
-                  rows={3}
-                  defaultValue={`# Self-Attention Notes\n- Formula: Attention(Q,K,V) = softmax(QK^T / sqrt(d_k)) * V\n- Eliminates sequential computation bottlenecks.`}
-                  className="saas-input w-full text-xs font-mono p-3 bg-gray-50"
-                />
-              </div>
-            )}
-
-          </div>
-
         </div>
       )}
 
