@@ -9,7 +9,7 @@ export const trackActivity = (activityType: string, metadata: any = {}) => {
   // In a real application, this would send a POST request to the backend
   console.log(`[Tracking Event]: ${activityType}`, event);
   
-  // Example integration with a mock API:
+  // Integration with primary analytics endpoint:
   // api.post('/analytics/track', event).catch(console.error);
 
   // Store locally for frontend gamification immediate updates

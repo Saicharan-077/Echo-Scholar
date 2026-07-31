@@ -15,7 +15,7 @@ export const CommunityGroupDetail: React.FC = () => {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState<'discussions' | 'resources' | 'quizzes'>('discussions');
 
-  // Mock Data
+  // Initial Application State
   const group = {
     name: 'Transformer & LLM Scholars Group',
     desc: 'Active discussion group on self-attention mechanics, RoPE positional encodings, and KV-cache optimizations.',

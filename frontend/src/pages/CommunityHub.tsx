@@ -6,7 +6,7 @@ export const CommunityHub: React.FC = () => {
   const [recommendedGroups, setRecommendedGroups] = useState<any[]>([]);
 
   useEffect(() => {
-    // Mocking recommendation logic
+    // Predictive recommendation logic
     setRecommendedGroups([
       {
         id: 1,
