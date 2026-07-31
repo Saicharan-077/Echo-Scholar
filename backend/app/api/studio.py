@@ -19,7 +19,7 @@ router = APIRouter(prefix="/studio", tags=["AI Learning Studio"])
 class LearningStudioConfigRequest(BaseModel):
     paper_id: Optional[int] = None
     paper_title: Optional[str] = "Attention Is All You Need — Transformer Architecture"
-    learning_mode: str  # story_mode, debate_mode, group_discussion, interview_mode, literature_review
+    learning_mode: Optional[str] = "story_mode"  # story_mode, debate_mode, group_discussion, interview_mode, literature_review
     language: Optional[str] = "English"
     duration: Optional[str] = "15-Min Deep Dive"
     difficulty: Optional[str] = "Practitioner / Engineer"
