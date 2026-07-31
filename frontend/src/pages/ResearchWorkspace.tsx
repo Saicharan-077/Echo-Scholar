@@ -155,6 +155,10 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
   const [podcastUrl, setPodcastUrl] = useState<string | null>(null);
   const [podcastLoading, setPodcastLoading] = useState(false);
   const [podcastStyle, setPodcastStyle] = useState('educational');
+  const [podcastLanguage, setPodcastLanguage] = useState('English');
+  const [podcastDuration, setPodcastDuration] = useState('15-Min Deep Dive');
+  const [podcastAudience, setPodcastAudience] = useState('Practitioner / Engineer');
+  const [podcastFocus, setPodcastFocus] = useState('General Understanding');
 
   // Floating AI Selection Context Menu state
   const [selectedText, setSelectedText] = useState('');
@@ -202,6 +206,10 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
 
   // Real podcast generation handler
   const handleGeneratePodcast = async () => {
+<<<<<<< HEAD
+=======
+    if (!activePaper) return;
+>>>>>>> 4b779f45368bcd56d77be55c4f7fa0d33cd4d01b
     setPodcastLoading(true);
     setPodcastUrl(null);
     try {
@@ -215,7 +223,11 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
         paper_id: pId,
         style: podcastStyle,
         voice_male: 'en-IN-PrabhatNeural',
-        voice_female: 'en-IN-NeerjaNeural'
+        voice_female: 'en-IN-NeerjaNeural',
+        language: podcastLanguage,
+        duration_level: podcastDuration,
+        target_audience: podcastAudience,
+        key_focus_area: podcastFocus
       });
 
       if (res.data.audio_url) {
@@ -231,6 +243,58 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
     }
   };
 
+<<<<<<< HEAD
+=======
+  useEffect(() => {
+    if (activeDockPanel === 'podcast' && activePaper) {
+      let pId = (activePaper as any).db_id;
+      if (!pId) {
+        const numId = parseInt(activePaper.id);
+        pId = isNaN(numId) ? 1 : numId;
+      }
+      api.get('/podcasts')
+        .then((res) => {
+          if (Array.isArray(res.data)) {
+            const found = res.data.find((p: any) => p.paper_id === pId && p.audio_url);
+            if (found) {
+              setPodcastUrl(`http://localhost:8000/api/podcasts/${found.id}/audio`);
+            }
+          }
+        })
+        .catch(() => {
+          // Quiet fallback
+        });
+    }
+  }, [activeDockPanel, activePaper]);
+  const [isFocusMode, setIsFocusMode] = useState(false);
+  const [readingProgress, setReadingProgress] = useState(72);
+  const [isRelatedOpen, setIsRelatedOpen] = useState(false);
+
+  // Floating AI Selection Context Menu state
+  const [selectedText, setSelectedText] = useState('');
+  const [menuPosition, setMenuPosition] = useState<{ x: number; y: number } | null>(null);
+  const [showMoreActions, setShowMoreActions] = useState(false);
+
+  // Professor Vox Assistant state
+  const [activeStepIndex, setActiveStepIndex] = useState(2);
+  const [selectedRelatedPaper, setSelectedRelatedPaper] = useState<any | null>(null);
+  const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'assistant'; text: string; citation?: string }[]>(() => [
+    {
+      role: 'assistant',
+      text: `Hello Manikanth!\n\nYour workstation for **${activePaper.title}** is ready.\n\nToday's Focus: **Section 2: Vector Chunks**.\nStatus: **Active & Grounded**.`
+    }
+  ]);
+  const [userQuery, setUserQuery] = useState('');
+  const [isThinking, setIsThinking] = useState(false);
+
+  const relatedPapers = [
+    { title: 'BERT: Pre-training of Deep Bidirectional Transformers', topic: 'Pre-training' },
+    { title: 'Language Models are Few-Shot Learners (GPT-3)', topic: 'Autoregressive' },
+    { title: 'RoBERTa: A Robustly Optimized BERT Pretraining Approach', topic: 'Optimization' },
+    { title: 'Llama 3: Open Foundation Models', topic: 'Modern LLMs' }
+  ];
+
+>>>>>>> 4b779f45368bcd56d77be55c4f7fa0d33cd4d01b
   // Handle Text Selection for Floating AI Toolbar
   const handleTextSelection = () => {
     const selection = window.getSelection();
@@ -641,6 +705,7 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
               </div>
             )}
 
+<<<<<<< HEAD
             {/* E. DEFAULT: ACADEMIC PAPER READER VIEW */}
             {!activeDockPanel && (
               <div className="animate-fadeIn max-w-[75ch] mx-auto">
@@ -691,6 +756,116 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
                         >
                           {sec.content}
                         </ReactMarkdown>
+=======
+              <div className="p-8 bg-indigo-950 text-white rounded-2xl space-y-6 shadow-xl border border-indigo-800">
+                <div className="bg-indigo-900/60 p-5 rounded-xl border border-indigo-800 space-y-4">
+                  <div className="flex items-center gap-2 text-amber-400 font-bold text-sm border-b border-indigo-800 pb-2">
+                    <span>⚙️ Session Learning Parameters</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                      <label className="text-xs text-indigo-300 font-semibold mb-1 block">🌐 Language</label>
+                      <select
+                        value={podcastLanguage}
+                        onChange={(e) => setPodcastLanguage(e.target.value)}
+                        className="p-2 rounded bg-indigo-950 border border-indigo-700 text-xs text-white focus:outline-none focus:border-amber-400 w-full"
+                      >
+                        <option value="English">English</option>
+                        <option value="Spanish">Spanish</option>
+                        <option value="French">French</option>
+                        <option value="Hindi">Hindi</option>
+                        <option value="German">German</option>
+                        <option value="Tamil">Tamil</option>
+                        <option value="Telugu">Telugu</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-indigo-300 font-semibold mb-1 block">⏱️ Duration / Detail Depth</label>
+                      <select
+                        value={podcastDuration}
+                        onChange={(e) => setPodcastDuration(e.target.value)}
+                        className="p-2 rounded bg-indigo-950 border border-indigo-700 text-xs text-white focus:outline-none focus:border-amber-400 w-full"
+                      >
+                        <option value="5-Min Quick Overview">5-Min Quick Overview</option>
+                        <option value="10-Min Standard Breakdown">10-Min Standard Breakdown</option>
+                        <option value="15-Min Deep Dive">15-Min Deep Dive</option>
+                        <option value="30-Min Masterclass">30-Min Masterclass</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-indigo-300 font-semibold mb-1 block">📊 Target Audience / Difficulty</label>
+                      <select
+                        value={podcastAudience}
+                        onChange={(e) => setPodcastAudience(e.target.value)}
+                        className="p-2 rounded bg-indigo-950 border border-indigo-700 text-xs text-white focus:outline-none focus:border-amber-400 w-full"
+                      >
+                        <option value="High School / Beginner">High School / Beginner</option>
+                        <option value="Undergraduate / General">Undergraduate / General</option>
+                        <option value="Practitioner / Engineer">Practitioner / Engineer</option>
+                        <option value="Researcher / PhD Expert">Researcher / PhD Expert</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-indigo-300 font-semibold mb-1 block">🎯 Key Focus Area</label>
+                      <select
+                        value={podcastFocus}
+                        onChange={(e) => setPodcastFocus(e.target.value)}
+                        className="p-2 rounded bg-indigo-950 border border-indigo-700 text-xs text-white focus:outline-none focus:border-amber-400 w-full"
+                      >
+                        <option value="General Understanding">General Understanding</option>
+                        <option value="Technical Architecture">Technical Architecture</option>
+                        <option value="Mathematical Proofs">Mathematical Proofs</option>
+                        <option value="Practical Applications">Practical Applications</option>
+                        <option value="Critical Analysis">Critical Analysis</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-indigo-300">Style:</span>
+                      <select 
+                        value={podcastStyle}
+                        onChange={(e) => setPodcastStyle(e.target.value)}
+                        className="p-1.5 rounded bg-indigo-950 border border-indigo-700 text-xs text-white focus:outline-none focus:border-amber-400"
+                      >
+                        <option value="educational">Educational (Default)</option>
+                        <option value="casual">Casual & Fun</option>
+                        <option value="debate">Debate / Critical</option>
+                        <option value="deep-dive">Technical Deep Dive</option>
+                      </select>
+                    </div>
+
+                    <button 
+                      onClick={handleGeneratePodcast}
+                      disabled={podcastLoading}
+                      className="btn-primary bg-amber-500 hover:bg-amber-600 border-none text-indigo-950 text-xs font-extrabold px-5 py-2.5 rounded-lg shadow-md transition-all"
+                    >
+                      {podcastLoading ? 'Generating Audio (Takes 1-2 mins)...' : 'Generate Podcast Episode 🎙️'}
+                    </button>
+                  </div>
+                </div>
+
+                {podcastLoading ? (
+                  <div className="p-8 flex flex-col items-center justify-center space-y-4">
+                    <div className="w-12 h-12 border-4 border-indigo-500 border-t-amber-400 rounded-full animate-spin"></div>
+                    <p className="text-sm font-semibold text-indigo-200 animate-pulse">
+                      Prof. Vox is writing the script and recording audio. This requires compiling TTS and FFmpeg merging...
+                    </p>
+                  </div>
+                ) : podcastUrl ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-white text-indigo-950 rounded-full flex items-center justify-center font-bold shadow-lg shrink-0">
+                        <Headphones className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-white">{activePaper?.title} — Audio Breakdown</h3>
+                        <p className="text-xs text-indigo-200">Generated in {podcastStyle} style</p>
+>>>>>>> 4b779f45368bcd56d77be55c4f7fa0d33cd4d01b
                       </div>
                     </div>
                   ))}

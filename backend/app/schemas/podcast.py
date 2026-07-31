@@ -104,6 +104,11 @@ class PodcastGenerationRequest(BaseModel):
     persona_female_name: Optional[str] = None     # e.g. "Prof. Sara"
     persona_male_style: Optional[str] = None      # e.g. "sceptical professor"
     persona_female_style: Optional[str] = None    # e.g. "enthusiastic student"
+    # Learning parameters
+    language: Optional[str] = "English"
+    duration_level: Optional[str] = "15-Min Deep Dive"
+    target_audience: Optional[str] = "Practitioner / Engineer"
+    key_focus_area: Optional[str] = "General Understanding"
 
 
 class PodcastGenerationStatus(BaseModel):
