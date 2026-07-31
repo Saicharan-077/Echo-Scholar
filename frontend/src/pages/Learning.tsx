@@ -1,554 +1,261 @@
-import React, { useState } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   Brain, 
+  Clock, 
+  ArrowRight, 
+  Sparkles, 
+  BookOpen, 
+  CheckCircle2, 
+  Play, 
+  Layers, 
   Headphones, 
-  Mic, 
-  Network, 
-  FileText, 
   HelpCircle, 
-  ArrowRight,
-  Sparkles,
-  MessageSquare,
-  CheckCircle2,
-  XCircle,
-  Download,
-  Send,
-  RefreshCw,
-  Plus
+  FileText, 
+  Activity, 
+  Target, 
+  Award,
+  ChevronRight
 } from 'lucide-react';
+import { Badge } from '../shared/ui/Badge';
+import { Card } from '../shared/ui/Card';
+import { Button } from '../shared/ui/Button';
 
 export const Learning: React.FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get('tab') || 'tools';
+  const navigate = useNavigate();
 
-  // State for AI Chat tool tab
-  const [chatPaper, setChatPaper] = useState('Attention Is All You Need — Transformer Architecture');
-  const [chatMessages, setChatMessages] = useState<{ role: 'user' | 'assistant'; text: string; citation?: string }[]>([
-    { role: 'assistant', text: 'Welcome to RAG Document Q&A! Pick a paper above and ask any technical question.' }
-  ]);
-  const [userQuery, setUserQuery] = useState('');
-  const [isThinking, setIsThinking] = useState(false);
-
-  // State for Quizzes tool tab
-  const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
-  const [showExplanation, setShowExplanation] = useState(false);
-  const [quizScore, setQuizScore] = useState(0);
-
-  const quizQuestions = [
+  const activeSessions = [
     {
-      id: 1,
-      question: 'Why does the Transformer model replace Recurrent Neural Networks (RNNs) with Self-Attention?',
-      options: [
-        'To reduce model size to fit on mobile devices',
-        'To enable sequence parallelization during training and eliminate sequential computation bottlenecks',
-        'Because self-attention operates only on binary numbers',
-        'To restrict the maximum input token length to 128'
-      ],
-      correct: 1,
-      explanation: 'RNNs require sequential processing $O(N)$ step-by-step. Self-attention calculates pairwise token interactions in parallel $O(1)$ sequential operations, dramatically accelerating GPU training.'
+      id: 'transformer-1',
+      title: 'Attention Is All You Need — Transformer Architecture',
+      category: 'Artificial Intelligence & Deep Learning',
+      progress: 72,
+      lastStudied: '10 mins ago',
+      currentSection: 'Section 2: Key Vector Chunks & Scaled Dot-Product Attention',
+      totalChunks: 38,
+      readChunks: 27,
+      route: '/workspace/transformer-1',
+      badge: 'Active Workstation'
     },
     {
-      id: 2,
-      question: 'What is the purpose of Positional Encodings in Transformer architectures?',
-      options: [
-        'To compress the input embedding vectors by 50%',
-        'To inject order/position information since self-attention contains no inherent sequence order awareness',
-        'To encrypt student data for privacy compliance',
-        'To increase learning rate during SGD backpropagation'
-      ],
-      correct: 1,
-      explanation: 'Self-attention is permutation-equivariant. Sinusoidal or learned positional encodings add positional vectors to input embeddings so the model recognizes token order.'
+      id: 'resnet-2',
+      title: 'Deep Residual Learning for Image Recognition (ResNet)',
+      category: 'Computer Vision & Convolutional Nets',
+      progress: 45,
+      lastStudied: '2 hours ago',
+      currentSection: 'Section 1: Residual Mapping & Degenerate Identity Functions',
+      totalChunks: 42,
+      readChunks: 19,
+      route: '/workspace/resnet-2',
+      badge: 'In Progress'
     },
     {
-      id: 3,
-      question: 'In the Raft Consensus Algorithm, what triggers a Follower node to become a Candidate?',
-      options: [
-        'Receiving a heart-beat RPC from the current Leader node',
-        'Election timeout expiration without receiving Heartbeat/AppendEntries RPC from Leader',
-        'Running out of memory buffer on disk',
-        'Completing a background database vacuum'
-      ],
-      correct: 1,
-      explanation: 'If a follower receives no communication from the leader during an election timeout window, it increments its term and transitions to Candidate state to request votes.'
+      id: 'raft-3',
+      title: 'Raft Consensus Algorithm for Fault-Tolerant Systems',
+      category: 'Distributed Systems & Databases',
+      progress: 90,
+      lastStudied: 'Yesterday',
+      currentSection: 'Section 4: Log Compaction & Snapshotting',
+      totalChunks: 30,
+      readChunks: 27,
+      route: '/workspace/raft-3',
+      badge: 'Near Mastery'
     }
   ];
 
-  // State for Notes tool tab
-  const [noteTitle, setNoteTitle] = useState('My Research Notes: Transformer Self-Attention & Raft Consensus');
-  const [noteContent, setNoteContent] = useState(
-    `# Key Insights & Active Recall Notes\n\n` +
-    `## 1. Transformer Self-Attention Mechanism\n` +
-    `- **Formula**: \\(\\text{Attention}(Q,K,V) = \\text{softmax}(\\frac{QK^T}{\\sqrt{d_k}})V\\)\n` +
-    `- **Advantage**: Parallelized matrix multiplication enables massive scaling.\n\n` +
-    `## 2. Raft Consensus Notes\n` +
-    `- Leader election relies on randomized election timeouts (150ms-300ms) to prevent split votes.`
-  );
-  const [isSummarizing, setIsSummarizing] = useState(false);
-
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!userQuery.trim()) return;
-
-    const userText = userQuery.trim();
-    setChatMessages((prev) => [...prev, { role: 'user', text: userText }]);
-    setUserQuery('');
-    setIsThinking(true);
-
-    const lowerQuery = userText.toLowerCase();
-
-    // 1. Intelligent Conversational Greeting Handling
-    if (['hi', 'hello', 'hey', 'greetings', 'who are you', 'help'].includes(lowerQuery) || lowerQuery.length <= 3) {
-      setTimeout(() => {
-        setChatMessages((prev) => [
-          ...prev,
-          {
-            role: 'assistant',
-            text: `Hello! 👋 I am Professor Vox, your document-grounded AI tutor.\n\nI have indexed **${chatPaper}** in the FAISS vector database. What technical concept, equation, or architecture detail would you like to explore today?`
-          }
-        ]);
-        setIsThinking(false);
-      }, 400);
-      return;
+  const timelineSteps = [
+    {
+      step: 1,
+      title: 'Executive Summary & Core Abstract',
+      status: 'completed',
+      desc: 'High-level synthesis of self-attention mechanisms replacing recurrence.'
+    },
+    {
+      step: 2,
+      title: 'Vector Chunk Extracts & Key Findings',
+      status: 'active',
+      desc: 'Deep dive into Scaled Dot-Product, Positional Encodings, and Multi-Head projections.'
+    },
+    {
+      step: 3,
+      title: 'Interactive Knowledge Graph & Concept Map',
+      status: 'upcoming',
+      desc: 'Visual DAG tree mapping term dependencies and prerequisites.'
+    },
+    {
+      step: 4,
+      title: 'Socratic Active Recall Quiz & Mastery Check',
+      status: 'upcoming',
+      desc: 'Adaptive assessment evaluating formula retention and structural design.'
     }
-
-    try {
-      // 2. Try Backend RAG API Call
-      const res = await api.post('/chat/ask', {
-        question: userText,
-        paper_id: 1
-      });
-      if (res.data && res.data.answer) {
-        setChatMessages((prev) => [
-          ...prev,
-          {
-            role: 'assistant',
-            text: res.data.answer,
-            citation: res.data.citations?.[0] || 'FAISS Vector Index • Page 3'
-          }
-        ]);
-        setIsThinking(false);
-        return;
-      }
-    } catch (e) {
-      console.log('Using local intelligent response generator');
-    }
-
-    // 3. Fallback High-Quality Document Grounded Generator
-    setTimeout(() => {
-      let response = '';
-      let citation = '';
-
-      if (lowerQuery.includes('attention') || lowerQuery.includes('transformer')) {
-        response = `### 🧠 Self-Attention Mechanism\n\n` +
-          `In **${chatPaper}**, Self-Attention calculates pairwise dependencies between all tokens simultaneously without sequential RNN recurrence.\n\n` +
-          `**Mathematical Formulation**:\n` +
-          `$$\\text{Attention}(Q,K,V) = \\text{softmax}\\left(\\frac{QK^T}{\\sqrt{d_k}}\\right)V$$\n\n` +
-          `**Key Benefits**:\n` +
-          `- **Parallel Computation**: Enables GPU acceleration across entire token sequences.\n` +
-          `- **Constant Path Length**: Maximum path length between any two tokens is $O(1)$.`;
-        citation = '📄 Transformer Paper • Section 3.2 (Page 4)';
-      } else if (lowerQuery.includes('resnet') || lowerQuery.includes('residual')) {
-        response = `### ⚡ Deep Residual Learning (ResNet)\n\n` +
-          `ResNet addresses the **degrading gradient problem** in deep neural networks by introducing skip/shortcut connections.\n\n` +
-          `**Formulation**: Instead of learning underlying mapping $\\mathcal{H}(x)$, the network learns residual mapping $\\mathcal{F}(x) = \\mathcal{H}(x) - x$.\n\n` +
-          `$$\\text{Output} = \\mathcal{F}(x) + x$$\n\n` +
-          `**Impact**: Enables stable training of architectures exceeding 150+ layers.`;
-        citation = '📄 ResNet Paper • Section 3.1 (Page 3)';
-      } else if (lowerQuery.includes('raft') || lowerQuery.includes('consensus')) {
-        response = `### 🛡️ Raft Distributed Consensus\n\n` +
-          `Raft decomposes distributed consensus into three key subproblems:\n\n` +
-          `1. **Leader Election**: Followers transition to Candidates after randomized election timeouts.\n` +
-          `2. **Log Replication**: Leader accepts log entries from clients and replicates them to a majority of followers.\n` +
-          `3. **Safety**: Enforces state machine safety via strict term number checks.`;
-        citation = '📄 Raft Paper • Section 5.1 (Page 5)';
-      } else {
-        response = `### 📄 Grounded Document Insight\n\n` +
-          `Based on top-ranking semantic vector chunks retrieved from **${chatPaper}** (Cosine Similarity: **0.94**):\n\n` +
-          `- **Core Concept**: The document specifies modular abstractions, error mitigation strategies, and low-latency state propagation.\n` +
-          `- **Implementation**: Designed for high throughput with minimal overhead under concurrent access patterns.\n\n` +
-          `*Would you like to generate a podcast overview or test your knowledge with a Socratic quiz on this concept?*`;
-        citation = `📄 ${chatPaper} • Vector Chunk #18`;
-      }
-
-      setChatMessages((prev) => [...prev, { role: 'assistant', text: response, citation }]);
-      setIsThinking(false);
-    }, 700);
-  };
-
-  const handleQuizAnswer = (index: number) => {
-    if (selectedOption !== null) return;
-    setSelectedOption(index);
-    setShowExplanation(true);
-    if (index === quizQuestions[currentQuizIndex].correct) {
-      setQuizScore((prev) => prev + 1);
-    }
-  };
-
-  const handleNextQuiz = () => {
-    setSelectedOption(null);
-    setShowExplanation(false);
-    setCurrentQuizIndex((prev) => (prev + 1) % quizQuestions.length);
-  };
-
-  const handleGenerateSummary = () => {
-    setIsSummarizing(true);
-    setTimeout(() => {
-      setNoteContent((prev) => 
-        prev + `\n\n### 🤖 AI Summary & Key Takeaways\n` +
-        `- **Core Concept**: Scalable Transformer attention removes sequential dependencies.\n` +
-        `- **System Reliability**: Raft election timeouts prevent split votes and enforce strong consistency.`
-      );
-      setIsSummarizing(false);
-    }, 800);
-  };
-
-  const tools = [
-    {
-      title: 'AI Chat',
-      tab: 'chat',
-      desc: 'Ask questions grounded directly in your uploaded study documents using RAG vector search.',
-      icon: Sparkles,
-      tag: 'Document Q&A'
-    },
-    {
-      title: 'AI Tutor',
-      path: '/professor',
-      desc: 'Socratic speech classroom that adapts follow-up questions to your Cognitive DNA profile.',
-      icon: Mic,
-      tag: 'Voice Classroom'
-    },
-    {
-      title: 'AI Podcast',
-      path: '/podcasts',
-      desc: 'Dual co-host audio overview with real-time speech interruption and mid-podcast pop quizzes.',
-      icon: Headphones,
-      tag: 'Interruptible Audio'
-    },
-    {
-      title: 'Knowledge Map',
-      path: '/graph',
-      desc: 'Interactive prerequisite DAG tree highlighting red-flag concept gaps before exams.',
-      icon: Network,
-      tag: 'Concept DAG'
-    },
-    {
-      title: 'Quizzes',
-      tab: 'quizzes',
-      desc: 'Adaptive diagnostic quizzes tailored to your active knowledge gaps.',
-      icon: HelpCircle,
-      tag: 'Active Recall'
-    },
-    {
-      title: 'Notes',
-      tab: 'notes',
-      desc: 'Rich-text research notes with automatic PDF export and AI summary generation.',
-      icon: FileText,
-      tag: 'Study Notes'
-    },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50/60 text-gray-900 p-6 sm:p-8 lg:p-12 space-y-10 max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50/60 text-gray-900 font-sans p-4 sm:p-6 lg:p-10 space-y-10 max-w-7xl mx-auto">
       
-      {/* Header */}
-      <div className="saas-panel p-8 bg-white border border-gray-200/80 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm">
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-sm font-semibold border border-indigo-200">
-            <Brain className="w-4 h-4" />
-            <span>Multi-Agent AI Learning Ecosystem</span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">AI Learning Tools & Workflows</h1>
-          <p className="text-base text-gray-600 max-w-2xl leading-relaxed">
-            Select an active AI learning mode to master technical concepts, generate audio podcasts, test memory decay, or review research notes.
+      {/* Header Banner */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-200/80 pb-6">
+        <div>
+          <Badge variant="accent">Continuous AI Learning Journey</Badge>
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2 tracking-tight">
+            Resume Learning & Workspaces
+          </h1>
+          <p className="text-sm text-gray-600 mt-1 max-w-2xl">
+            Pick up exactly where you left off. Access active paper reader workstations, interactive quizzes, and audio overviews.
           </p>
         </div>
 
-        {/* Tab Pills */}
-        <div className="flex items-center gap-1.5 p-1.5 bg-gray-100/80 rounded-xl border border-gray-200/60 shrink-0 overflow-x-auto">
-          <button
-            onClick={() => setSearchParams({ tab: 'tools' })}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-              activeTab === 'tools' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            All Tools
-          </button>
-          <button
-            onClick={() => setSearchParams({ tab: 'chat' })}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-              activeTab === 'chat' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            RAG Chat
-          </button>
-          <button
-            onClick={() => setSearchParams({ tab: 'quizzes' })}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-              activeTab === 'quizzes' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Active Quizzes
-          </button>
-          <button
-            onClick={() => setSearchParams({ tab: 'notes' })}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-              activeTab === 'notes' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            Research Notes
-          </button>
+        <Button variant="primary" onClick={() => navigate('/upload')}>
+          <BookOpen className="w-4 h-4" />
+          <span>Upload New Paper</span>
+        </Button>
+      </div>
+
+      {/* Hero Active Session Card */}
+      <div className="bg-white border border-gray-200/80 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50/50 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="badge-accent text-xs px-3 py-1 font-semibold">
+            🔥 Priority Workstation
+          </span>
+          <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+            <Clock className="w-3.5 h-3.5 text-indigo-600" />
+            <span>Last active 10 minutes ago</span>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider">
+            {activeSessions[0].category}
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">
+            {activeSessions[0].title}
+          </h2>
+          <p className="text-sm text-gray-600 flex items-center gap-2 font-medium">
+            <Target className="w-4 h-4 text-indigo-600" />
+            <span>Current Topic: {activeSessions[0].currentSection}</span>
+          </p>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="space-y-2 pt-2">
+          <div className="flex items-center justify-between text-xs font-semibold">
+            <span className="text-gray-700">Overall Mastery Progress</span>
+            <span className="text-indigo-600 font-extrabold">{activeSessions[0].progress}% Complete</span>
+          </div>
+          <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden p-0.5 border border-gray-200/60">
+            <div className="bg-gradient-to-r from-indigo-600 to-blue-600 h-full rounded-full transition-all duration-500" style={{ width: `${activeSessions[0].progress}%` }}></div>
+          </div>
+          <div className="flex items-center justify-between text-[11px] text-gray-500 pt-0.5">
+            <span>{activeSessions[0].readChunks} of {activeSessions[0].totalChunks} Vector Chunks Processed</span>
+            <span>Target Score: 90%+</span>
+          </div>
+        </div>
+
+        {/* Quick Action Buttons */}
+        <div className="pt-4 border-t border-gray-100 flex flex-wrap items-center gap-3">
+          <Link to={activeSessions[0].route} className="btn-primary px-6 py-2.5 text-xs font-semibold flex items-center gap-2 shadow-xs">
+            <Play className="w-4 h-4 fill-white" /> Resume Workspace Reader
+          </Link>
+          <Link to="/quiz" className="btn-secondary px-5 py-2.5 text-xs font-semibold flex items-center gap-2">
+            <HelpCircle className="w-4 h-4 text-indigo-600" /> Take Concept Quiz
+          </Link>
+          <Link to="/podcasts" className="btn-secondary px-5 py-2.5 text-xs font-semibold flex items-center gap-2">
+            <Headphones className="w-4 h-4 text-indigo-600" /> Audio Overview
+          </Link>
+          <Link to="/graph" className="btn-secondary px-5 py-2.5 text-xs font-semibold flex items-center gap-2">
+            <Layers className="w-4 h-4 text-indigo-600" /> Mind Map
+          </Link>
         </div>
       </div>
 
-      {/* VIEW 1: TOOLS GRID OVERVIEW */}
-      {activeTab === 'tools' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {tools.map((t) => {
-            const Icon = t.icon;
-            return t.path ? (
-              <Link
-                key={t.title}
-                to={t.path}
-                className="saas-card p-8 space-y-6 rounded-2xl hover:border-indigo-400 transition-all group flex flex-col justify-between"
-              >
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-200/80 flex items-center justify-center text-indigo-600 group-hover:scale-105 transition-transform">
-                      <Icon className="w-6 h-6" />
-                    </div>
-                    <span className="badge-accent text-xs">{t.tag}</span>
-                  </div>
-
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900 flex items-center justify-between">
-                      <span>{t.title}</span>
-                      <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
-                    </h3>
-                    <p className="text-base text-gray-600 leading-relaxed mt-2">{t.desc}</p>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-gray-100 flex items-center justify-between text-sm font-semibold text-indigo-600">
-                  <span>Launch Tool</span>
-                  <span className="group-hover:translate-x-1 transition-transform">→</span>
-                </div>
-              </Link>
-            ) : (
-              <button
-                key={t.title}
-                onClick={() => setSearchParams({ tab: t.tab! })}
-                className="text-left saas-card p-8 space-y-6 rounded-2xl hover:border-indigo-400 transition-all group flex flex-col justify-between cursor-pointer"
-              >
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-200/80 flex items-center justify-center text-indigo-600 group-hover:scale-105 transition-transform">
-                      <Icon className="w-6 h-6" />
-                    </div>
-                    <span className="badge-accent text-xs">{t.tag}</span>
-                  </div>
-
-                  <div>
-                    <h3 className="text-2xl font-bold text-gray-900 flex items-center justify-between">
-                      <span>{t.title}</span>
-                      <ArrowRight className="w-5 h-5 text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
-                    </h3>
-                    <p className="text-base text-gray-600 leading-relaxed mt-2">{t.desc}</p>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-gray-100 flex items-center justify-between text-sm font-semibold text-indigo-600">
-                  <span>Open Interactive Mode</span>
-                  <span className="group-hover:translate-x-1 transition-transform">→</span>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      {/* VIEW 2: RAG CHAT TAB */}
-      {activeTab === 'chat' && (
-        <div className="saas-panel bg-white border border-gray-200/80 rounded-2xl overflow-hidden shadow-sm flex flex-col h-[650px]">
-          <div className="p-6 bg-indigo-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-indigo-800 flex items-center justify-center font-bold">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="font-bold text-lg">AI Document Q&A (RAG Vector Search)</h3>
-                <p className="text-xs text-indigo-200">Grounded answers with exact page & chunk citations</p>
-              </div>
-            </div>
-
-            <select
-              value={chatPaper}
-              onChange={(e) => setChatPaper(e.target.value)}
-              className="bg-indigo-800 text-white border border-indigo-700 text-xs rounded-lg px-3 py-2 outline-none"
-            >
-              <option value="Attention Is All You Need — Transformer Architecture">Attention Is All You Need</option>
-              <option value="Deep Residual Learning for Image Recognition (ResNet)">ResNet Paper</option>
-              <option value="Distributed Consensus & Raft Algorithm Breakdown">Raft Consensus Algorithm</option>
-            </select>
+      {/* Grid: Learning Timeline & Recent Workspaces */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Left Column: Learning Timeline */}
+        <div className="lg:col-span-1 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-bold text-gray-900">Learning Milestone Timeline</h3>
+            <span className="text-xs font-semibold text-indigo-600">2 / 4 Completed</span>
           </div>
 
-          <div className="flex-1 p-6 overflow-y-auto space-y-4 bg-gray-50/50">
-            {chatMessages.map((msg, idx) => (
-              <div key={idx} className={`flex flex-col w-full ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                <div
-                  className={`max-w-[80%] px-5 py-3.5 rounded-2xl text-sm leading-relaxed whitespace-pre-line break-words ${
-                    msg.role === 'user'
-                      ? 'bg-indigo-600 text-white rounded-tr-sm shadow-sm font-medium'
-                      : 'bg-white text-gray-800 border border-gray-200/80 rounded-tl-sm shadow-xs'
-                  }`}
-                >
-                  <div>{msg.text}</div>
-                  {msg.citation && (
-                    <div className="mt-3 pt-2.5 border-t border-gray-100 flex items-center gap-1.5 text-xs font-semibold text-indigo-600">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>Citation: {msg.citation}</span>
-                    </div>
-                  )}
+          <div className="bg-white border border-gray-200/80 rounded-2xl p-6 shadow-xs space-y-6">
+            {timelineSteps.map((step) => (
+              <div key={step.step} className="flex items-start gap-4 relative">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 ${
+                  step.status === 'completed' 
+                    ? 'bg-emerald-100 text-emerald-700 border border-emerald-300' 
+                    : step.status === 'active'
+                    ? 'bg-indigo-600 text-white shadow-sm ring-4 ring-indigo-100'
+                    : 'bg-gray-100 text-gray-400 border border-gray-200'
+                }`}>
+                  {step.status === 'completed' ? <CheckCircle2 className="w-4 h-4" /> : step.step}
+                </div>
+                <div className="space-y-1 pt-0.5">
+                  <h4 className={`text-sm font-bold ${step.status === 'active' ? 'text-indigo-600' : 'text-gray-900'}`}>
+                    {step.title}
+                  </h4>
+                  <p className="text-xs text-gray-500 leading-relaxed">{step.desc}</p>
                 </div>
               </div>
             ))}
-
-            {isThinking && (
-              <div className="flex items-center gap-2 text-xs text-gray-500 font-medium bg-white p-3 rounded-xl border border-gray-200/80 max-w-[220px]">
-                <Sparkles className="w-4 h-4 text-indigo-600 animate-spin" />
-                <span>Running FAISS Cosine Search...</span>
-              </div>
-            )}
           </div>
-
-          <form onSubmit={handleSendMessage} className="p-4 bg-white border-t border-gray-200 flex gap-3">
-            <input
-              type="text"
-              value={userQuery}
-              onChange={(e) => setUserQuery(e.target.value)}
-              placeholder="Ask a technical question about the selected document..."
-              className="saas-input flex-1 text-sm py-3"
-            />
-            <button type="submit" disabled={!userQuery.trim() || isThinking} className="btn-primary px-6 py-3 font-semibold text-sm rounded-xl">
-              <Send className="w-4 h-4" />
-            </button>
-          </form>
         </div>
-      )}
 
-      {/* VIEW 3: ACTIVE QUIZZES TAB */}
-      {activeTab === 'quizzes' && (
-        <div className="saas-panel p-8 lg:p-10 bg-white border border-gray-200/80 rounded-2xl space-y-8 max-w-3xl mx-auto shadow-sm">
-          <div className="flex items-center justify-between border-b border-gray-100 pb-4">
-            <div>
-              <span className="badge-warning text-xs">Active Recall Diagnostic Engine</span>
-              <h2 className="text-2xl font-bold text-gray-900 mt-1">Socratic Quiz: Question {currentQuizIndex + 1} of {quizQuestions.length}</h2>
-            </div>
-            <div className="text-right">
-              <span className="text-xs text-gray-500 font-semibold block">Score</span>
-              <span className="text-xl font-bold text-indigo-600">{quizScore} / {quizQuestions.length}</span>
-            </div>
+        {/* Right Column: Other Active Learning Sessions */}
+        <div className="lg:col-span-2 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-bold text-gray-900">Recent Active Study Workspaces</h3>
+            <Link to="/research" className="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+              View All Papers <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
           </div>
 
-          <div className="space-y-6">
-            <h3 className="text-xl font-bold text-gray-900 leading-snug">
-              {quizQuestions[currentQuizIndex].question}
-            </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {activeSessions.slice(1).map((s) => (
+              <div 
+                key={s.id}
+                className="bg-white border border-gray-200/80 hover:border-indigo-400 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between space-y-4 group"
+              >
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="badge-neutral text-[11px] font-semibold">{s.badge}</span>
+                    <span className="text-[11px] text-gray-400 font-medium">{s.lastStudied}</span>
+                  </div>
+                  <h4 className="text-base font-bold text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-2">
+                    {s.title}
+                  </h4>
+                  <p className="text-xs text-gray-500 font-medium line-clamp-1">{s.category}</p>
+                </div>
 
-            <div className="space-y-3">
-              {quizQuestions[currentQuizIndex].options.map((opt, idx) => {
-                const isSelected = selectedOption === idx;
-                const isCorrect = idx === quizQuestions[currentQuizIndex].correct;
-                
-                let btnStyle = 'border-gray-200 hover:border-indigo-400 bg-white text-gray-800';
-                if (selectedOption !== null) {
-                  if (isCorrect) btnStyle = 'border-emerald-500 bg-emerald-50 text-emerald-950 font-semibold';
-                  else if (isSelected) btnStyle = 'border-rose-500 bg-rose-50 text-rose-950 font-semibold';
-                }
+                <div className="space-y-3 pt-2 border-t border-gray-100">
+                  <div className="space-y-1">
+                    <div className="flex justify-between text-[11px] font-semibold text-gray-600">
+                      <span>Progress</span>
+                      <span className="text-indigo-600">{s.progress}%</span>
+                    </div>
+                    <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                      <div className="bg-indigo-600 h-full rounded-full" style={{ width: `${s.progress}%` }}></div>
+                    </div>
+                  </div>
 
-                return (
-                  <button
-                    key={idx}
-                    onClick={() => handleQuizAnswer(idx)}
-                    className={`w-full text-left p-4 rounded-xl border text-sm transition-all flex items-center justify-between ${btnStyle}`}
+                  <Link 
+                    to={s.route} 
+                    className="btn-secondary w-full py-2 text-xs font-semibold flex justify-center items-center gap-2 group-hover:bg-indigo-50 group-hover:border-indigo-200 group-hover:text-indigo-700 transition-colors"
                   >
-                    <span>{opt}</span>
-                    {selectedOption !== null && isCorrect && <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />}
-                    {selectedOption !== null && isSelected && !isCorrect && <XCircle className="w-5 h-5 text-rose-600 shrink-0" />}
-                  </button>
-                );
-              })}
-            </div>
-
-            {showExplanation && (
-              <div className="p-5 rounded-xl bg-indigo-50 border border-indigo-200/80 space-y-2 animate-in fade-in duration-200">
-                <div className="flex items-center gap-2 text-indigo-900 font-bold text-sm">
-                  <Sparkles className="w-4 h-4 text-indigo-600" />
-                  <span>Cognitive Diagnostic Feedback</span>
-                </div>
-                <p className="text-sm text-indigo-950 leading-relaxed">
-                  {quizQuestions[currentQuizIndex].explanation}
-                </p>
-                <div className="pt-2 flex justify-end">
-                  <button onClick={handleNextQuiz} className="btn-primary text-xs px-4 py-2">
-                    Next Question →
-                  </button>
+                    Resume Study Session <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
                 </div>
               </div>
-            )}
+            ))}
           </div>
+
         </div>
-      )}
 
-      {/* VIEW 4: RESEARCH NOTES TAB */}
-      {activeTab === 'notes' && (
-        <div className="saas-panel p-8 bg-white border border-gray-200/80 rounded-2xl space-y-6 max-w-4xl mx-auto shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-100 pb-4">
-            <div>
-              <span className="badge-accent text-xs">Rich-Text Study Notes</span>
-              <h2 className="text-2xl font-bold text-gray-900 mt-1">Research Notes Editor</h2>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <button
-                onClick={handleGenerateSummary}
-                disabled={isSummarizing}
-                className="btn-secondary text-xs flex items-center gap-1.5"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                <span>{isSummarizing ? 'Summarizing...' : 'AI Auto-Summary'}</span>
-              </button>
-
-              <button
-                onClick={() => alert('Exporting research notes as PDF...')}
-                className="btn-primary text-xs flex items-center gap-1.5"
-              >
-                <Download className="w-3.5 h-3.5" />
-                <span>Export PDF</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <input
-              type="text"
-              value={noteTitle}
-              onChange={(e) => setNoteTitle(e.target.value)}
-              className="saas-input w-full text-lg font-bold py-2.5"
-            />
-
-            <textarea
-              rows={14}
-              value={noteContent}
-              onChange={(e) => setNoteContent(e.target.value)}
-              className="saas-input w-full text-sm font-mono leading-relaxed p-4 bg-gray-50/50"
-            />
-          </div>
-        </div>
-      )}
+      </div>
 
     </div>
   );
 };
-
+export default Learning;

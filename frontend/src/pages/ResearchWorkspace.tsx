@@ -5,6 +5,7 @@ import { LearningJourney } from '../features/workspace/components/LearningJourne
 import { VoxHeader } from '../features/vox/components/VoxHeader';
 import { VoxGoalCard } from '../features/vox/components/VoxGoalCard';
 import { Navbar } from '../components/Navbar';
+import { InteractiveQuiz } from '../components/InteractiveQuiz';
 import { Button } from '../shared/ui/Button';
 import { Badge } from '../shared/ui/Badge';
 import { Breadcrumbs } from '../shared/ui/Breadcrumbs';
@@ -483,50 +484,11 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
 
           {/* C. FULL-SCREEN SOCRATIC ACTIVE RECALL QUIZ SCREEN */}
           {activeDockPanel === 'quiz' && (
-            <div className="space-y-6 animate-fadeIn">
-              <div className="flex items-center justify-between border-b pb-4">
-                <div>
-                  <button onClick={() => setActiveDockPanel(null)} className="text-xs font-bold text-indigo-600 hover:text-indigo-800 mb-1 block">
-                    ← Back to Paper Reader
-                  </button>
-                  <h2 className="text-2xl font-extrabold text-gray-900">Socratic Active Recall Quiz</h2>
-                  <p className="text-xs text-gray-500">Test your mastery of Transformer self-attention mechanics</p>
-                </div>
-                <Badge variant="success" size="sm">Question 1 of 3</Badge>
-              </div>
-
-              <div className="p-8 bg-white border border-gray-200/80 rounded-2xl space-y-6 shadow-xs">
-                <div className="space-y-2">
-                  <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider">Active Recall Challenge</span>
-                  <h3 className="text-xl font-extrabold text-gray-900">
-                    Why does Self-Attention calculate Queries (Q), Keys (K), and Values (V) dot-products in parallel?
-                  </h3>
-                </div>
-
-                <div className="grid grid-cols-1 gap-3">
-                  <button 
-                    onClick={() => alert('Correct! Parallel dot-products eliminate sequential RNN recurrence, dramatically speeding up GPU training.')}
-                    className="p-4 rounded-xl border border-gray-200 hover:border-indigo-600 hover:bg-indigo-50/70 text-left transition-all font-semibold text-sm text-gray-900 shadow-2xs cursor-pointer"
-                  >
-                    A. To eliminate sequential RNN computation bottlenecks and parallelize matrix multiplication across GPU cores.
-                  </button>
-
-                  <button 
-                    onClick={() => alert('Incorrect. Positional encodings preserve order, not dot-products.')}
-                    className="p-4 rounded-xl border border-gray-200 hover:border-indigo-600 hover:bg-indigo-50/70 text-left transition-all font-semibold text-sm text-gray-900 shadow-2xs cursor-pointer"
-                  >
-                    B. To compress embedding dimensions by 50% without loss of sequence order information.
-                  </button>
-
-                  <button 
-                    onClick={() => alert('Incorrect. Self-attention works for all sequence lengths.')}
-                    className="p-4 rounded-xl border border-gray-200 hover:border-indigo-600 hover:bg-indigo-50/70 text-left transition-all font-semibold text-sm text-gray-900 shadow-2xs cursor-pointer"
-                  >
-                    C. To prevent sequence transduction on short sequences.
-                  </button>
-                </div>
-              </div>
-            </div>
+            <InteractiveQuiz 
+              paperId={activePaper.id} 
+              paperTitle={activePaper.title} 
+              onBack={() => setActiveDockPanel(null)} 
+            />
           )}
 
           {/* D. FULL-SCREEN WORKSPACE STUDY NOTES SCREEN */}
