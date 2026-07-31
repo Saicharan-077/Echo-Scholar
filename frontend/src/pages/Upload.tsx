@@ -193,11 +193,15 @@ export const Upload: React.FC = () => {
     formData.append('file', selectedFile);
     formData.append('title', title);
 
+    let realBackendPaperId: number | null = null;
     try {
-      await api.post('/papers/upload', formData, {
+      const uploadRes = await api.post('/papers/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 3000
+        timeout: 60000
       });
+      if (uploadRes.data && uploadRes.data.paper_id) {
+        realBackendPaperId = uploadRes.data.paper_id;
+      }
     } catch (err) {
       console.log('Indexed document into local vector memory');
     }
@@ -207,7 +211,7 @@ export const Upload: React.FC = () => {
     setTimeout(() => {
       setUploadProgress(100);
 
-      const newPaperId = `paper-${Date.now()}`;
+      const newPaperId = realBackendPaperId ? String(realBackendPaperId) : `paper-${Date.now()}`;
       const newSessionId = `session-${Date.now()}`;
 
       const fileSizeMb = (selectedFile.size / (1024 * 1024)).toFixed(1);
@@ -219,6 +223,7 @@ export const Upload: React.FC = () => {
 
       const newPaper = {
         id: newPaperId,
+        db_id: realBackendPaperId,
         title,
         filename: selectedFile.name,
         category,

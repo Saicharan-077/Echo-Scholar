@@ -155,10 +155,11 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
     setPodcastLoading(true);
     setPodcastUrl(null);
     try {
-      let pId = (activePaper as any).db_id;
-      if (!pId) {
-        const numId = parseInt(activePaper.id);
-        pId = isNaN(numId) ? 1 : numId;
+      let pId = (activePaper as any).db_id || parseInt(activePaper.id);
+      if (!pId || isNaN(pId)) {
+        // Try parsing numeric ID from activePaper.id if format is like paper-123 or 123
+        const match = activePaper.id.match(/\d+/);
+        pId = match ? parseInt(match[0]) : 1;
       }
 
       const res = await api.post(`/podcasts/generate`, {
@@ -173,8 +174,9 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
       });
 
       if (res.data.audio_url) {
-        const path = res.data.audio_url.startsWith('/api') ? res.data.audio_url : `/api${res.data.audio_url}`;
-        setPodcastUrl(`http://localhost:8000${path}`);
+        const backendBase = (import.meta.env.VITE_BACKEND_URL || 'https://echo-scholar.onrender.com').replace(/\/$/, '');
+        const path = res.data.audio_url.startsWith('/') ? res.data.audio_url : `/${res.data.audio_url}`;
+        setPodcastUrl(res.data.audio_url.startsWith('http') ? res.data.audio_url : `${backendBase}${path}`);
       } else {
         alert("Podcast generation failed or audio URL not provided.");
       }
@@ -187,17 +189,18 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
 
   useEffect(() => {
     if (activeDockPanel === 'podcast' && activePaper) {
-      let pId = (activePaper as any).db_id;
-      if (!pId) {
-        const numId = parseInt(activePaper.id);
-        pId = isNaN(numId) ? 1 : numId;
+      let pId = (activePaper as any).db_id || parseInt(activePaper.id);
+      if (!pId || isNaN(pId)) {
+        const match = activePaper.id.match(/\d+/);
+        pId = match ? parseInt(match[0]) : 1;
       }
       api.get('/podcasts')
         .then((res) => {
           if (Array.isArray(res.data)) {
             const found = res.data.find((p: any) => p.paper_id === pId && p.audio_url);
             if (found) {
-              setPodcastUrl(`http://localhost:8000/api/podcasts/${found.id}/audio`);
+              const backendBase = (import.meta.env.VITE_BACKEND_URL || 'https://echo-scholar.onrender.com').replace(/\/$/, '');
+              setPodcastUrl(`${backendBase}/api/podcasts/${found.id}/audio`);
             }
           }
         })
