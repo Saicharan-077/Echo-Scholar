@@ -145,6 +145,10 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
   const [podcastUrl, setPodcastUrl] = useState<string | null>(null);
   const [podcastLoading, setPodcastLoading] = useState(false);
   const [podcastStyle, setPodcastStyle] = useState('educational');
+  const [podcastLanguage, setPodcastLanguage] = useState('English');
+  const [podcastDuration, setPodcastDuration] = useState('15-Min Deep Dive');
+  const [podcastAudience, setPodcastAudience] = useState('Practitioner / Engineer');
+  const [podcastFocus, setPodcastFocus] = useState('General Understanding');
 
   const handleGeneratePodcast = async () => {
     if (!activePaper) return;
@@ -161,7 +165,11 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
         paper_id: pId,
         style: podcastStyle,
         voice_male: 'en-IN-PrabhatNeural',
-        voice_female: 'en-IN-NeerjaNeural'
+        voice_female: 'en-IN-NeerjaNeural',
+        language: podcastLanguage,
+        duration_level: podcastDuration,
+        target_audience: podcastAudience,
+        key_focus_area: podcastFocus
       });
 
       if (res.data.audio_url) {
@@ -184,12 +192,17 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
         const numId = parseInt(activePaper.id);
         pId = isNaN(numId) ? 1 : numId;
       }
-      api.get(`/podcasts/paper/${pId}/audio`)
-        .then(() => {
-          setPodcastUrl(`http://localhost:8000/api/podcasts/paper/${pId}/audio`);
+      api.get('/podcasts')
+        .then((res) => {
+          if (Array.isArray(res.data)) {
+            const found = res.data.find((p: any) => p.paper_id === pId && p.audio_url);
+            if (found) {
+              setPodcastUrl(`http://localhost:8000/api/podcasts/${found.id}/audio`);
+            }
+          }
         })
         .catch(() => {
-          // No pre-existing audio found
+          // Quiet fallback
         });
     }
   }, [activeDockPanel, activePaper]);
@@ -499,29 +512,95 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
                 <Badge variant="accent" size="sm">Co-Hosts Prabhat & Neerja</Badge>
               </div>
 
-              <div className="p-8 bg-indigo-950 text-white rounded-2xl space-y-6 shadow-xl">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                  <div className="w-full">
-                    <label className="text-xs text-indigo-300 font-bold mb-2 block">Select Podcast Style</label>
+              <div className="p-8 bg-indigo-950 text-white rounded-2xl space-y-6 shadow-xl border border-indigo-800">
+                <div className="bg-indigo-900/60 p-5 rounded-xl border border-indigo-800 space-y-4">
+                  <div className="flex items-center gap-2 text-amber-400 font-bold text-sm border-b border-indigo-800 pb-2">
+                    <span>⚙️ Session Learning Parameters</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                      <label className="text-xs text-indigo-300 font-semibold mb-1 block">🌐 Language</label>
+                      <select
+                        value={podcastLanguage}
+                        onChange={(e) => setPodcastLanguage(e.target.value)}
+                        className="p-2 rounded bg-indigo-950 border border-indigo-700 text-xs text-white focus:outline-none focus:border-amber-400 w-full"
+                      >
+                        <option value="English">English</option>
+                        <option value="Spanish">Spanish</option>
+                        <option value="French">French</option>
+                        <option value="Hindi">Hindi</option>
+                        <option value="German">German</option>
+                        <option value="Tamil">Tamil</option>
+                        <option value="Telugu">Telugu</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-indigo-300 font-semibold mb-1 block">⏱️ Duration / Detail Depth</label>
+                      <select
+                        value={podcastDuration}
+                        onChange={(e) => setPodcastDuration(e.target.value)}
+                        className="p-2 rounded bg-indigo-950 border border-indigo-700 text-xs text-white focus:outline-none focus:border-amber-400 w-full"
+                      >
+                        <option value="5-Min Quick Overview">5-Min Quick Overview</option>
+                        <option value="10-Min Standard Breakdown">10-Min Standard Breakdown</option>
+                        <option value="15-Min Deep Dive">15-Min Deep Dive</option>
+                        <option value="30-Min Masterclass">30-Min Masterclass</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-indigo-300 font-semibold mb-1 block">📊 Target Audience / Difficulty</label>
+                      <select
+                        value={podcastAudience}
+                        onChange={(e) => setPodcastAudience(e.target.value)}
+                        className="p-2 rounded bg-indigo-950 border border-indigo-700 text-xs text-white focus:outline-none focus:border-amber-400 w-full"
+                      >
+                        <option value="High School / Beginner">High School / Beginner</option>
+                        <option value="Undergraduate / General">Undergraduate / General</option>
+                        <option value="Practitioner / Engineer">Practitioner / Engineer</option>
+                        <option value="Researcher / PhD Expert">Researcher / PhD Expert</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="text-xs text-indigo-300 font-semibold mb-1 block">🎯 Key Focus Area</label>
+                      <select
+                        value={podcastFocus}
+                        onChange={(e) => setPodcastFocus(e.target.value)}
+                        className="p-2 rounded bg-indigo-950 border border-indigo-700 text-xs text-white focus:outline-none focus:border-amber-400 w-full"
+                      >
+                        <option value="General Understanding">General Understanding</option>
+                        <option value="Technical Architecture">Technical Architecture</option>
+                        <option value="Mathematical Proofs">Mathematical Proofs</option>
+                        <option value="Practical Applications">Practical Applications</option>
+                        <option value="Critical Analysis">Critical Analysis</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
                     <div className="flex items-center gap-2">
+                      <span className="text-xs text-indigo-300">Style:</span>
                       <select 
                         value={podcastStyle}
                         onChange={(e) => setPodcastStyle(e.target.value)}
-                        className="p-2 rounded bg-indigo-900 border border-indigo-700 text-sm text-white focus:outline-none focus:border-amber-400 w-48"
+                        className="p-1.5 rounded bg-indigo-950 border border-indigo-700 text-xs text-white focus:outline-none focus:border-amber-400"
                       >
                         <option value="educational">Educational (Default)</option>
                         <option value="casual">Casual & Fun</option>
                         <option value="debate">Debate / Critical</option>
                         <option value="deep-dive">Technical Deep Dive</option>
                       </select>
-                      <button 
-                        onClick={handleGeneratePodcast}
-                        disabled={podcastLoading}
-                        className="btn-primary bg-amber-500 hover:bg-amber-600 border-none text-indigo-950"
-                      >
-                        {podcastLoading ? 'Generating Audio (Takes 1-2 mins)...' : 'Generate New Podcast'}
-                      </button>
                     </div>
+
+                    <button 
+                      onClick={handleGeneratePodcast}
+                      disabled={podcastLoading}
+                      className="btn-primary bg-amber-500 hover:bg-amber-600 border-none text-indigo-950 text-xs font-extrabold px-5 py-2.5 rounded-lg shadow-md transition-all"
+                    >
+                      {podcastLoading ? 'Generating Audio (Takes 1-2 mins)...' : 'Generate Podcast Episode 🎙️'}
+                    </button>
                   </div>
                 </div>
 

@@ -55,6 +55,25 @@ class EdgeTTSService:
         )
         return ssml
 
+    def _clean_text_for_speech(self, text: str) -> str:
+        import re
+        if not text:
+            return ""
+        # Strip markdown headers (### Header -> Header, # Header -> Header)
+        t = re.sub(r'#+\s*', '', text)
+        # Strip markdown links [label](url) -> label
+        t = re.sub(r'\[([^\]]+)\]\([^)]+\)', r'\1', t)
+        # Strip bold, italic formatting (**text** -> text, *text* -> text, _text_ -> text)
+        t = re.sub(r'\*{1,3}(.+?)\*{1,3}', r'\1', t)
+        t = re.sub(r'_{1,3}(.+?)_{1,3}', r'\1', t)
+        # Strip residual hashtags or standalone '#'
+        t = re.sub(r'#', '', t)
+        # Strip bullet points at line starts (- , * )
+        t = re.sub(r'^\s*[-*]\s+', '', t, flags=re.MULTILINE)
+        # Normalize whitespace
+        t = re.sub(r'\s+', ' ', t).strip()
+        return t
+
     async def generate_speech(
         self,
         text: str,
@@ -62,16 +81,14 @@ class EdgeTTSService:
         output_path: str
     ) -> bool:
         try:
-            import re
-            clean_text = re.sub(r'\*\*(.+?)\*\*', r'\1', text)
+            clean_text = self._clean_text_for_speech(text)
             communicate = edge_tts.Communicate(clean_text, voice)
             await communicate.save(output_path)
             return True
         except Exception as e:
             print(f"Edge TTS Error: {e}")
             try:
-                import re
-                plain = re.sub(r'\*\*(.+?)\*\*', r'\1', text)
+                plain = self._clean_text_for_speech(text)
                 communicate = edge_tts.Communicate(plain, voice)
                 await communicate.save(output_path)
                 return True
@@ -119,40 +136,59 @@ class EdgeTTSService:
         male_voice = voice_male or self.default_male_voice
         female_voice = voice_female or self.default_female_voice
 
-        valid_entries = []
-        for i, entry in enumerate(script):
+        # Group consecutive dialogue entries by speaker for fast batch processing
+        batched_entries = []
+        curr_voice = None
+        curr_text_list = []
+
+        for entry in script:
             text = entry.get("text", "").strip()
-            if text and not entry.get("is_recap", False):
-                spk_val = str(entry.get("speaker", "A")).upper()
-                voice = female_voice if "B" in spk_val else male_voice
-                valid_entries.append((i, entry, voice))
-
-        # Parallel TTS generation
-        temp_files = []
-        tasks = []
-        for i, entry, voice in valid_entries:
-            temp_fd, temp_path = tempfile.mkstemp(suffix=".mp3")
-            os.close(temp_fd)
-            temp_files.append((i, temp_path))
+            if not text or entry.get("is_recap", False):
+                continue
+            spk_val = str(entry.get("speaker", "A")).upper()
+            voice = female_voice if "B" in spk_val else male_voice
             
-            clean_t = entry.get("text", "")
-            tasks.append(self.generate_speech(clean_t, voice, temp_path))
+            if curr_voice is None:
+                curr_voice = voice
+                curr_text_list.append(text)
+            elif curr_voice == voice and len(" ".join(curr_text_list)) < 1500:
+                curr_text_list.append(text)
+            else:
+                batched_entries.append((" ".join(curr_text_list), curr_voice))
+                curr_voice = voice
+                curr_text_list = [text]
 
-        await asyncio.gather(*tasks)
+        if curr_text_list and curr_voice:
+            batched_entries.append((" ".join(curr_text_list), curr_voice))
 
-        # Merge segments using pydub
+        # High-concurrency TTS synthesis with semaphore
+        sem = asyncio.Semaphore(12)
+        temp_files = []
+
+        async def _synth_batch(idx: int, text_block: str, v: str):
+            async with sem:
+                temp_fd, temp_path = tempfile.mkstemp(suffix=".mp3")
+                os.close(temp_fd)
+                success = await self.generate_speech(text_block, v, temp_path)
+                return idx, temp_path, success
+
+        tasks = [_synth_batch(i, text_block, v) for i, (text_block, v) in enumerate(batched_entries)]
+        results = await asyncio.gather(*tasks)
+
+        # Sort by original batch index to preserve audio order
+        results.sort(key=lambda x: x[0])
+
         combined = AudioSegment.empty()
-        for idx, path in temp_files:
+        for idx, path, ok in results:
+            if ok:
+                try:
+                    segment = AudioSegment.from_mp3(path)
+                    combined += segment
+                except Exception as e:
+                    print(f"Error loading audio batch {idx}: {e}")
             try:
-                segment = AudioSegment.from_mp3(path)
-                combined += segment
-            except Exception as e:
-                print(f"Error loading podcast segment {idx}: {e}")
-
-        # Cleanup temp files
-        for idx, path in temp_files:
-            try:
-                os.remove(path)
+                if os.path.exists(path):
+                    os.remove(path)
             except Exception:
                 pass
 

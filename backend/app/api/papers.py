@@ -256,11 +256,59 @@ async def run_processing(paper_id: int, user_id: int, db_session_factory):
             db.add(Artifact(paper_id=paper_id, artifact_type="relationships", status="ready", content=relationships))
             await db.commit()
             
-            # Trigger other core artifacts to generate in background so they are ready
+            # Trigger core artifacts (Quiz, Flashcards, Knowledge Graph) to pre-generate in background for instant loading
             await artifact_manager.get_or_generate_artifact(db, paper_id, "quiz", clean_text)
             await artifact_manager.get_or_generate_artifact(db, paper_id, "flashcards", clean_text)
             await artifact_manager.get_or_generate_artifact(db, paper_id, "graph", clean_text)
-            await artifact_manager.get_or_generate_artifact(db, paper_id, "podcast", clean_text, title=paper.title, summary=summary)
+            
+            # Pre-compile Podcast script and Edge TTS audio MP3 in background
+            try:
+                from app.crud import podcast as podcast_crud
+                from app.models.podcast import PodcastStatus
+                from app.schemas import PodcastCreate
+                from app.services.edge_tts_service import edge_tts_service
+                from app.services.storage_service import storage_service
+                
+                existing_podcast = await podcast_crud.get_podcast_by_paper(db, paper_id, paper.user_id)
+                if not existing_podcast:
+                    podcast_data = PodcastCreate(
+                        paper_id=paper_id,
+                        title=f"Podcast: {paper.title}",
+                        description=f"AI-generated podcast summarizing {paper.title}",
+                        voice_male="en-IN-PrabhatNeural",
+                        voice_female="en-IN-NeerjaNeural",
+                        speed=1.0,
+                        style="educational"
+                    )
+                    podcast_rec = await podcast_crud.create_podcast(db, paper.user_id, podcast_data)
+                    
+                    script = await openai_service.generate_podcast_script(
+                        paper_title=paper.title,
+                        summary=summary,
+                        key_findings=paper.key_findings or [],
+                        style="educational",
+                        voice_male_name="Prabhat",
+                        voice_female_name="Neerja",
+                        document_text=clean_text
+                    )
+                    if script:
+                        audio_bytes, duration = await edge_tts_service.generate_podcast_audio(
+                            script=script,
+                            voice_male="en-IN-PrabhatNeural",
+                            voice_female="en-IN-NeerjaNeural",
+                            speed=1.0
+                        )
+                        audio_url, local_path = await storage_service.upload_audio(
+                            audio_bytes=audio_bytes,
+                            filename=f"podcast_{podcast_rec.id}.mp3",
+                            folder="podcasts"
+                        )
+                        transcript_text = "\n".join([f"[{e.get('timestamp', '0:00')}] {e.get('name', 'Speaker')}: {e.get('text', '')}" for e in script])
+                        await podcast_crud.set_podcast_audio(
+                            db, podcast_rec.id, audio_url=local_path, audio_duration=duration, audio_size=len(audio_bytes), transcript=transcript_text, transcript_json=script
+                        )
+            except Exception as pe:
+                print(f"DEBUG: [Pipeline] Background podcast pre-compilation note: {pe}")
             
             # 5. Chunking, Embedding, Vector Storage (RAG Indexing)
             print("DEBUG: [Pipeline] Starting semantic chunking & vector indexing...")

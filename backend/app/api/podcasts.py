@@ -111,7 +111,11 @@ async def generate_podcast(
             style=request.style,
             voice_male_name=male_name,
             voice_female_name=female_name,
-            document_text=paper.raw_text or ""
+            document_text=paper.raw_text or "",
+            language=getattr(request, "language", "English") or "English",
+            duration_level=getattr(request, "duration_level", "15-Min Deep Dive") or "15-Min Deep Dive",
+            target_audience=getattr(request, "target_audience", "Practitioner / Engineer") or "Practitioner / Engineer",
+            key_focus_area=getattr(request, "key_focus_area", "General Understanding") or "General Understanding"
         )
         
         if not script:
