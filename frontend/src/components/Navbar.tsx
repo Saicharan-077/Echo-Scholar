@@ -8,9 +8,11 @@ import {
   Sparkles,
   Command,
   Sun,
-  Moon
+  Moon,
+  Laptop
 } from 'lucide-react';
 import { JUDGE_PERSONAS, loginWithPersona } from '../services/api';
+import { useTheme, Theme } from '../context/ThemeContext';
 
 interface NavbarProps {
   onOpenSearch?: () => void;
@@ -18,22 +20,19 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
   const location = useLocation();
+  const { theme, setTheme, effectiveTheme } = useTheme();
   const [selectedPersona, setSelectedPersona] = useState<string>('Standard Student');
   const [isPersonaOpen, setIsPersonaOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isThemeOpen, setIsThemeOpen] = useState(false);
   
   const personaRef = useRef<HTMLDivElement>(null);
+  const themeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const savedEmail = localStorage.getItem('user_email');
     if (savedEmail) {
       const match = JUDGE_PERSONAS.find(p => p.email === savedEmail);
       if (match) setSelectedPersona(match.role);
-    }
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-      setIsDarkMode(true);
     }
   }, []);
 
@@ -86,7 +85,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200/80">
+    <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200/80 dark:border-gray-800">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         
         {/* Logo (Minimal Symbol + EchoXScholar) */}
@@ -94,8 +93,8 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
           <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm group-hover:bg-indigo-700 transition-all duration-150 group-hover:scale-105">
             <Command className="w-5 h-5" />
           </div>
-          <span className="font-bold text-gray-900 text-xl tracking-tight">
-            EchoXScholar <span className="text-indigo-600 font-extrabold">X</span>
+          <span className="font-bold text-gray-900 dark:text-white text-xl tracking-tight">
+            EchoXScholar <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">X</span>
           </span>
         </Link>
 
@@ -109,6 +108,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
             }`}
           >
             Discover
+          </Link>
+
+          <Link
+            to="/dashboard"
+            className={`text-[15px] font-medium tracking-wide transition-colors ${
+              location.pathname === '/dashboard' ? 'text-indigo-600 font-semibold' : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            Dashboard
           </Link>
 
           <Link
@@ -154,13 +162,51 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
         {/* Right Section: Profile & Settings */}
         <div className="flex items-center gap-4 shrink-0">
           
-          <button
-            onClick={toggleDarkMode}
-            className="p-2 text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100/80 dark:hover:bg-gray-800/80 rounded-lg transition-colors"
-            title="Toggle Dark Mode"
-          >
-            {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </button>
+          {/* Theme Selector Dropdown */}
+          <div className="relative" ref={themeRef}>
+            <button
+              onClick={() => setIsThemeOpen(!isThemeOpen)}
+              className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors flex items-center gap-1.5"
+              title={`Current Theme: ${theme}`}
+            >
+              {effectiveTheme === 'dark' ? <Moon className="w-4 h-4 text-indigo-400" /> : <Sun className="w-4 h-4 text-amber-500" />}
+              <span className="text-xs font-medium capitalize hidden md:inline text-gray-700 dark:text-gray-300">
+                {theme}
+              </span>
+            </button>
+
+            {isThemeOpen && (
+              <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-1.5 z-50 animate-in fade-in duration-150 space-y-1">
+                <button
+                  onClick={() => { setTheme('light'); setIsThemeOpen(false); }}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs rounded-lg transition-colors ${
+                    theme === 'light' ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <Sun className="w-4 h-4 text-amber-500" />
+                  <span>Light</span>
+                </button>
+                <button
+                  onClick={() => { setTheme('dark'); setIsThemeOpen(false); }}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs rounded-lg transition-colors ${
+                    theme === 'dark' ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <Moon className="w-4 h-4 text-indigo-400" />
+                  <span>Dark</span>
+                </button>
+                <button
+                  onClick={() => { setTheme('system'); setIsThemeOpen(false); }}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs rounded-lg transition-colors ${
+                    theme === 'system' ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <Laptop className="w-4 h-4 text-gray-400" />
+                  <span>System</span>
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* De-emphasized Persona Switcher (Secondary Subtle Outline) */}
           <div className="relative" ref={personaRef}>
