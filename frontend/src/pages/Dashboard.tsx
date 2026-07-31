@@ -8,15 +8,11 @@ import {
   Mic, 
   Network, 
   Briefcase, 
-  CheckCircle2, 
   AlertTriangle, 
-  ArrowUpRight,
-  Sparkles,
+  ArrowRight,
   Activity,
   BookOpen,
-  Compass,
-  Sliders,
-  Sparkle
+  CheckCircle2
 } from 'lucide-react';
 import { api } from '../services/api';
 
@@ -39,72 +35,69 @@ export const Dashboard: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-black text-slate-100 p-4 lg:p-8 space-y-8 max-w-7xl mx-auto pt-6">
+    <div className="min-h-screen bg-gray-50 text-gray-900 p-4 sm:p-6 lg:p-8 space-y-8 max-w-7xl mx-auto">
       
-      {/* Apple Vision Pro Style Hero Header */}
-      <div className="relative overflow-hidden rounded-3xl apple-glass p-8 lg:p-10 border border-white/15">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div className="relative z-10 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white text-xs font-medium border border-white/20 backdrop-blur-md">
-            <Sparkles className="w-3.5 h-3.5 text-purple-300" />
-            <span>Designed by Apple Developer Guidelines • Cognitive Twin System</span>
+      {/* Welcome Title & Header */}
+      <div className="saas-panel p-6 sm:p-8 bg-white border border-gray-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-medium border border-indigo-200">
+            <span>Cognitive Twin System</span>
+            <span>•</span>
+            <span className="font-semibold">Enterprise Active Session</span>
           </div>
-
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-white">
-            Welcome to <span className="apple-purple-gradient">EchoScholar X</span>
-          </h1>
-
-          <p className="text-slate-300 text-sm max-w-2xl leading-relaxed">
-            Your persistent Cognitive Twin continuously recalculates memory decay rates, vernacular explanation preferences, and prerequisite DAG concept maps.
+          <h1 className="h1-title text-2xl sm:text-3xl">Command Center Dashboard</h1>
+          <p className="small-text">
+            Real-time memory decay tracking, concept prerequisite DAG maps, and adaptive quiz diagnostics.
           </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Link to="/upload" className="btn-primary text-xs">
+            <span>Upload Research Paper</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
       </div>
 
-      {/* Grid Layout: Apple Widgets */}
+      {/* Grid Row 1: Cognitive DNA & Heatmap */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Widget 1: Cognitive Twin Profile Card */}
-        <div className="apple-card rounded-3xl p-6 space-y-5 border border-white/10">
-          <div className="flex items-center justify-between">
+        {/* Cognitive DNA Panel */}
+        <div className="saas-card p-6 space-y-5">
+          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center text-purple-300">
-                <Brain className="w-4 h-4" />
-              </div>
-              <h2 className="font-bold text-base text-white">Cognitive DNA</h2>
+              <Brain className="w-5 h-5 text-indigo-600" />
+              <h2 className="h3-title">Cognitive Twin Profile</h2>
             </div>
-            <span className="text-[10px] bg-white/10 text-slate-300 px-2 py-0.5 rounded-full font-mono">
-              Live Sync
-            </span>
+            <span className="badge-accent">Live Sync</span>
           </div>
 
           {loading ? (
-            <div className="text-xs text-slate-400 py-4">Syncing Cognitive Twin profile...</div>
+            <div className="small-text py-4">Syncing profile metrics...</div>
           ) : (
             <div className="space-y-3 text-xs">
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
-                <span className="text-slate-400 font-medium">Explanation Style</span>
-                <span className="text-purple-300 font-semibold">{learningDna?.explanation_style || 'Analogy-Based'}</span>
+              <div className="flex items-center justify-between p-2.5 rounded bg-gray-50 border border-gray-200">
+                <span className="text-gray-600">Explanation Style</span>
+                <span className="font-semibold text-gray-900">{learningDna?.explanation_style || 'Analogy-Based'}</span>
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
-                <span className="text-slate-400 font-medium">Vernacular Preference</span>
-                <span className="text-cyan-300 font-semibold">{learningDna?.preferred_language || 'Teluglish'}</span>
+              <div className="flex items-center justify-between p-2.5 rounded bg-gray-50 border border-gray-200">
+                <span className="text-gray-600">Vernacular Language</span>
+                <span className="font-semibold text-gray-900">{learningDna?.preferred_language || 'Teluglish'}</span>
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/5">
-                <span className="text-slate-400 font-medium">Memory Decay Rate</span>
-                <span className="text-amber-300 font-semibold">{(learningDna?.memory_decay_rate || 0.15) * 100}% / day</span>
+              <div className="flex items-center justify-between p-2.5 rounded bg-gray-50 border border-gray-200">
+                <span className="text-gray-600">Memory Decay Rate ($\lambda$)</span>
+                <span className="font-semibold text-indigo-600">{(learningDna?.memory_decay_rate || 0.15) * 100}% / day</span>
               </div>
 
               {/* Warning Alert */}
-              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-1.5">
-                <div className="flex items-center gap-2 text-amber-400 font-bold text-xs">
-                  <AlertTriangle className="w-4 h-4" />
-                  <span>Prerequisite Gap Alert</span>
+              <div className="p-3 rounded bg-amber-50 border border-amber-200 space-y-1">
+                <div className="flex items-center gap-1.5 text-amber-800 font-semibold text-xs">
+                  <AlertTriangle className="w-4 h-4 text-amber-600" />
+                  <span>Prerequisite Gap Warning</span>
                 </div>
-                <p className="text-[11px] text-amber-200/80 leading-relaxed">
+                <p className="text-[11px] text-amber-900 leading-relaxed">
                   Prerequisite gap detected in <strong>Recursion call stack</strong> before Dynamic Programming.
                 </p>
               </div>
@@ -112,32 +105,33 @@ export const Dashboard: React.FC = () => {
           )}
         </div>
 
-        {/* Widget 2: 30-Day Activity Heatmap */}
-        <div className="lg:col-span-2 apple-card rounded-3xl p-6 lg:p-8 space-y-6 border border-white/10">
-          <div className="flex items-center justify-between">
+        {/* 30-Day Learning Velocity Heatmap */}
+        <div className="lg:col-span-2 saas-card p-6 space-y-5">
+          <div className="flex items-center justify-between border-b border-gray-100 pb-3">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300">
-                <Activity className="w-4 h-4" />
-              </div>
-              <h2 className="font-bold text-base text-white">Learning Velocity Grid</h2>
+              <Activity className="w-5 h-5 text-indigo-600" />
+              <h2 className="h3-title">30-Day Study Velocity Heatmap</h2>
             </div>
-            <span className="text-xs text-slate-400 font-medium">Past 30 Days</span>
+            <div className="flex items-center gap-3 text-xs text-gray-500">
+              <span className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded bg-gray-200"></div> Low</span>
+              <span className="flex items-center gap-1"><div className="w-2.5 h-2.5 rounded bg-indigo-600"></div> High</span>
+            </div>
           </div>
 
           <div className="grid grid-cols-10 gap-2 py-2">
             {Array.from({ length: 30 }).map((_, i) => {
               const intensity = [0, 1, 2, 3, 2, 4, 3, 1, 4, 2, 0, 3, 4, 2, 1, 3, 4, 2, 4, 3, 1, 2, 3, 4, 2, 3, 4, 1, 2, 4][i];
               const styles = [
-                'bg-white/5 border-white/5',
-                'bg-purple-950/60 border-purple-800/40 text-purple-200',
-                'bg-purple-700/60 border-purple-500/40 text-white',
-                'bg-purple-500 border-purple-400 text-white shadow-md shadow-purple-500/30',
-                'bg-cyan-400 border-cyan-300 text-black font-extrabold shadow-lg shadow-cyan-400/40',
+                'bg-gray-100 text-gray-500 border-gray-200',
+                'bg-indigo-50 text-indigo-700 border-indigo-200',
+                'bg-indigo-100 text-indigo-800 border-indigo-300 font-medium',
+                'bg-indigo-600 text-white font-semibold',
+                'bg-indigo-800 text-white font-bold',
               ];
               return (
                 <div
                   key={i}
-                  className={`h-9 rounded-xl border flex items-center justify-center text-[10px] transition-all apple-btn ${styles[intensity]}`}
+                  className={`h-8 rounded border flex items-center justify-center text-[10px] ${styles[intensity]}`}
                 >
                   {i + 1}
                 </div>
@@ -146,93 +140,78 @@ export const Dashboard: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-3 gap-4 pt-2">
-            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/5 text-center space-y-1">
-              <span className="text-[11px] text-slate-400 font-medium">Total Study Time</span>
-              <p className="text-xl font-extrabold text-purple-300">42.5 hrs</p>
+            <div className="p-3 rounded bg-gray-50 border border-gray-200 text-center">
+              <span className="text-[11px] text-gray-500">Total Study Time</span>
+              <p className="text-lg font-bold text-gray-900">42.5 hrs</p>
             </div>
-            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/5 text-center space-y-1">
-              <span className="text-[11px] text-slate-400 font-medium">Mastery Index</span>
-              <p className="text-xl font-extrabold text-cyan-300">78.4%</p>
+            <div className="p-3 rounded bg-gray-50 border border-gray-200 text-center">
+              <span className="text-[11px] text-gray-500">Mastery Index</span>
+              <p className="text-lg font-bold text-indigo-600">78.4%</p>
             </div>
-            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/5 text-center space-y-1">
-              <span className="text-[11px] text-slate-400 font-medium">Current Scholar Level</span>
-              <p className="text-xl font-extrabold text-amber-300">Level 4</p>
+            <div className="p-3 rounded bg-gray-50 border border-gray-200 text-center">
+              <span className="text-[11px] text-gray-500">Scholar Level</span>
+              <p className="text-lg font-bold text-gray-900">Level 4</p>
             </div>
           </div>
         </div>
 
       </div>
 
-      {/* Feature Navigation Grid */}
+      {/* Core Action Modules */}
       <div className="space-y-4">
-        <h2 className="text-lg font-bold text-white flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-purple-400" />
-          <span>Core Interactive Learning Modules</span>
-        </h2>
+        <h2 className="h2-title text-xl">Core Learning Engines</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           
-          <Link
-            to="/podcasts"
-            className="apple-card rounded-3xl p-6 space-y-4 border border-white/10 group apple-btn"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center text-purple-300 group-hover:scale-110 transition-transform">
-              <Headphones className="w-6 h-6" />
+          <Link to="/podcasts" className="saas-card p-5 space-y-3 hover:border-indigo-400 group transition-all">
+            <div className="w-10 h-10 rounded-md bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
+              <Headphones className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-white text-base flex items-center justify-between">
+              <h3 className="font-semibold text-gray-900 text-sm flex items-center justify-between">
                 <span>Interruptible Podcast</span>
-                <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-purple-400 transition-colors" />
+                <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
               </h3>
-              <p className="text-xs text-slate-400 mt-1">Dual AI co-hosts with real-time speech interruption.</p>
+              <p className="text-xs text-gray-500 mt-1">Dual AI co-hosts with real-time speech interruption.</p>
             </div>
           </Link>
 
-          <Link
-            to="/professor"
-            className="apple-card rounded-3xl p-6 space-y-4 border border-white/10 group apple-btn"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 border border-cyan-400/30 flex items-center justify-center text-cyan-300 group-hover:scale-110 transition-transform">
-              <Mic className="w-6 h-6" />
+          <Link to="/professor" className="saas-card p-5 space-y-3 hover:border-indigo-400 group transition-all">
+            <div className="w-10 h-10 rounded-md bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
+              <Mic className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-white text-base flex items-center justify-between">
+              <h3 className="font-semibold text-gray-900 text-sm flex items-center justify-between">
                 <span>Voice Professor</span>
-                <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-cyan-400 transition-colors" />
+                <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
               </h3>
-              <p className="text-xs text-slate-400 mt-1">Socratic speech classroom in Teluglish/Hinglish.</p>
+              <p className="text-xs text-gray-500 mt-1">Socratic speech classroom in Teluglish / Hinglish.</p>
             </div>
           </Link>
 
-          <Link
-            to="/graph"
-            className="apple-card rounded-3xl p-6 space-y-4 border border-white/10 group apple-btn"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300 group-hover:scale-110 transition-transform">
-              <Network className="w-6 h-6" />
+          <Link to="/graph" className="saas-card p-5 space-y-3 hover:border-indigo-400 group transition-all">
+            <div className="w-10 h-10 rounded-md bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
+              <Network className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-white text-base flex items-center justify-between">
+              <h3 className="font-semibold text-gray-900 text-sm flex items-center justify-between">
                 <span>Concept DAG Tree</span>
-                <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-blue-400 transition-colors" />
+                <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
               </h3>
-              <p className="text-xs text-slate-400 mt-1">Interactive prerequisite tree with RED gap alerts.</p>
+              <p className="text-xs text-gray-500 mt-1">Interactive prerequisite tree with RED gap alerts.</p>
             </div>
           </Link>
 
-          <Link
-            to="/placement"
-            className="apple-card rounded-3xl p-6 space-y-4 border border-white/10 group apple-btn"
-          >
-            <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-300 group-hover:scale-110 transition-transform">
-              <Briefcase className="w-6 h-6" />
+          <Link to="/placement" className="saas-card p-5 space-y-3 hover:border-indigo-400 group transition-all">
+            <div className="w-10 h-10 rounded-md bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600">
+              <Briefcase className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-white text-base flex items-center justify-between">
-                <span>Placement Simulator</span>
-                <ArrowUpRight className="w-4 h-4 text-slate-500 group-hover:text-amber-400 transition-colors" />
+              <h3 className="font-semibold text-gray-900 text-sm flex items-center justify-between">
+                <span>Placement Mode</span>
+                <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-indigo-600 group-hover:translate-x-1 transition-all" />
               </h3>
-              <p className="text-xs text-slate-400 mt-1">Whiteboard interview scenarios & AI scorecards.</p>
+              <p className="text-xs text-gray-500 mt-1">Whiteboard interview practice & AI scorecards.</p>
             </div>
           </Link>
 

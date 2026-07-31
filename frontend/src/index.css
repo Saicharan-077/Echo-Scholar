@@ -2,108 +2,355 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+/* ==========================================================================
+   ENTERPRISE SAAS DESIGN SYSTEM (Stripe / Linear / Vercel Standards)
+   60-30-10 Rule: 60% Canvas Neutral, 30% Surface Variants, 10% Accent
+   ========================================================================== */
+
 :root {
-  --apple-bg: #000000;
-  --apple-card: rgba(255, 255, 255, 0.05);
-  --apple-card-hover: rgba(255, 255, 255, 0.08);
-  --apple-border: rgba(255, 255, 255, 0.12);
-  --apple-blue: #007aff;
-  --apple-purple: #af52de;
-  --apple-pink: #ff2d55;
-  --apple-cyan: #5ac8fa;
-  --apple-green: #34c759;
-  --apple-orange: #ff9500;
+  /* Neutral Palette (Light Enterprise Canvas) */
+  --bg-canvas: #f9fafb;
+  --bg-surface: #ffffff;
+  --bg-surface-subtle: #f3f4f6;
+  --bg-surface-hover: #e5e7eb;
+
+  /* Hairline Borders & Dividers */
+  --border-subtle: #e5edf5;
+  --border-strong: #d1d5db;
+
+  /* High-Contrast Typography */
+  --text-primary: #1f2937;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+  --text-inverse: #ffffff;
+
+  /* Single Brand Primary Accent (Indigo-600) */
+  --accent-primary: #4f46e5;
+  --accent-hover: #4338ca;
+  --accent-active: #3730a3;
+  --accent-light: #eeef2;
+
+  /* Controlled Semantic Colors */
+  --semantic-success: #10b981;
+  --semantic-warning: #f59e0b;
+  --semantic-error: #ef4444;
+
+  /* Typography Scale */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  /* Corner Radii */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 9999px;
+
+  /* Subtle Elevation & Hairline Shadows */
+  --shadow-flat: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.08), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  --shadow-modal: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
 }
 
+/* Base Body Styles */
 body {
-  background-color: #000000;
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(175, 82, 222, 0.15) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(0, 122, 255, 0.15) 0px, transparent 50%),
-    radial-gradient(at 50% 100%, rgba(52, 199, 89, 0.1) 0px, transparent 50%);
-  background-attachment: fixed;
-  color: #f5f5f7;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  line-height: 1.5;
+  margin: 0;
+  padding: 0;
 }
 
-/* Apple Liquid Glass Panel */
-.apple-glass {
-  background: rgba(20, 20, 25, 0.65);
-  backdrop-filter: blur(25px) saturate(190%);
-  -webkit-backdrop-filter: blur(25px) saturate(190%);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+/* Enterprise Flat Cards & Containers */
+.saas-card {
+  background-color: #ffffff;
+  border: 1px solid #e5edf5;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-.apple-card {
-  background: rgba(255, 255, 255, 0.04);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+.saas-card:hover {
+  border-color: #a5b4fc;
+  box-shadow: 0 10px 20px -3px rgba(79, 70, 229, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
 }
 
-.apple-card:hover {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-3px) scale(1.01);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+.saas-card:active {
+  transform: scale(0.995);
 }
 
-/* Apple Button Spring Effect */
-.apple-btn {
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+.saas-panel {
+  background-color: #ffffff;
+  border: 1px solid #e5edf5;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-flat);
+  transition: all 0.2s ease-in-out;
 }
-.apple-btn:hover {
-  transform: scale(1.03);
+
+/* Primary Button (Indigo-600) with Apple Press Physics */
+.btn-primary {
+  background-color: #4f46e5;
+  color: #ffffff;
+  font-weight: 500;
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  transition: background-color 0.15s ease-in-out, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s ease-in-out;
+  cursor: pointer;
+  display: inline-flex;
+  items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
-.apple-btn:active {
+.btn-primary:hover {
+  background-color: #4338ca;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+  transform: translateY(-1px);
+}
+.btn-primary:active {
+  background-color: #3730a3;
+  transform: scale(0.97);
+  box-shadow: none;
+}
+
+/* Secondary Button (Outline Style) */
+.btn-secondary {
+  background-color: #ffffff;
+  color: #374151;
+  font-weight: 500;
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid #d1d5db;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  display: inline-flex;
+  items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.btn-secondary:hover {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+  color: #111827;
+  transform: translateY(-1px);
+}
+.btn-secondary:active {
   transform: scale(0.97);
 }
 
-/* Apple Floating Dock Styling */
-.apple-dock {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(30px) saturate(200%);
-  -webkit-backdrop-filter: blur(30px) saturate(200%);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+/* Accent Outline Button */
+.btn-outline-accent {
+  background-color: transparent;
+  color: #4f46e5;
+  font-weight: 500;
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid #4f46e5;
+  transition: background-color 0.15s ease-in-out;
+  cursor: pointer;
+}
+.btn-outline-accent:hover {
+  background-color: #eef2ff;
 }
 
-/* Glowing text gradients */
-.apple-text-gradient {
-  background: linear-gradient(135deg, #ffffff 0%, #a1a1a6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* Inputs & Form Controls */
+.saas-input {
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  color: #1f2937;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+.saas-input:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
 }
 
-.apple-purple-gradient {
-  background: linear-gradient(135deg, #e0aaff 0%, #c77dff 50%, #7b2cbf 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+/* Typography Classes (Enterprise SaaS Scale) */
+.h1-title {
+  font-size: 2.75rem;
+  line-height: 1.12;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.025em;
 }
 
-.apple-blue-gradient {
-  background: linear-gradient(135deg, #70d6ff 0%, #007aff 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+@media (min-width: 640px) {
+  .h1-title {
+    font-size: 3.75rem;
+    line-height: 1.08;
+  }
 }
 
-/* Custom Scrollbar */
+@media (min-width: 1024px) {
+  .h1-title {
+    font-size: 4.75rem; /* ~76px */
+    line-height: 1.05;
+  }
+}
+
+.h2-title {
+  font-size: 2.25rem; /* ~36px */
+  line-height: 1.2;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 768px) {
+  .h2-title {
+    font-size: 2.75rem; /* ~44px */
+    line-height: 1.15;
+  }
+}
+
+.h3-title {
+  font-size: 1.375rem; /* ~22px */
+  line-height: 1.35;
+  font-weight: 600;
+  color: #111827;
+}
+
+@media (min-width: 768px) {
+  .h3-title {
+    font-size: 1.5rem; /* ~24px */
+  }
+}
+
+.body-text {
+  font-size: 1.125rem; /* ~18px */
+  line-height: 1.7;
+  color: #4b5563;
+}
+
+.small-text {
+  font-size: 1rem; /* ~16px */
+  line-height: 1.65;
+  color: #4b5563;
+}
+
+/* Primary Button (Indigo-600) with Apple Press Physics */
+.btn-primary {
+  background-color: #4f46e5;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 1rem; /* 16px */
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  transition: background-color 0.15s ease-in-out, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s ease-in-out;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.btn-primary:hover {
+  background-color: #4338ca;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.28);
+  transform: translateY(-1px);
+}
+.btn-primary:active {
+  background-color: #3730a3;
+  transform: scale(0.98);
+  box-shadow: none;
+}
+
+/* Secondary Button (Outline Style) */
+.btn-secondary {
+  background-color: #ffffff;
+  color: #374151;
+  font-weight: 600;
+  font-size: 1rem; /* 16px */
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-md);
+  border: 1px solid #d1d5db;
+  transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.btn-secondary:hover {
+  background-color: #f9fafb;
+  border-color: #9ca3af;
+  color: #111827;
+  transform: translateY(-1px);
+}
+.btn-secondary:active {
+  transform: scale(0.98);
+}
+
+/* Badges */
+.badge-neutral {
+  background-color: #f3f4f6;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  padding: 0.25rem 0.875rem; /* 4px 14px */
+  border-radius: var(--radius-pill);
+  font-size: 0.875rem; /* 14px */
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.badge-accent {
+  background-color: #eef2ff;
+  color: #4338ca;
+  border: 1px solid #c7d2fe;
+  padding: 0.25rem 0.875rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.875rem; /* 14px */
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.badge-warning {
+  background-color: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  padding: 0.25rem 0.875rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+/* Accessibility: Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Scrollbar Customization */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #f1f5f9;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 999px;
+  background: #cbd5e1;
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.4);
+  background: #94a3b8;
 }

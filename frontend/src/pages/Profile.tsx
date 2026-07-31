@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   User, 
   Brain, 
-  Sparkles, 
   CheckCircle2, 
   Globe, 
   GraduationCap, 
   Target, 
-  Award,
   Save
 } from 'lucide-react';
 import { api } from '../services/api';
@@ -42,122 +40,115 @@ export const Profile: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100 p-4 lg:p-8 space-y-8 max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gray-50 text-gray-900 p-4 sm:p-6 lg:p-8 space-y-8 max-w-4xl mx-auto">
       
       {/* Header */}
-      <div className="glass-panel p-6 rounded-2xl border border-purple-500/20 flex items-center justify-between">
+      <div className="saas-panel p-6 bg-white border border-gray-200 flex items-center justify-between">
         <div>
-          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-xs font-semibold mb-2">
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold border border-indigo-200 mb-2">
             <User className="w-3.5 h-3.5" />
-            <span>Cognitive Twin User Profile & Avatar Engine</span>
+            <span>Cognitive Twin Profile Engine</span>
           </div>
-          <h1 className="text-2xl lg:text-3xl font-extrabold text-white">
-            User Persona & <span className="gradient-text">Cognitive Profile</span>
-          </h1>
-          <p className="text-xs text-slate-400 mt-1">
-            Customize your AI persona avatar (Girl/Boy), learning style, and academic targets.
+          <h1 className="h1-title text-2xl sm:text-3xl">User Persona & Cognitive Profile</h1>
+          <p className="small-text mt-1">
+            Customize your AI persona avatar (Girl / Boy Image), learning style, and academic targets.
           </p>
         </div>
       </div>
 
-      {/* Main Profile Form Card */}
-      <div className="glass-card rounded-2xl p-6 lg:p-8 space-y-8 border border-purple-500/20">
+      {/* Profile Form Card */}
+      <div className="saas-card p-6 sm:p-8 space-y-8">
         
-        {/* AVATAR SELECTOR: GIRL VS BOY IMAGE */}
-        <div className="space-y-4">
-          <label className="text-sm font-extrabold text-white flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-purple-400" />
-            <span>Select Your User Persona Avatar (Girl / Boy Image)</span>
+        {/* AVATAR SELECTOR */}
+        <div className="space-y-3">
+          <label className="text-sm font-semibold text-gray-900">
+            Select User Persona Avatar (Girl / Boy Image)
           </label>
 
           <div className="grid grid-cols-2 gap-6 max-w-md">
             
-            {/* Girl Persona Option */}
+            {/* Girl Persona */}
             <button
               type="button"
               onClick={() => setSelectedAvatar('girl')}
-              className={`p-4 rounded-2xl border text-center space-y-3 transition-all flex flex-col items-center ${
+              className={`p-4 rounded-lg border text-center space-y-3 transition-all flex flex-col items-center cursor-pointer ${
                 selectedAvatar === 'girl'
-                  ? 'bg-purple-600/30 border-2 border-purple-500 shadow-xl shadow-purple-500/20 scale-105'
-                  : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 opacity-70'
+                  ? 'bg-indigo-50 border-2 border-indigo-600 shadow-sm'
+                  : 'bg-white border-gray-200 hover:border-gray-300'
               }`}
             >
               <img
                 src={girlAvatar}
                 alt="Girl Persona Avatar"
-                className="w-24 h-24 rounded-2xl object-cover border-2 border-purple-400 shadow-md"
+                className="w-20 h-20 rounded-lg object-cover border border-gray-300"
               />
               <div>
-                <span className="font-bold text-xs text-white block">Girl Scholar Persona</span>
-                <span className="text-[10px] text-purple-300">Ananya (Research Lead)</span>
+                <span className="font-semibold text-xs text-gray-900 block">Girl Scholar Persona</span>
+                <span className="text-[11px] text-gray-500">Ananya (Research Lead)</span>
               </div>
               {selectedAvatar === 'girl' && (
-                <span className="text-[10px] bg-purple-500 text-white font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <CheckCircle2 className="w-3 h-3" /> Selected Avatar
-                </span>
+                <span className="badge-accent">Selected Avatar</span>
               )}
             </button>
 
-            {/* Boy Persona Option */}
+            {/* Boy Persona */}
             <button
               type="button"
               onClick={() => setSelectedAvatar('boy')}
-              className={`p-4 rounded-2xl border text-center space-y-3 transition-all flex flex-col items-center ${
+              className={`p-4 rounded-lg border text-center space-y-3 transition-all flex flex-col items-center cursor-pointer ${
                 selectedAvatar === 'boy'
-                  ? 'bg-cyan-600/30 border-2 border-cyan-500 shadow-xl shadow-cyan-500/20 scale-105'
-                  : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 opacity-70'
+                  ? 'bg-indigo-50 border-2 border-indigo-600 shadow-sm'
+                  : 'bg-white border-gray-200 hover:border-gray-300'
               }`}
             >
               <img
                 src={boyAvatar}
                 alt="Boy Persona Avatar"
-                className="w-24 h-24 rounded-2xl object-cover border-2 border-cyan-400 shadow-md"
+                className="w-20 h-20 rounded-lg object-cover border border-gray-300"
               />
               <div>
-                <span className="font-bold text-xs text-white block">Boy Scholar Persona</span>
-                <span className="text-[10px] text-cyan-300">Vikram (AI Engineer)</span>
+                <span className="font-semibold text-xs text-gray-900 block">Boy Scholar Persona</span>
+                <span className="text-[11px] text-gray-500">Vikram (AI Engineer)</span>
               </div>
               {selectedAvatar === 'boy' && (
-                <span className="text-[10px] bg-cyan-500 text-slate-950 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <CheckCircle2 className="w-3 h-3" /> Selected Avatar
-                </span>
+                <span className="badge-accent">Selected Avatar</span>
               )}
             </button>
 
           </div>
         </div>
 
-        {/* User Details Grid */}
+        {/* User Form Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
           
-          <div className="space-y-2">
-            <label className="font-bold text-slate-300">Full Name</label>
+          <div className="space-y-1.5">
+            <label className="font-semibold text-gray-700">Full Name</label>
             <input
               type="text"
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-purple-500"
+              className="saas-input w-full"
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="font-bold text-slate-300">Username</label>
+          <div className="space-y-1.5">
+            <label className="font-semibold text-gray-700">Username</label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-purple-500"
+              className="saas-input w-full"
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="font-bold text-slate-300 flex items-center gap-1.5">
-              <GraduationCap className="w-4 h-4 text-purple-400" /> Academic Branch / Major
+          <div className="space-y-1.5">
+            <label className="font-semibold text-gray-700 flex items-center gap-1">
+              <GraduationCap className="w-4 h-4 text-indigo-600" /> Academic Branch / Major
             </label>
             <select
               value={branch}
               onChange={(e) => setBranch(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-purple-500 cursor-pointer"
+              className="saas-input w-full cursor-pointer"
             >
               <option value="Computer Science & AI">Computer Science & AI</option>
               <option value="Data Science & ML">Data Science & ML</option>
@@ -166,14 +157,14 @@ export const Profile: React.FC = () => {
             </select>
           </div>
 
-          <div className="space-y-2">
-            <label className="font-bold text-slate-300 flex items-center gap-1.5">
-              <Globe className="w-4 h-4 text-cyan-400" /> Preferred Vernacular Language
+          <div className="space-y-1.5">
+            <label className="font-semibold text-gray-700 flex items-center gap-1">
+              <Globe className="w-4 h-4 text-indigo-600" /> Preferred Vernacular Language
             </label>
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-purple-500 cursor-pointer"
+              className="saas-input w-full cursor-pointer"
             >
               <option value="Teluglish">Teluglish (Telugu + English)</option>
               <option value="Hinglish">Hinglish (Hindi + English)</option>
@@ -181,14 +172,14 @@ export const Profile: React.FC = () => {
             </select>
           </div>
 
-          <div className="space-y-2">
-            <label className="font-bold text-slate-300 flex items-center gap-1.5">
-              <Brain className="w-4 h-4 text-amber-400" /> AI Explanation Style
+          <div className="space-y-1.5">
+            <label className="font-semibold text-gray-700 flex items-center gap-1">
+              <Brain className="w-4 h-4 text-indigo-600" /> AI Explanation Style
             </label>
             <select
               value={explanationStyle}
               onChange={(e) => setExplanationStyle(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-purple-500 cursor-pointer"
+              className="saas-input w-full cursor-pointer"
             >
               <option value="Analogy-Based">Analogy-Based (Real-world examples)</option>
               <option value="First-Principles">First-Principles (Mathematical & Proofs)</option>
@@ -196,35 +187,32 @@ export const Profile: React.FC = () => {
             </select>
           </div>
 
-          <div className="space-y-2">
-            <label className="font-bold text-slate-300 flex items-center gap-1.5">
-              <Target className="w-4 h-4 text-emerald-400" /> Career & Academic Goal
+          <div className="space-y-1.5">
+            <label className="font-semibold text-gray-700 flex items-center gap-1">
+              <Target className="w-4 h-4 text-indigo-600" /> Target Goal
             </label>
             <input
               type="text"
               value={targetGoal}
               onChange={(e) => setTargetGoal(e.target.value)}
-              className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-purple-500"
+              className="saas-input w-full"
             />
           </div>
 
         </div>
 
         {/* Save Button */}
-        <div className="flex items-center justify-between pt-4 border-t border-slate-800">
+        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
           {savedSuccess ? (
-            <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold animate-in fade-in">
+            <div className="flex items-center gap-2 text-emerald-700 text-xs font-semibold">
               <CheckCircle2 className="w-4 h-4" />
-              <span>Cognitive Twin Profile & Persona Updated Successfully!</span>
+              <span>Cognitive Twin Profile Updated Successfully!</span>
             </div>
           ) : (
-            <span className="text-[11px] text-slate-500">Changes save instantly to Cognitive Twin database</span>
+            <span className="text-[11px] text-gray-400">Changes save directly to persistent database</span>
           )}
 
-          <button
-            onClick={handleSaveProfile}
-            className="px-6 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition-all flex items-center gap-2 shadow-md"
-          >
+          <button onClick={handleSaveProfile} className="btn-primary text-xs">
             <Save className="w-4 h-4" />
             <span>Save Profile Persona</span>
           </button>

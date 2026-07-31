@@ -3,9 +3,6 @@ import {
   Mic, 
   MicOff, 
   Volume2, 
-  Sparkles, 
-  MessageSquare, 
-  BookOpen, 
   Brain, 
   Send,
   Globe
@@ -19,7 +16,7 @@ export const VoiceProfessor: React.FC = () => {
   const [chatHistory, setChatHistory] = useState<any[]>([
     {
       role: 'assistant',
-      text: "Namaste! I am your AI Socratic Voice Professor. I see your Learning DNA shows confusion in Dynamic Programming state transitions. Shall we break down Memoization vs Tabulation with an intuitive analogy in Teluglish?",
+      text: "Namaste! I am your AI Socratic Voice Professor. I see your Cognitive Twin DNA shows confusion in Dynamic Programming state transitions. Shall we break down Memoization vs Tabulation with an intuitive analogy in Teluglish?",
     }
   ]);
   const [loading, setLoading] = useState(false);
@@ -54,41 +51,38 @@ export const VoiceProfessor: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100 p-4 lg:p-8 space-y-6 max-w-5xl mx-auto">
+    <div className="min-h-screen bg-gray-50 text-gray-900 p-4 sm:p-6 lg:p-8 space-y-6 max-w-5xl mx-auto">
       
       {/* Header */}
-      <div className="glass-panel p-6 rounded-2xl border border-cyan-500/20 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="saas-panel p-6 bg-white border border-gray-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-semibold mb-2">
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold border border-indigo-200 mb-2">
             <Brain className="w-3.5 h-3.5" />
             <span>Socratic AI Classroom • Vernacular Audio Enabled</span>
           </div>
-          <h1 className="text-2xl lg:text-3xl font-extrabold text-white">
-            AI Voice <span className="gradient-text">Professor</span>
-          </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <h1 className="h1-title text-2xl sm:text-3xl">AI Voice Professor</h1>
+          <p className="small-text mt-1">
             Adapts Socratic follow-up questions to your Cognitive Twin DNA profile.
           </p>
         </div>
 
-        {/* Language selector */}
-        <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-xs">
-          <Globe className="w-4 h-4 text-cyan-400" />
-          <span className="text-slate-400">Language:</span>
+        <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 px-3 py-1.5 rounded-md text-xs">
+          <Globe className="w-4 h-4 text-indigo-600" />
+          <span className="text-gray-500">Language:</span>
           <select
             value={language}
             onChange={(e) => setLanguage(e.target.value)}
-            className="bg-transparent text-cyan-300 font-bold focus:outline-none cursor-pointer"
+            className="bg-transparent text-gray-800 font-semibold focus:outline-none cursor-pointer"
           >
-            <option value="Teluglish" className="bg-slate-900">Teluglish (Telugu + Eng)</option>
-            <option value="Hinglish" className="bg-slate-900">Hinglish (Hindi + Eng)</option>
-            <option value="English" className="bg-slate-900">English (Standard)</option>
+            <option value="Teluglish">Teluglish (Telugu + Eng)</option>
+            <option value="Hinglish">Hinglish (Hindi + Eng)</option>
+            <option value="English">English (Standard)</option>
           </select>
         </div>
       </div>
 
       {/* Main Classroom Panel */}
-      <div className="glass-card rounded-2xl p-6 space-y-6 border border-cyan-500/20 min-h-[450px] flex flex-col justify-between">
+      <div className="saas-card p-6 space-y-6 min-h-[450px] flex flex-col justify-between">
         
         {/* Messages */}
         <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
@@ -100,23 +94,23 @@ export const VoiceProfessor: React.FC = () => {
               }`}
             >
               {msg.role === 'assistant' && (
-                <div className="w-8 h-8 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-600 shrink-0">
                   <Brain className="w-4 h-4" />
                 </div>
               )}
 
               <div
-                className={`max-w-[80%] p-4 rounded-2xl space-y-2 ${
+                className={`max-w-[80%] p-4 rounded-lg space-y-2 ${
                   msg.role === 'user'
-                    ? 'bg-purple-600 text-white rounded-br-none'
-                    : 'bg-slate-900/80 border border-slate-800 text-slate-200 rounded-bl-none'
+                    ? 'bg-indigo-600 text-white font-medium'
+                    : 'bg-gray-50 border border-gray-200 text-gray-800'
                 }`}
               >
                 <p>{msg.text}</p>
 
                 {msg.role === 'assistant' && (
-                  <div className="flex items-center gap-2 pt-1 border-t border-slate-800/80">
-                    <button className="flex items-center gap-1 text-[10px] text-cyan-400 hover:underline">
+                  <div className="flex items-center gap-2 pt-1 border-t border-gray-200">
+                    <button className="flex items-center gap-1 text-[10px] text-indigo-600 font-medium hover:underline">
                       <Volume2 className="w-3 h-3" /> Listen Audio (Edge-TTS)
                     </button>
                   </div>
@@ -126,45 +120,35 @@ export const VoiceProfessor: React.FC = () => {
           ))}
 
           {loading && (
-            <div className="flex items-center gap-2 text-xs text-slate-400 py-2">
-              <Sparkles className="w-4 h-4 text-cyan-400 animate-spin" />
+            <div className="flex items-center gap-2 text-xs text-gray-500 py-2">
+              <span className="animate-spin text-indigo-600">🌀</span>
               <span>AI Socratic Professor is formulating explanation...</span>
             </div>
           )}
         </div>
 
-        {/* Audio Mic & Input Controls */}
-        <div className="space-y-3 pt-4 border-t border-slate-800">
+        {/* Input Controls */}
+        <div className="space-y-3 pt-4 border-t border-gray-200">
           <div className="flex items-center gap-3">
-            
-            {/* Mic Toggle Button */}
             <button
               onClick={() => setIsRecording(!isRecording)}
-              className={`w-12 h-12 rounded-xl flex items-center justify-center text-white transition-all shadow-md ${
-                isRecording
-                  ? 'bg-red-600 animate-pulse shadow-red-600/40'
-                  : 'bg-cyan-600 hover:bg-cyan-500 shadow-cyan-600/30'
+              className={`w-10 h-10 rounded-md flex items-center justify-center text-white transition-colors ${
+                isRecording ? 'bg-red-600' : 'bg-indigo-600 hover:bg-indigo-700'
               }`}
-              title={isRecording ? 'Stop Recording' : 'Start Speech Mic'}
             >
-              {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+              {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
             </button>
 
-            {/* Input Box */}
             <input
               type="text"
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
               placeholder="Ask Professor a question or respond to Socratic prompt..."
-              className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500"
+              className="saas-input flex-1 text-xs"
             />
 
-            {/* Send Button */}
-            <button
-              onClick={handleSend}
-              className="px-5 py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition-all flex items-center gap-2"
-            >
+            <button onClick={handleSend} className="btn-primary text-xs">
               <span>Send</span>
               <Send className="w-3.5 h-3.5" />
             </button>

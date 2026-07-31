@@ -8,13 +8,11 @@ import {
   CheckCircle2, 
   Sparkles, 
   Award, 
-  Play,
-  FileText
+  Play
 } from 'lucide-react';
 
 export const PlacementMode: React.FC = () => {
   const [activeCategory, setActiveCategory] = useState('System Design');
-  const [inInterview, setInInterview] = useState(false);
   const [answerCode, setAnswerCode] = useState('');
   const [scorecard, setScorecard] = useState<any>(null);
   const [evaluating, setEvaluating] = useState(false);
@@ -40,27 +38,23 @@ export const PlacementMode: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100 p-4 lg:p-8 space-y-8 max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gray-50 text-gray-900 p-4 sm:p-6 lg:p-8 space-y-8 max-w-6xl mx-auto">
       
       {/* Header */}
-      <div className="glass-panel p-6 rounded-2xl border border-amber-500/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="saas-panel p-6 bg-white border border-gray-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-xs font-semibold mb-2">
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold border border-indigo-200 mb-2">
             <Briefcase className="w-3.5 h-3.5" />
             <span>Technical Placement Hub • Whiteboard & Scorecards</span>
           </div>
-          <h1 className="text-2xl lg:text-3xl font-extrabold text-white">
-            Placement & Mock <span className="gradient-text">Interview Simulator</span>
-          </h1>
-          <p className="text-xs text-slate-400 mt-1">
+          <h1 className="h1-title text-2xl sm:text-3xl">Placement & Technical Interview Simulator</h1>
+          <p className="small-text mt-1">
             Simulate realistic technical interviews with AI audio scorecards and architectural evaluation.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 px-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold">
-            Average Interview Rating: <span className="text-white font-extrabold">8.8 / 10</span>
-          </div>
+        <div className="p-2.5 px-4 rounded bg-indigo-50 border border-indigo-200 text-indigo-900 text-xs font-semibold">
+          Average Interview Rating: <span className="font-extrabold text-indigo-700">8.8 / 10</span>
         </div>
       </div>
 
@@ -73,108 +67,90 @@ export const PlacementMode: React.FC = () => {
             <button
               key={cat.id}
               onClick={() => setActiveCategory(cat.id)}
-              className={`p-4 rounded-2xl border text-left transition-all flex flex-col justify-between space-y-3 ${
+              className={`p-4 rounded-lg border text-left transition-colors flex flex-col justify-between space-y-3 cursor-pointer ${
                 isActive
-                  ? 'bg-amber-500/20 border-amber-500/60 text-white shadow-lg shadow-amber-500/10'
-                  : 'glass-card text-slate-400 hover:text-white hover:border-slate-700'
+                  ? 'bg-indigo-50 border-indigo-600 text-indigo-900 shadow-sm'
+                  : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
               }`}
             >
               <div className="flex items-center justify-between">
-                <Icon className={`w-6 h-6 ${isActive ? 'text-amber-400' : 'text-slate-500'}`} />
-                <span className="text-[10px] font-bold bg-slate-900/80 px-2 py-0.5 rounded text-slate-400">{cat.count}</span>
+                <Icon className={`w-5 h-5 ${isActive ? 'text-indigo-600' : 'text-gray-400'}`} />
+                <span className="text-[10px] font-medium bg-gray-100 px-2 py-0.5 rounded text-gray-500">{cat.count}</span>
               </div>
-              <span className="font-bold text-xs">{cat.id}</span>
+              <span className="font-semibold text-xs">{cat.id}</span>
             </button>
           );
         })}
       </div>
 
-      {/* Interview Question Workspace */}
-      <div className="glass-card rounded-2xl p-6 lg:p-8 space-y-6 border border-amber-500/20">
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+      {/* Workspace Card */}
+      <div className="saas-card p-6 space-y-6">
+        <div className="flex items-center justify-between border-b border-gray-100 pb-4">
           <div>
-            <span className="text-[10px] bg-amber-500/20 text-amber-300 font-bold px-2 py-0.5 rounded border border-amber-500/30">
-              Mock Scenario #14
-            </span>
-            <h2 className="text-lg font-bold text-white mt-1">
+            <span className="badge-accent">Scenario #14</span>
+            <h2 className="h3-title text-base mt-1">
               Design a Distributed Multi-Tier Caching Layer for High-Traffic E-Commerce
             </h2>
           </div>
 
-          <button
-            onClick={() => setInInterview(true)}
-            className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-xs transition-all shadow-md flex items-center gap-2"
-          >
+          <button className="btn-primary text-xs">
             <Play className="w-3.5 h-3.5 fill-current" />
-            <span>Start AI Audio Interview</span>
+            <span>Start Audio Interview</span>
           </button>
         </div>
 
-        {/* Whiteboard / Solution Editor */}
+        {/* Editor */}
         <div className="space-y-3">
-          <label className="text-xs font-bold text-slate-300 flex items-center justify-between">
-            <span>Whiteboard Solution & Code Explanation</span>
-            <span className="text-[10px] text-slate-500">Supports Markdown / Python / SQL / Architecture text</span>
+          <label className="text-xs font-semibold text-gray-700 flex items-center justify-between">
+            <span>Whiteboard Solution & Architecture Explanation</span>
+            <span className="text-[10px] text-gray-400">Markdown / System Architecture text</span>
           </label>
 
           <textarea
             value={answerCode}
             onChange={(e) => setAnswerCode(e.target.value)}
-            placeholder="Write your system design architecture breakdown here... e.g. L1 Local Memory Cache (Guava) -> L2 Distributed Redis Cluster -> L3 Read Replicas (PostgreSQL)..."
-            className="w-full h-40 bg-slate-950 border border-slate-800 rounded-xl p-4 font-mono text-xs text-amber-200 placeholder-slate-600 focus:outline-none focus:border-amber-500"
+            placeholder="Write your system design breakdown here... e.g. L1 Local Memory Cache (Guava) -> L2 Distributed Redis Cluster -> L3 Read Replicas (PostgreSQL)..."
+            className="saas-input w-full h-40 font-mono text-xs text-gray-900"
           />
 
           <div className="flex justify-end">
             <button
               onClick={handleEvaluate}
               disabled={evaluating || !answerCode}
-              className="px-6 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs transition-all disabled:opacity-50 flex items-center gap-2 shadow-md"
+              className="btn-primary text-xs"
             >
-              {evaluating ? (
-                <>
-                  <Sparkles className="w-4 h-4 animate-spin text-purple-300" />
-                  <span>Evaluating Architecture...</span>
-                </>
-              ) : (
-                <>
-                  <Award className="w-4 h-4 text-purple-300" />
-                  <span>Submit for AI Interview Evaluation</span>
-                </>
-              )}
+              {evaluating ? 'Evaluating Architecture...' : 'Submit for AI Scorecard'}
             </button>
           </div>
         </div>
 
-        {/* Evaluation Scorecard Modal */}
+        {/* Scorecard Modal */}
         {scorecard && (
-          <div className="p-6 rounded-2xl bg-gradient-to-r from-emerald-950/40 to-slate-900/80 border border-emerald-500/40 space-y-4 animate-in fade-in duration-200">
-            <div className="flex items-center justify-between border-b border-emerald-500/20 pb-3">
+          <div className="p-5 rounded-lg bg-emerald-50 border border-emerald-200 space-y-4">
+            <div className="flex items-center justify-between border-b border-emerald-200 pb-3">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                <h3 className="font-extrabold text-white text-base">AI Mock Interview Scorecard</h3>
+                <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                <h3 className="h3-title text-emerald-900 text-base">AI Mock Interview Scorecard</h3>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-xs text-slate-400">Verdict:</span>
-                <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-extrabold text-xs border border-emerald-500/40">
-                  {scorecard.verdict}
-                </span>
-                <span className="text-lg font-extrabold text-emerald-400">{scorecard.score}</span>
+                <span className="badge-accent">{scorecard.verdict}</span>
+                <span className="text-lg font-extrabold text-emerald-800">{scorecard.score}</span>
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-              <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2">
-                <span className="font-bold text-emerald-400">Key Architectural Strengths:</span>
-                <ul className="list-disc list-inside space-y-1 text-slate-300">
+              <div className="p-3 rounded bg-white border border-emerald-200 space-y-2">
+                <span className="font-semibold text-emerald-900">Key Architectural Strengths:</span>
+                <ul className="list-disc list-inside space-y-1 text-gray-700">
                   {scorecard.strengths.map((s: string, idx: number) => (
                     <li key={idx}>{s}</li>
                   ))}
                 </ul>
               </div>
 
-              <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 space-y-2">
-                <span className="font-bold text-amber-400">Suggested Enhancements:</span>
-                <ul className="list-disc list-inside space-y-1 text-slate-300">
+              <div className="p-3 rounded bg-white border border-emerald-200 space-y-2">
+                <span className="font-semibold text-amber-900">Suggested Enhancements:</span>
+                <ul className="list-disc list-inside space-y-1 text-gray-700">
                   {scorecard.improvement.map((s: string, idx: number) => (
                     <li key={idx}>{s}</li>
                   ))}
