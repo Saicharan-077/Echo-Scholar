@@ -156,5 +156,17 @@ class EdgeTTSService:
         duration_sec = len(combined) / 1000.0
         return audio_bytes, duration_sec
 
+    def get_available_voices(self) -> List[Dict[str, str]]:
+        """Return available Edge TTS voices."""
+        return [
+            {"id": "en-IN-PrabhatNeural", "name": "Prabhat (Indian English Male)", "gender": "male", "provider": "Edge-TTS"},
+            {"id": "en-IN-NeerjaNeural", "name": "Neerja (Indian English Female)", "gender": "female", "provider": "Edge-TTS"},
+            {"id": "en-US-AvaNeural", "name": "Ava (US English Female)", "gender": "female", "provider": "Edge-TTS"},
+            {"id": "en-US-AndrewNeural", "name": "Andrew (US English Male)", "gender": "male", "provider": "Edge-TTS"},
+            {"id": "en-GB-SoniaNeural", "name": "Sonia (UK English Female)", "gender": "female", "provider": "Edge-TTS"},
+            {"id": "en-GB-RyanNeural", "name": "Ryan (UK English Male)", "gender": "male", "provider": "Edge-TTS"},
+        ]
+
 
 edge_tts_service = EdgeTTSService()
+

@@ -24,6 +24,7 @@ from app.services.openai_service import openai_service
 from app.services.elevenlabs_service import elevenlabs_service
 from app.services.storage_service import storage_service
 from app.services.edge_tts_service import edge_tts_service
+from app.services.kokoro_tts_service import kokoro_tts_service
 
 router = APIRouter(prefix="/podcasts", tags=["Podcasts"])
 
@@ -82,7 +83,11 @@ async def generate_podcast(
     
     try:
         # Resolve voice names — prefer custom persona names if provided
-        all_voices = edge_tts_service.get_available_voices() + elevenlabs_service.get_available_voices()
+        all_voices = (
+            kokoro_tts_service.get_available_voices() +
+            edge_tts_service.get_available_voices() +
+            elevenlabs_service.get_available_voices()
+        )
         male_name = request.persona_male_name or "Prabhat"
         female_name = request.persona_female_name or "Neerja"
         
@@ -102,8 +107,7 @@ async def generate_podcast(
             style=request.style, voice_male_name=male_name, voice_female_name=female_name
         )
         
-        # If it just started generating, we should just generate it here synchronously or return a background task ID.
-        # But this endpoint generates audio synchronously. Let's just generate the script directly if we need audio synchronously!
+        # Generate script directly if needed synchronously
         script = await openai_service.generate_podcast_script(
             paper_title=paper.title,
             summary=paper.summary or "",
@@ -118,7 +122,14 @@ async def generate_podcast(
             raise Exception("Failed to generate podcast script")
         
         # Generate audio based on voice type
-        if request.voice_male and request.voice_male.startswith("en-"):
+        if request.voice_male and ("kokoro" in request.voice_male or (request.voice_female and "kokoro" in request.voice_female)):
+            audio_bytes, duration = await kokoro_tts_service.generate_podcast_audio(
+                script=script,
+                voice_male=request.voice_male,
+                voice_female=request.voice_female,
+                speed=request.speed
+            )
+        elif request.voice_male and request.voice_male.startswith("en-"):
             audio_bytes, duration = await edge_tts_service.generate_podcast_audio(
                 script=script,
                 voice_male=request.voice_male,
@@ -132,6 +143,7 @@ async def generate_podcast(
                 voice_female=request.voice_female,
                 speed=request.speed
             )
+
         
         # Upload audio to storage (Cloudinary or local)
         audio_filename = f"podcast_{podcast.id}.mp3"

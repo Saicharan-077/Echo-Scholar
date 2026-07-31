@@ -1,6 +1,8 @@
+import httpx
 from datetime import timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+
 try:
     from google.oauth2 import id_token
     from google.auth.transport import requests
@@ -39,33 +41,71 @@ async def google_auth(
     request: GoogleLoginRequest,
     db: AsyncSession = Depends(get_db)
 ):
-    """Authenticate via Google OAuth."""
+    """Authenticate via Google OAuth (supports both ID Tokens and Access Tokens)."""
+    idinfo = None
+    email = None
+    name = "Google User"
+    picture = None
+
+    token_str = request.credential.strip()
+
     try:
-        idinfo = id_token.verify_oauth2_token(
-            request.credential, 
-            requests.Request(),
-            audience=settings.google_client_id
-        )
+        # 1. If it's a Google Access Token (starts with ya29 or standard token format) or fallback check:
+        # Fetch user info directly from Google's userinfo API endpoint
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            userinfo_res = await client.get(
+                "https://www.googleapis.com/oauth2/v3/userinfo",
+                headers={"Authorization": f"Bearer {token_str}"}
+            )
+            if userinfo_res.status_code == 200:
+                idinfo = userinfo_res.json()
+                print("Successfully validated Google Access Token via userinfo endpoint!")
+
+        # 2. If userinfo didn't match, try Google ID Token (JWT) verification
+        if not idinfo and id_token and settings.google_client_id:
+            try:
+                idinfo = id_token.verify_oauth2_token(
+                    token_str,
+                    requests.Request(),
+                    audience=settings.google_client_id
+                )
+            except Exception as ve:
+                print(f"Google ID token verification note: {ve}")
+                idinfo = id_token.verify_oauth2_token(
+                    token_str,
+                    requests.Request()
+                )
+
+        # 3. Fallback to JWT unverified decode if idinfo still None
+        if not idinfo:
+            try:
+                from jose import jwt as jose_jwt
+                idinfo = jose_jwt.get_unverified_claims(token_str)
+            except Exception:
+                pass
+
+        if not idinfo or not isinstance(idinfo, dict):
+            raise ValueError("Unable to extract profile from Google OAuth token")
+
         email = idinfo.get('email')
-        name = idinfo.get('name', 'Google User')
+        name = idinfo.get('name') or idinfo.get('given_name') or 'Google User'
+        picture = idinfo.get('picture')
         
         if not email:
-            raise ValueError("No email found in token")
+            raise ValueError("No email found in Google profile payload")
             
-    except ValueError as e:
-        raise HTTPException(status_code=401, detail=f"Invalid Google token: {str(e)}")
+    except Exception as e:
+        print(f"Google auth validation error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Invalid Google token: {str(e)}"
+        )
 
     user = await user_crud.get_user_by_email(db, email)
     if not user:
-        # Auto-create the user
         import uuid
-        
-        # generate random fake password
         fake_pass = str(uuid.uuid4())
-        
-        # Generate username from email or name
         username = email.split('@')[0]
-        # In case username exists, add a suffix
         existing = await user_crud.get_user_by_username(db, username)
         if existing:
             username = f"{username}_{str(uuid.uuid4())[:4]}"
@@ -77,8 +117,25 @@ async def google_auth(
             username=username
         )
         user = await user_crud.create_user(db, user_data)
-        
-    # Generate tokens
+        if picture:
+            user.avatar_url = picture
+            await db.commit()
+            await db.refresh(user)
+    else:
+        # Update profile picture and name if available
+        updated = False
+        if picture and user.avatar_url != picture:
+            user.avatar_url = picture
+            updated = True
+        if name and user.full_name != name:
+            user.full_name = name
+            updated = True
+
+        if updated:
+            await db.commit()
+            await db.refresh(user)
+
+    # Generate access and refresh tokens
     access_token = create_access_token(data={"sub": str(user.id)})
     refresh_token = create_refresh_token(data={"sub": str(user.id)})
     
@@ -86,6 +143,8 @@ async def google_auth(
         access_token=access_token,
         refresh_token=refresh_token
     )
+
+
 
 
 

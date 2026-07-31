@@ -1,4 +1,4 @@
-﻿"""
+"""
 EchoXScholar - Voice AI Professor API Routes
 """
 from fastapi import APIRouter, Depends, HTTPException, Body
@@ -10,6 +10,7 @@ from app.core.database import get_db
 from app.core.security import get_current_user
 from app.models.user import User
 from app.services.edge_tts_service import EdgeTTSService
+from app.services.kokoro_tts_service import kokoro_tts_service
 from app.services.vector_memory_service import VectorMemoryService
 from app.services.learning_dna_service import LearningDNAService
 from app.services.ai_model_router import AIModelRouter
@@ -84,14 +85,21 @@ async def interact_with_professor(
     audio_path = None
     try:
         clean_text_for_speech = ai_text.replace("#", "").replace("*", "").replace("`", "")[:400]
-        audio_res = await EdgeTTSService.generate_audio(
-            text=clean_text_for_speech,
-            voice=voice
-        )
+        if "kokoro" in voice:
+            audio_res = await kokoro_tts_service.generate_audio(
+                text=clean_text_for_speech,
+                voice=voice
+            )
+        else:
+            audio_res = await EdgeTTSService.generate_audio(
+                text=clean_text_for_speech,
+                voice=voice
+            )
         if audio_res.get("success"):
             audio_path = audio_res.get("file_path")
     except Exception as e:
         print(f"TTS generation note: {e}")
+
 
     # Log memory
     await VectorMemoryService.add_memory(

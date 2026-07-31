@@ -9,10 +9,12 @@ import {
 } from 'lucide-react';
 import { JUDGE_PERSONAS, loginWithPersona } from '../services/api';
 import { useTheme } from '../context/ThemeContext';
+import { UserMenu } from './auth/UserMenu';
 
 interface NavbarProps {
   onOpenSearch?: () => void;
 }
+
 
 export const Navbar: React.FC<NavbarProps> = () => {
   const location = useLocation();
@@ -73,8 +75,9 @@ export const Navbar: React.FC<NavbarProps> = () => {
             <Command className="w-4 h-4" />
           </div>
           <span className="font-bold text-gray-900 dark:text-white text-lg tracking-tight">
-            EchoXScholar <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">X</span>
+            Vox<span className="text-indigo-600 dark:text-indigo-400 font-extrabold">X</span>Scholar
           </span>
+
         </Link>
 
         {/* Navigation Links */}
@@ -156,13 +159,9 @@ export const Navbar: React.FC<NavbarProps> = () => {
             )}
           </div>
 
-          {/* Profile Action Button */}
-          <Link 
-            to="/profile" 
-            className="btn-primary text-xs px-3.5 py-1.5 font-semibold shadow-xs"
-          >
-            Profile
-          </Link>
+          {/* User Profile Menu */}
+          <UserMenu />
+
 
         </div>
 

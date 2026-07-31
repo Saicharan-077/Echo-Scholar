@@ -69,6 +69,10 @@ class Settings(BaseSettings):
     elevenlabs_api_key: str = ""
     voice_id_male: str = "21m00Tcm4TlvDq8ikWAM"
     voice_id_female: str = "2EiwWnGeFN0m4CMYp7k9"
+
+    # Replicate API (Kokoro-82M TTS)
+    replicate_api_key: str = ""
+
     
     # Cloudinary (Optional for cloud storage)
     cloudinary_cloud_name: str = ""
