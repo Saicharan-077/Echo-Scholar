@@ -3,11 +3,9 @@ import { Link, useLocation } from 'react-router-dom';
 import { 
   Command, 
   Sun, 
-  Moon, 
-  UserCheck, 
-  ChevronDown 
+  Moon
 } from 'lucide-react';
-import { JUDGE_PERSONAS, loginWithPersona } from '../services/api';
+
 import { useTheme } from '../context/ThemeContext';
 import { UserMenu } from './auth/UserMenu';
 
@@ -19,42 +17,6 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = () => {
   const location = useLocation();
   const { theme, toggleTheme } = useTheme();
-  const [selectedPersona, setSelectedPersona] = useState<string>('Standard Student');
-  const [isPersonaOpen, setIsPersonaOpen] = useState(false);
-  const personaRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const savedEmail = localStorage.getItem('user_email');
-    if (savedEmail) {
-      const match = JUDGE_PERSONAS.find(p => p.email === savedEmail);
-      if (match) setSelectedPersona(match.role);
-    }
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (personaRef.current && !personaRef.current.contains(event.target as Node)) {
-        setIsPersonaOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    setIsPersonaOpen(false);
-  }, [location.pathname]);
-
-  const handleSwitchPersona = async (persona: typeof JUDGE_PERSONAS[0]) => {
-    try {
-      await loginWithPersona(persona.email, persona.password);
-      setSelectedPersona(persona.role);
-      setIsPersonaOpen(false);
-      window.location.reload();
-    } catch (e) {
-      console.error(e);
-    }
-  };
 
   const navLinks = [
     { label: 'Discover', path: '/discover' },
@@ -117,47 +79,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
             )}
           </button>
 
-          {/* Persona Switcher */}
-          <div className="relative" ref={personaRef}>
-            <button
-              onClick={() => setIsPersonaOpen(!isPersonaOpen)}
-              className="px-2.5 py-1.5 text-xs text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50/80 dark:bg-gray-800/80 hover:bg-gray-100 dark:hover:bg-gray-700 transition-all flex items-center gap-1.5"
-            >
-              <UserCheck className="w-3.5 h-3.5 text-gray-500 dark:text-gray-400" />
-              <span className="hidden sm:inline text-gray-400 dark:text-gray-500">Persona:</span>
-              <strong className="font-medium text-gray-800 dark:text-gray-200">{selectedPersona}</strong>
-              <ChevronDown className="w-3 h-3 text-gray-400" />
-            </button>
 
-            {isPersonaOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-2.5 z-50 animate-in fade-in duration-150">
-                <div className="px-2.5 py-1.5 border-b border-gray-100 dark:border-gray-700 mb-1.5">
-                  <p className="text-[11px] font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
-                    Demo Persona Switcher
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  {JUDGE_PERSONAS.map((p) => (
-                    <button
-                      key={p.role}
-                      onClick={() => handleSwitchPersona(p)}
-                      className={`w-full text-left p-2.5 rounded-lg text-xs transition-colors flex flex-col gap-0.5 ${
-                        selectedPersona === p.role
-                          ? 'bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-900 dark:text-indigo-200 font-medium'
-                          : 'hover:bg-gray-50 dark:hover:bg-gray-700/60 text-gray-700 dark:text-gray-300'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between font-semibold">
-                        <span>{p.role}</span>
-                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300">{p.badge}</span>
-                      </div>
-                      <span className="text-[11px] text-gray-500 dark:text-gray-400">{p.desc}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
 
           {/* User Profile Menu */}
           <UserMenu />
