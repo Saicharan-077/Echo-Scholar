@@ -23,6 +23,71 @@ class AIModelRouter:
     """
 
     @classmethod
+    async def generate_response_stream(
+        cls,
+        prompt: str,
+        system_instruction: str = "You are Professor Vox, an expert AI Personal Professor.",
+        model_name: str = "default",
+        temperature: float = 0.7,
+        max_tokens: int = 1500
+    ):
+        """
+        Real streaming response generator supporting Gemini and OpenAI via SSE.
+        Yields text chunks as they arrive.
+        """
+        gemini_key = os.getenv("GEMINI_API_KEY") or getattr(settings, "gemini_api_key", None) or ""
+        
+        # 1. Try Gemini Streaming via REST SSE
+        if gemini_key and len(gemini_key) > 10 and not gemini_key.startswith("your_"):
+            try:
+                url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:streamGenerateContent?alt=sse&key={gemini_key}"
+                payload = {
+                    "contents": [{"parts": [{"text": prompt}]}],
+                    "systemInstruction": {"parts": [{"text": system_instruction}]},
+                    "generationConfig": {"maxOutputTokens": max_tokens, "temperature": temperature}
+                }
+                async with httpx.AsyncClient(timeout=30.0) as client:
+                    async with client.stream("POST", url, json=payload) as response:
+                        async for line in response.aiter_lines():
+                            if line.startswith("data: "):
+                                try:
+                                    data = json.loads(line[6:])
+                                    text = data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+                                    if text:
+                                        yield text
+                                except Exception:
+                                    pass
+                return
+            except Exception as e:
+                print(f"Gemini Streaming error: {e}")
+
+        # 2. Try OpenAI Streaming
+        openai_key = os.getenv("OPENAI_API_KEY") or getattr(settings, "openai_api_key", None) or ""
+        if openai_key and len(openai_key) > 10 and not openai_key.startswith("sk-your_"):
+            try:
+                from openai import AsyncOpenAI
+                client = AsyncOpenAI(api_key=openai_key)
+                stream = await client.chat.completions.create(
+                    model=getattr(settings, "openai_model", "gpt-4o-mini"),
+                    messages=[{"role": "system", "content": system_instruction}, {"role": "user", "content": prompt}],
+                    stream=True,
+                    temperature=temperature
+                )
+                async for chunk in stream:
+                    if chunk.choices[0].delta.content:
+                        yield chunk.choices[0].delta.content
+                return
+            except Exception as e:
+                print(f"OpenAI Streaming error: {e}")
+
+        # Fallback to smart offline generator, yielded word-by-word to simulate streaming if offline
+        fallback_text = cls._generate_smart_fallback(prompt, system_instruction)
+        words = fallback_text.split(" ")
+        for word in words:
+            yield word + " "
+            await asyncio.sleep(0.02)
+
+    @classmethod
     async def generate_response(
         cls,
         prompt: str,
