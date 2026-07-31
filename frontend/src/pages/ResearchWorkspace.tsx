@@ -146,13 +146,13 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
   const [podcastStyle, setPodcastStyle] = useState('educational');
 
   const handleGeneratePodcast = async () => {
-    if (!paper) return;
+    if (!activePaper) return;
     setPodcastLoading(true);
     setPodcastUrl(null);
     try {
-      let pId = (paper as any).db_id;
+      let pId = (activePaper as any).db_id;
       if (!pId) {
-        const numId = parseInt(paper.id);
+        const numId = parseInt(activePaper.id);
         pId = isNaN(numId) ? 1 : numId;
       }
 
@@ -177,10 +177,10 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
   };
 
   useEffect(() => {
-    if (activeDockPanel === 'podcast' && paper) {
-      let pId = (paper as any).db_id;
+    if (activeDockPanel === 'podcast' && activePaper) {
+      let pId = (activePaper as any).db_id;
       if (!pId) {
-        const numId = parseInt(paper.id);
+        const numId = parseInt(activePaper.id);
         pId = isNaN(numId) ? 1 : numId;
       }
       api.get(`/podcasts/paper/${pId}/audio`)
@@ -191,7 +191,7 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
           // No pre-existing audio found
         });
     }
-  }, [activeDockPanel, paper]);
+  }, [activeDockPanel, activePaper]);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [readingProgress, setReadingProgress] = useState(72);
   const [isRelatedOpen, setIsRelatedOpen] = useState(false);
@@ -538,7 +538,7 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
                         <Headphones className="w-6 h-6" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold text-white">{paper?.title} — Audio Breakdown</h3>
+                        <h3 className="text-lg font-bold text-white">{activePaper?.title} — Audio Breakdown</h3>
                         <p className="text-xs text-indigo-200">Generated in {podcastStyle} style</p>
                       </div>
                     </div>
