@@ -18,6 +18,17 @@ class EdgeTTSService:
         self.default_male_voice = "en-IN-PrabhatNeural"
         self.default_female_voice = "en-IN-NeerjaNeural"
 
+    def get_available_voices(self) -> List[Dict[str, str]]:
+        """Get list of available Edge TTS voices."""
+        return [
+            {"id": "en-IN-PrabhatNeural", "name": "Prabhat (Indian Male)", "gender": "male", "lang": "en-IN"},
+            {"id": "en-IN-NeerjaNeural", "name": "Neerja (Indian Female)", "gender": "female", "lang": "en-IN"},
+            {"id": "en-US-GuyNeural", "name": "Guy (US Male)", "gender": "male", "lang": "en-US"},
+            {"id": "en-US-JennyNeural", "name": "Jenny (US Female)", "gender": "female", "lang": "en-US"},
+            {"id": "en-GB-RyanNeural", "name": "Ryan (UK Male)", "gender": "male", "lang": "en-GB"},
+            {"id": "en-GB-SoniaNeural", "name": "Sonia (UK Female)", "gender": "female", "lang": "en-GB"}
+        ]
+
     def _text_to_ssml(self, text: str, voice: str) -> str:
         import re
         import html
