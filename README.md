@@ -1,295 +1,134 @@
-﻿# 🎙️ EchoXScholar AI
+# 🎙️ EchoScholar AI — Research & Learning Operating System
 
-> **An AI-powered research platform that transforms academic papers into interactive audio podcasts and enables intelligent Q&A with your documents.**
+> **Transform complex research papers into multi-speaker audio podcasts, interactive knowledge graphs, and adaptive quizzes. Learn faster with your Cognitive Twin AI workspace.**
 
----
-
-## 📋 Table of Contents
-
-- [Overview](#overview)
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Tech Stack](#tech-stack)
-- [Prerequisites](#prerequisites)
-- [Environment Variables](#environment-variables)
-- [How to Run](#how-to-run)
-- [API Overview](#api-overview)
+![EchoScholar Dashboard](https://github.com/Saicharan-077/Echo-Scholar/assets/dashboard.png) *(Placeholder for dashboard image)*
 
 ---
 
-## Overview
+## 🌟 Overview
 
-EchoXScholar AI allows researchers, students, and academics to:
-- Upload PDF research papers
-- Automatically generate AI-narrated audio podcasts from those papers
-- Ask questions and get intelligent answers grounded in the paper content (RAG-based Q&A)
-- Manage research notes with a rich-text editor
-- Authenticate securely with JWT-based login
+EchoScholar AI is a comprehensive learning operating system designed for researchers, students, and academics. By simply uploading a PDF research paper, EchoScholar intelligently processes the content to provide a multi-modal learning experience:
+- Listen to **dynamic AI-narrated podcasts** featuring a Professor and Student discussing the paper.
+- Test your knowledge with **Adaptive Quizzes** grounded strictly in the academic text.
+- Explore concepts visually through an **Interactive Knowledge Graph**.
+- Ask questions and get answers via **RAG (Retrieval-Augmented Generation)**.
 
 ---
 
-## Features
+## ✨ Key Features
 
 | Feature | Description |
 |---|---|
-| 📄 PDF Upload & Analysis | Upload research papers (up to 50 MB); text is extracted and indexed |
-| 🎧 Podcast Generation | Convert papers to host/guest style audio podcasts using ElevenLabs TTS |
-| 🤖 AI Chat (RAG) | Ask questions; AI answers using FAISS vector search over the paper's content |
-| 📝 Research Notes | Rich-text note editor with export to PDF |
-| 🔐 Authentication | JWT-based login/signup with secure refresh tokens |
-| ☁️ Cloud Storage | Optional Cloudinary integration for uploaded PDF assets |
+| 📄 **Smart PDF Ingestion** | Upload research papers (up to 50 MB). Text is cleaned, chunked, and indexed using FAISS for semantic search. |
+| 🎧 **Dynamic Multi-Speaker Podcasts** | Converts papers into engaging dialogue (Host/Guest). Features intelligent duration scaling (5-min, 15-min, 30-min) and async batch processing for rapid generation. |
+| 🧠 **Adaptive Quizzes** | Generates real-time, document-grounded multiple-choice questions. Uses strict filtering to remove PDF metadata/noise from options. |
+| 🕸️ **Knowledge Graph** | Visualizes core entities and their relationships within a paper using React Flow. |
+| 🤖 **Multi-LLM Engine Support** | Supports OpenAI, Groq, OpenRouter, and Featherless.ai for lightning-fast inference and RAG. |
+| 🔐 **Authentication** | Secure JWT-based email/password login and Google OAuth integration. |
 
 ---
 
-## Project Structure
+## 🏗️ Tech Stack
 
-```
-echo-scholar/
-├── frontend/               # React + TypeScript + Tailwind CSS (Vite)
-│   ├── src/
-│   │   ├── components/     # Reusable UI components (shadcn/ui based)
-│   │   ├── pages/          # Route-level page components
-│   │   ├── hooks/          # Custom React hooks
-│   │   ├── lib/            # Utilities, API clients, helpers
-│   │   └── main.tsx        # App entry point
-│   ├── public/             # Static assets
-│   ├── index.html
-│   ├── package.json
-│   ├── vite.config.ts
-│   └── .env.example        # Frontend environment variables template
-│
-└── backend/                # FastAPI Python backend
-    ├── app/
-    │   ├── main.py         # FastAPI application entry point
-    │   ├── routes/         # API route handlers
-    │   ├── models/         # SQLAlchemy DB models
-    │   ├── services/       # Business logic (AI, podcast, auth, etc.)
-    │   └── schemas/        # Pydantic request/response schemas
-    ├── models/             # AI/ML model files (FAISS indexes, etc.)
-    ├── uploads/            # Local file uploads directory
-    ├── requirements.txt    # Python dependencies
-    ├── run.sh              # Convenience startup script
-    └── .env.example        # Backend environment variables template
-```
+### Frontend (Vercel Ready)
+- **Framework:** React 18 + TypeScript + Vite
+- **Styling:** Tailwind CSS + shadcn/ui
+- **State & Data:** TanStack Query, React Router v6
+- **Visuals:** Framer Motion, React Flow (Knowledge Graphs)
+
+### Backend (Render Ready)
+- **Framework:** FastAPI (Python 3.10+)
+- **Database:** PostgreSQL (via `asyncpg`) or SQLite (`aiosqlite`) + SQLAlchemy ORM
+- **AI/LLM:** OpenAI, Groq, OpenRouter
+- **TTS Engine:** ElevenLabs (Premium) with Edge TTS (Free, high-speed fallback)
+- **Vector Search:** FAISS + PyMuPDF for document embedding
 
 ---
 
-## Tech Stack
+## 🚀 Getting Started (Local Development)
 
-### Frontend
-| Technology | Purpose |
-|---|---|
-| React 18 + TypeScript | Core UI framework |
-| Vite | Build tool & dev server |
-| Tailwind CSS + shadcn/ui | Styling & component library |
-| Framer Motion | Animations |
-| React Router v6 | Client-side routing |
-| TanStack Query | Server state & data fetching |
-| React Hook Form + Zod | Form validation |
-| Axios | HTTP client |
+### Prerequisites
+- **Node.js 18+** & npm
+- **Python 3.10+**
+- (Optional) PostgreSQL database
 
-### Backend
-| Technology | Purpose |
-|---|---|
-| FastAPI | Web framework & REST API |
-| SQLAlchemy + Alembic | ORM & database migrations |
-| Supabase / PostgreSQL | Primary database |
-| OpenAI GPT-4 / Groq | AI text generation & analysis |
-| ElevenLabs TTS | Text-to-speech podcast generation |
-| Edge TTS | Fallback TTS option |
-| PyMuPDF | PDF text extraction |
-| FAISS + NumPy | Vector similarity search (RAG) |
-| python-jose + passlib | JWT authentication & password hashing |
-| Cloudinary | Optional cloud file storage |
-
----
-
-## Prerequisites
-
-Make sure the following are installed on your system:
-
-### For the Backend
-- **Python 3.10+** — [Download](https://www.python.org/downloads/)
-- **pip** (comes with Python)
-- **PostgreSQL** (or use Supabase cloud) — [Download](https://www.postgresql.org/download/)
-
-### For the Frontend
-- **Node.js 18+** — [Download](https://nodejs.org/)
-- **npm** (comes with Node.js)
-
-### Required API Keys
-You will need accounts and API keys for:
-| Service | Required | Purpose | Get Key |
-|---|---|---|---|
-| OpenAI | ✅ Yes | AI analysis & podcast script writing | [platform.openai.com](https://platform.openai.com) |
-| ElevenLabs | ✅ Yes | Text-to-speech audio generation | [elevenlabs.io](https://elevenlabs.io) |
-| Supabase | ✅ Yes | Database (or use local PostgreSQL) | [supabase.com](https://supabase.com) |
-| Groq | ⬜ Optional | Faster LLM inference alternative | [console.groq.com](https://console.groq.com) |
-| Cloudinary | ⬜ Optional | Cloud file storage for PDFs | [cloudinary.com](https://cloudinary.com) |
-
----
-
-## Environment Variables
-
-### Backend — `backend/.env`
-
-Copy `backend/.env.example` to `backend/.env` and fill in your values:
-
-```env
-# Server
-HOST=0.0.0.0
-PORT=8000
-
-# Database
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/EchoXScholar
-# Or use Supabase connection string
-
-# JWT Authentication
-SECRET_KEY=your-super-secret-key-change-in-production
-ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=60
-REFRESH_TOKEN_EXPIRE_DAYS=7
-
-# OpenAI
-OPENAI_API_KEY=sk-your-openai-api-key
-OPENAI_MODEL=gpt-4
-
-# ElevenLabs (Text-to-Speech)
-ELEVENLABS_API_KEY=your-elevenlabs-api-key
-VOICE_ID_MALE=21m00Tcm4TlvDq8ikWAM
-VOICE_ID_FEMALE=2EiwWnGeFN0m4CMYp7k9
-
-# CORS — must match your frontend URL
-CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
-
-# File Uploads
-MAX_UPLOAD_SIZE=52428800   # 50 MB in bytes
-UPLOAD_DIR=./uploads
-
-# Cloudinary (Optional)
-CLOUDINARY_CLOUD_NAME=
-CLOUDINARY_API_KEY=
-CLOUDINARY_API_SECRET=
-```
-
-### Frontend — `frontend/.env`
-
-Copy `frontend/.env.example` to `frontend/.env` and fill in:
-
-```env
-VITE_API_BASE_URL=http://localhost:8000
-```
-
----
-
-## How to Run
-
-### 1. Clone the Repository
-
+### 1. Setup the Backend
 ```bash
-git clone https://github.com/your-username/echo-scholar.git
-cd echo-scholar
-```
-
----
-
-### 2. Start the Backend
-
-```bash
-# Navigate to the backend folder
 cd backend
-
-# Create and activate a Python virtual environment
 python -m venv venv
-source venv/bin/activate        # macOS / Linux
-# OR on Windows:
-# venv\Scripts\activate
-
-# Install Python dependencies
+source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
-# Set up environment variables
+# Copy environment template
 cp .env.example .env
-# ✏️  Open .env and add your API keys
+# Edit .env with your API keys (OpenAI, Groq, Google Client ID, etc.)
 
-# Run database migrations (first time only)
+# Run database migrations
 alembic upgrade head
 
-# Start the backend server
+# Start the FastAPI server
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
+*Backend runs on `http://localhost:8000` (Docs at `/docs`)*
 
-The backend will be running at: **http://localhost:8000**  
-Interactive API docs available at: **http://localhost:8000/docs**
-
----
-
-### 3. Start the Frontend
-
-Open a **new terminal tab/window**, then:
-
+### 2. Setup the Frontend
+Open a new terminal tab:
 ```bash
-# Navigate to the frontend folder
 cd frontend
-
-# Install Node.js dependencies
 npm install
 
 # Set up environment variables
+# Ensure VITE_API_URL=http://localhost:8000/api
 cp .env.example .env
-# ✏️  Open .env and set VITE_API_BASE_URL=http://localhost:8000
 
-# Start the development server
+# Start the Vite dev server
 npm run dev
 ```
-
-The frontend will be running at: **http://localhost:5173**
-
----
-
-### 4. Open the App
-
-Open your browser and go to: **[http://localhost:5173](http://localhost:5173)**
-
-- Sign up for a new account
-- Upload a PDF research paper
-- Generate a podcast or start chatting with the AI!
+*Frontend runs on `http://localhost:5173`*
 
 ---
 
-## API Overview
+## ☁️ Deployment Guide
 
-The backend exposes the following main API route groups:
+### Deploying the Frontend (Vercel)
+EchoScholar's frontend is pre-configured for Vercel SPA deployment.
+1. Push your code to GitHub.
+2. In Vercel, import your repository.
+3. Set the **Root Directory** to `frontend` or `./` (a root `vercel.json` and `package.json` handles the redirect).
+4. Add Environment Variables:
+   - `VITE_BACKEND_URL`: Your live backend URL.
+   - `VITE_API_URL`: Your live backend URL + `/api`.
+   - `VITE_GOOGLE_CLIENT_ID`: Your Google OAuth client ID.
+5. Click **Deploy**.
 
-| Route Prefix | Description |
-|---|---|
-| `POST /auth/signup` | Register a new user |
-| `POST /auth/login` | Login and receive JWT tokens |
-| `POST /papers/upload` | Upload a PDF paper |
-| `GET /papers/` | List all uploaded papers |
-| `POST /papers/{id}/podcast` | Generate a podcast from a paper |
-| `POST /papers/{id}/chat` | Ask a question about a paper (RAG) |
-| `GET /notes/` | List research notes |
-| `POST /notes/` | Create a new research note |
-
-Full interactive documentation: **http://localhost:8000/docs**
-
----
-
-## Common Issues
-
-**`ModuleNotFoundError` on backend start**  
-→ Make sure your virtual environment is activated: `source venv/bin/activate`
-
-**Database connection errors**  
-→ Check your `DATABASE_URL` in `backend/.env` and ensure PostgreSQL is running
-
-**CORS errors in browser**  
-→ Make sure `CORS_ORIGINS` in `backend/.env` includes your frontend URL (e.g., `http://localhost:5173`)
-
-**ElevenLabs quota exceeded**  
-→ The backend will automatically fall back to Edge TTS for audio generation
+### Deploying the Backend (Render)
+EchoScholar includes a `render.yaml` for automatic deployment.
+1. Connect your repository to [Render](https://render.com/).
+2. Create a **New Blueprint Instance**.
+3. Render will automatically detect the web service and configure it to use Python.
+4. Go to the Render Dashboard and add your Environment Variables (API Keys, `DATABASE_URL` with `postgresql+asyncpg://`, etc.).
 
 ---
 
-*Built with ❤️ using FastAPI, React, and OpenAI*
+## 🔑 Environment Variables Reference
+
+**Backend (`backend/.env`)**
+- `DATABASE_URL`: Connection string (PostgreSQL or SQLite).
+- `SECRET_KEY` / `ALGORITHM`: For JWT signing.
+- `OPENAI_API_KEY`: For script generation and RAG.
+- `GROQ_API_KEY` / `OPENROUTER_API_KEY`: Alternative ultra-fast LLMs.
+- `ELEVENLABS_API_KEY`: Premium TTS (optional).
+
+**Frontend (`frontend/.env`)**
+- `VITE_BACKEND_URL`
+- `VITE_API_URL`
+- `VITE_GOOGLE_CLIENT_ID`
+
+---
+
+## 🤝 Contributing
+Contributions are welcome! Please open an issue or submit a pull request for any bugs, features, or optimizations.
+
+## 📝 License
+This project is licensed under the MIT License.

@@ -71,7 +71,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ onSuccessRedirect }) => {
         {/* Header */}
         <div className="text-center space-y-1.5 mb-7">
           <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">
-            Sign in to VoxXScholar
+            Sign in to EchoScholar
 
           </h1>
           <p className="text-xs text-gray-500 max-w-xs mx-auto">
@@ -225,7 +225,7 @@ export const AuthCard: React.FC<AuthCardProps> = ({ onSuccessRedirect }) => {
             <span>256-Bit Encrypted Google OAuth 2.0</span>
           </div>
           <p className="text-[10px] text-gray-400">
-            By continuing, you agree to VoxXScholar's{' '}
+            By continuing, you agree to EchoScholar's{' '}
 
             <a href="#" className="text-gray-600 hover:underline font-medium">Terms of Service</a>
             {' '}and{' '}

@@ -17,7 +17,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
             <Brain className="w-5 h-5 text-white" />
           </div>
           <span className="font-extrabold text-xl text-gray-900 tracking-tight">
-            Vox<span className="text-indigo-600">X</span>Scholar
+            EchoScholar
           </span>
         </Link>
       </header>
@@ -29,7 +29,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
 
       {/* Clean Minimal Footer */}
       <footer className="w-full max-w-md pb-6 text-center text-xs text-gray-400">
-        <p>© {new Date().getFullYear()} VoxXScholar. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} EchoScholar. All rights reserved.</p>
       </footer>
 
 

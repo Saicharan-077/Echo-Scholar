@@ -75,7 +75,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
             <Command className="w-4 h-4" />
           </div>
           <span className="font-bold text-gray-900 dark:text-white text-lg tracking-tight">
-            Vox<span className="text-indigo-600 dark:text-indigo-400 font-extrabold">X</span>Scholar
+            EchoScholar
           </span>
 
         </Link>
