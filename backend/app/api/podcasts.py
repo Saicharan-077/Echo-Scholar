@@ -98,7 +98,16 @@ async def generate_podcast(
                 if v['id'] == request.voice_female and not request.persona_female_name:
                     female_name = v['name'].split(' (')[0]
 
-        # Generate script with personas
+        # Get script from artifact manager (force generation if custom styles are provided)
+        from app.services.artifact_manager import artifact_manager
+        artifact_res = await artifact_manager.get_or_generate_artifact(
+            db, paper.id, "podcast", paper.raw_text or "", force_regenerate=True,
+            title=paper.title, summary=paper.summary or "", key_findings=paper.key_findings or [],
+            style=request.style, voice_male_name=male_name, voice_female_name=female_name
+        )
+        
+        # If it just started generating, we should just generate it here synchronously or return a background task ID.
+        # But this endpoint generates audio synchronously. Let's just generate the script directly if we need audio synchronously!
         script = await openai_service.generate_podcast_script(
             paper_title=paper.title,
             summary=paper.summary or "",
@@ -106,8 +115,7 @@ async def generate_podcast(
             style=request.style,
             voice_male_name=male_name,
             voice_female_name=female_name,
-            persona_male_style=request.persona_male_style,
-            persona_female_style=request.persona_female_style,
+            document_text=paper.raw_text or ""
         )
         
         if not script:

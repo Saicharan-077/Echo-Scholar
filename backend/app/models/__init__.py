@@ -28,6 +28,7 @@ __all__ = [
     "Note",
     "ChatMessage",
     "ActivityLog",
+    "Artifact",
     "LearningDNA",
     "ConceptNode",
     "ConceptDependency",

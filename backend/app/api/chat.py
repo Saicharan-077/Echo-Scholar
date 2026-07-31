@@ -12,7 +12,8 @@ from app.core.database import get_db
 from app.core.security import get_current_user
 from app.crud import paper as paper_crud
 from app.models.user import User
-from app.services.ai_model_router import AIModelRouter
+from app.services.openai_service import openai_service
+from app.services.rag_service import RAGService
 from app.services.vector_memory_service import VectorMemoryService
 
 router = APIRouter(prefix="/chat", tags=["Chat"])
@@ -23,107 +24,6 @@ class AskRequestSchema(BaseModel):
     agent_type: Optional[str] = "teacher"
     ai_model: Optional[str] = "gemini-2.0-flash"
     paper_id: Optional[int] = None
-
-
-@router.post("/ask")
-async def ask_general_chat(
-    payload: AskRequestSchema,
-    current_user: User = Depends(get_current_user),
-    db: AsyncSession = Depends(get_db)
-):
-    """
-    Document-grounded Q&A.
-    1. RAG search for relevant chunks from the selected document
-    2. Build a rich context-grounded prompt
-    3. Call Gemini with document chunks as context
-    4. Return answer with citations
-    """
-    context_chunks = []
-    citations = []
-    paper_title = "your study material"
-
-    # Step 1: RAG vector search
-    if payload.paper_id:
-        try:
-            from app.services.rag_service import RAGService
-            context_chunks = await RAGService.vector_search(
-                db, payload.paper_id, payload.question, top_k=4
-            )
-            if context_chunks:
-                paper = await paper_crud.get_paper(db, payload.paper_id)
-                if paper:
-                    paper_title = paper.title
-                    citations = [
-                        f"📄 {paper.title} — Section {c['id']}"
-                        for c in context_chunks[:3]
-                    ]
-        except Exception as e:
-            print(f"RAG search error in chat: {e}")
-
-    # Step 2: Build context string from retrieved chunks
-    if context_chunks:
-        context_str = "\n\n---\n\n".join([
-            f"[Document Section {c['id']}]\n{c['text']}"
-            for c in context_chunks
-        ])
-    else:
-        context_str = "No specific document context available."
-
-    # Step 3: Build hybrid document-grounded + general knowledge system instruction
-    system_instruction = f"""You are Professor Vox, an expert AI tutor.
-
-PRIMARY INSTRUCTIONS:
-1. If the user's question relates to the document context provided below, ground your answer in that context and cite relevant sections/pages.
-2. If the user asks a question that is NOT covered in the provided document context (e.g. general knowledge, math, coding, system design, or unrelated concepts), DO NOT refuse to answer! Provide a comprehensive, accurate, and helpful response using your deep AI knowledge, and add a brief note at the end: "(Note: Answered using general knowledge as this wasn't found in your uploaded paper context)."
-3. Format your answers clearly with:
-   - Markdown headers (##)
-   - Bullet points for key takeaways
-   - Bold text for technical terms
-   - Code/math blocks for equations or code snippets
-4. Always end with an engaging Socratic follow-up question to encourage deeper learning.
-
-ACTIVE STUDY MATERIAL: {paper_title}
-
-RELEVANT DOCUMENT CONTEXT:
-{context_str}"""
-
-    # Step 4: Generate response
-    answer = await AIModelRouter.generate_response(
-        prompt=payload.question,
-        system_instruction=system_instruction,
-        model_name=payload.ai_model or "gemini-2.0-flash",
-        temperature=0.4,
-        max_tokens=1500
-    )
-
-    # Step 5: Log to memory
-    try:
-        await VectorMemoryService.add_memory(
-            db=db,
-            user_id=current_user.id,
-            content=f"Q: {payload.question[:100]} | Doc: {paper_title}",
-            memory_type="QueryHistory",
-            topic=payload.question[:40]
-        )
-    except Exception:
-        pass
-
-    if not citations:
-        citations = [f"📄 {paper_title}"]
-
-    return {
-        "status": "success",
-        "agent_type": payload.agent_type,
-        "model_used": "gemini-2.0-flash",
-        "answer": answer,
-        "citations": citations[:3],
-        "chunks_used": len(context_chunks),
-        "suggestions": [
-            f"Can you explain this with a diagram or example?",
-            f"What are the key formulas related to this?",
-            f"Quiz me on this topic from the document"
-        ]
-    }
 
 
 class ChatMessageSchema(BaseModel):
@@ -140,6 +40,64 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     message: str
     tokens_used: int
+    citations: List[dict] = []
+
+
+@router.post("/ask")
+async def ask_general_chat(
+    payload: AskRequestSchema,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Document-grounded Q&A with strict RAG and Standard Citations."""
+    paper_title = "your study material"
+    context_str = ""
+    citations = []
+
+    if payload.paper_id:
+        paper = await paper_crud.get_paper(db, payload.paper_id)
+        if paper and paper.user_id == current_user.id:
+            paper_title = paper.title
+            
+            rag_result = await RAGService.retrieve_context(
+                db, payload.paper_id, payload.question, top_k=4, threshold=0.01
+            )
+            context_str = rag_result.get("formatted_context", "")
+            citations = rag_result.get("citations", [])
+            
+    if not context_str:
+        context_str = "NO CONTEXT AVAILABLE. The document does not contain information about this query."
+
+    answer, _ = await openai_service.chat(payload.question, context_str, [])
+
+    try:
+        await VectorMemoryService.add_memory(
+            db=db,
+            user_id=current_user.id,
+            content=f"Q: {payload.question[:100]} | Doc: {paper_title}",
+            memory_type="QueryHistory",
+            topic=payload.question[:40]
+        )
+    except Exception:
+        pass
+
+    formatted_citations = [f"📄 {paper_title} — Chunk {c['chunk_id']} (Score: {c['score']})" for c in citations[:3]]
+    if not formatted_citations:
+        formatted_citations = [f"📄 {paper_title}"]
+
+    return {
+        "status": "success",
+        "agent_type": payload.agent_type,
+        "model_used": payload.ai_model,
+        "answer": answer,
+        "citations": formatted_citations,
+        "chunks_used": len(citations),
+        "suggestions": [
+            f"Can you explain this with a diagram or example?",
+            f"What are the key formulas related to this?",
+            f"Quiz me on this topic from the document"
+        ]
+    }
 
 
 @router.post("", response_model=ChatResponse)
@@ -153,30 +111,21 @@ async def chat_with_paper(
     if not paper or paper.user_id != current_user.id:
         raise HTTPException(status_code=404, detail="Paper not found or unauthorized")
 
-    # Get RAG context
-    context_str = ""
-    try:
-        from app.services.rag_service import RAGService
-        chunks = await RAGService.vector_search(db, request.paper_id, request.message, top_k=3)
-        if chunks:
-            context_str = "\n\n---\n\n".join([c["text"] for c in chunks])
-    except Exception:
-        pass
+    rag_result = await RAGService.retrieve_context(
+        db, request.paper_id, request.message, top_k=4, threshold=0.01
+    )
+    context_str = rag_result.get("formatted_context", "")
+    citations = rag_result.get("citations", [])
 
     if not context_str:
-        # Fall back to raw text excerpt
-        context_str = paper.raw_text[:3000] if paper.raw_text else paper.summary or paper.title
+        context_str = "NO CONTEXT AVAILABLE. The document does not contain information about this query."
 
-    system = (
-        f"You are Professor Vox teaching from the document: '{paper.title}'. "
-        f"Ground all answers in this content:\n\n{context_str}"
+    history_dicts = [{"role": msg.role, "content": msg.content} for msg in request.chat_history]
+    
+    answer, tokens = await openai_service.chat(request.message, context_str, history_dicts)
+
+    return ChatResponse(
+        message=answer, 
+        tokens_used=tokens,
+        citations=citations
     )
-
-    response_text = await AIModelRouter.generate_response(
-        prompt=request.message,
-        system_instruction=system,
-        temperature=0.4,
-        max_tokens=1200
-    )
-
-    return ChatResponse(message=response_text, tokens_used=len(response_text.split()) + 100)

@@ -213,51 +213,70 @@ async def delete_paper(
     return MessageResponse(message="Paper deleted successfully")
 
 async def run_processing(paper_id: int, user_id: int, db_session_factory):
-    """Background task for processing paper."""
+    \"\"\"Background task for processing paper: Document Processing Pipeline.\"\"\"
     from app.core.database import AsyncSessionLocal
+    from app.services.artifact_manager import artifact_manager
     async with AsyncSessionLocal() as db:
         paper = await paper_crud.get_paper(db, paper_id)
         if not paper:
             return
 
         try:
-            print(f"DEBUG: [Background] Starting processing for paper {paper_id}")
+            print(f"DEBUG: [Pipeline] Starting processing for paper {paper_id}")
             
-            # 1. Extract text from PDF
-            print(f"DEBUG: [Background] Extracting text")
+            # 1. Text Extraction
+            print(f"DEBUG: [Pipeline] Extracting text")
             raw_text = await pdf_service.extract_text(paper.file_path)
-            paper.raw_text = raw_text
+            
+            # 2. Cleaning
+            # Remove very short lines, page numbers, weird artifacts
+            lines = [l.strip() for l in raw_text.split("\n") if len(l.strip()) > 3 or l.strip().isalnum()]
+            clean_text = "\n".join(lines)
+            paper.raw_text = clean_text
             await db.commit()
             
-            # 2. AI Analysis (Concurrent Execution for speed)
-            print("DEBUG: [Background] Generating AI insights concurrently...")
-            summary, topics, key_findings, methodology = await asyncio.gather(
-                openai_service.generate_summary(raw_text),
-                openai_service.extract_topics(raw_text),
-                openai_service.extract_key_findings(raw_text),
-                openai_service.generate_methodology(raw_text)
+            # 3. AI Analysis & Metadata (Summary, Topics)
+            print("DEBUG: [Pipeline] Generating AI Metadata (Summary/Topics)...")
+            summary, topics = await asyncio.gather(
+                openai_service.generate_summary(clean_text),
+                openai_service.extract_topics(clean_text)
             )
             
             paper.summary = summary
             paper.topics = topics
-            paper.key_findings = key_findings
-            paper.methodology = methodology
             
-            # 3. Process RAG Vector Indexing
-            print("DEBUG: [Background] Starting semantic chunking & vector indexing...")
+            # 4. Entity Extraction & Relationship Extraction (For Knowledge Graph)
+            print("DEBUG: [Pipeline] Extracting Entities and Relationships...")
+            entities = await openai_service.extract_entities(clean_text)
+            relationships = await openai_service.extract_relationships(clean_text, entities)
+            
+            # Store in Artifact Manager immediately
+            from app.models.artifact import Artifact
+            db.add(Artifact(paper_id=paper_id, artifact_type="entities", status="ready", content=entities))
+            db.add(Artifact(paper_id=paper_id, artifact_type="relationships", status="ready", content=relationships))
+            await db.commit()
+            
+            # Trigger other core artifacts to generate in background so they are ready
+            await artifact_manager.get_or_generate_artifact(db, paper_id, "quiz", clean_text)
+            await artifact_manager.get_or_generate_artifact(db, paper_id, "flashcards", clean_text)
+            await artifact_manager.get_or_generate_artifact(db, paper_id, "graph", clean_text)
+            await artifact_manager.get_or_generate_artifact(db, paper_id, "podcast", clean_text, title=paper.title, summary=summary)
+            
+            # 5. Chunking, Embedding, Vector Storage (RAG Indexing)
+            print("DEBUG: [Pipeline] Starting semantic chunking & vector indexing...")
             from app.services.rag_service import RAGService
             rag_res = await RAGService.process_and_index_document(db, paper.id)
-            print(f"DEBUG: [Background] RAG indexing result: {rag_res}")
+            print(f"DEBUG: [Pipeline] RAG indexing result: {rag_res}")
 
-            # Mark as processed
+            # 6. Document Intelligence Layer Ready
             paper.is_processed = True
             paper.processing_status = "completed"
             
             await db.commit()
-            print(f"DEBUG: [Background] Processing complete for paper {paper_id}")
+            print(f"DEBUG: [Pipeline] Processing complete for paper {paper_id}")
             
         except Exception as e:
-            print(f"DEBUG: [Background] Error processing paper {paper_id}: {str(e)}")
+            print(f"DEBUG: [Pipeline] Error processing paper {paper_id}: {str(e)}")
             import traceback
             traceback.print_exc()
             paper.processing_status = "failed"

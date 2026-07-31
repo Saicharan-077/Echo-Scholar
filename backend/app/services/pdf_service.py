@@ -98,23 +98,38 @@ class PDFService:
     
     def _clean_text(self, text: str) -> str:
         """Clean extracted text."""
-        # Remove excessive whitespace
-        text = re.sub(r'\n{3,}', '\n\n', text)
-        
-        # Remove page numbers (common patterns)
-        text = re.sub(r'\n\s*\d+\s*\n', '\n', text)
-        
-        # Remove header/footer patterns (common in academic papers)
+        if not text:
+            return ""
+
+        # Remove binary/control characters
+        text = re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f]', '', text)
+
+        # PDF internal metadata and font dictionary patterns
+        pdf_meta_patterns = [
+            r'StemV', r'StemH', r'XHeight', r'FontBBox', r'ItalicAngle', r'Ascent',
+            r'Descent', r'CapHeight', r'FontFile', r'AvgWidth', r'MaxWidth', r'Leading',
+            r'FlateDecode', r'Filter', r'Annots', r'Parent', r'Pages', r'Kids',
+            r'First', r'Last', r'Outlines', r'Producer', r'ModDate', r'Root', r'Info',
+            r'XYZ', r'<<', r'>>', r'\d+\s+0\s+R', r'/Type', r'/BBox', r'/Font'
+        ]
+        meta_regex = re.compile('|'.join(pdf_meta_patterns), re.IGNORECASE)
+
         lines = text.split('\n')
         cleaned_lines = []
         
         for line in lines:
-            # Skip very short lines that are likely page numbers
-            if len(line.strip()) < 3 and line.strip().isdigit():
+            stripped = line.strip()
+            # Skip very short lines that are just numbers
+            if len(stripped) < 3 and stripped.isdigit():
+                continue
+            # Skip PDF dictionary / font metadata lines
+            if meta_regex.search(stripped):
                 continue
             cleaned_lines.append(line)
         
-        return '\n'.join(cleaned_lines)
+        cleaned_text = '\n'.join(cleaned_lines)
+        cleaned_text = re.sub(r'\n{3,}', '\n\n', cleaned_text)
+        return cleaned_text
     
     async def extract_metadata(self, file_path: str) -> Dict[str, Any]:
         """Extract metadata from PDF."""

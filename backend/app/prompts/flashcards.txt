@@ -1,0 +1,12 @@
+Generate 8-12 active recall flashcards from the provided DOCUMENT CONTEXT.
+Each flashcard must test a SPECIFIC fact, definition, formula, or concept from the text.
+Return ONLY a JSON array:
+[
+  {
+    "q": "What is [specific term from text]?",
+    "a": "Specific answer from the document text.",
+    "explanation": "Explanation from context with [Page X, Section Y, Chunk Z]",
+    "difficulty": "easy"
+  }
+]
+Difficulty options: "easy", "medium", "hard".

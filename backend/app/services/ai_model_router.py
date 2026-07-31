@@ -26,7 +26,7 @@ class AIModelRouter:
     async def generate_response(
         cls,
         prompt: str,
-        system_instruction: str = "You are Professor Vox, an expert AI Personal Professor.",
+        system_instruction: str = "",
         model_name: str = "default",
         temperature: float = 0.7,
         max_tokens: int = 1500
@@ -195,52 +195,5 @@ class AIModelRouter:
             except Exception as e:
                 print(f"Featherless.ai error: {e}")
 
-        # 5. Smart Context-Aware Offline Generator (Ensures realistic responses)
-        return cls._generate_smart_fallback(prompt, system_instruction)
-
-    @classmethod
-    def _generate_smart_fallback(cls, prompt: str, system_instruction: str) -> str:
-        """
-        Generates realistic, topic-grounded educational text or podcast dialogue when offline.
-        """
-        combined = (prompt + " " + system_instruction).lower()
-
-        # Podcast dialogue generation request
-        if "podcast" in combined or "co-host" in combined or "speaker" in combined or "neerja" in combined or "prabhat" in combined:
-            return (
-                "Prabhat: Welcome back to EchoScholar AI Podcasts! Today we're diving deep into the core mechanics of our research topic.\n\n"
-                "Neerja: Exactly, Prabhat. What makes this paper so fascinating is how it replaces complex sequential recurrence with parallel self-attention matrices!\n\n"
-                "Prabhat: That's right! By computing Query, Key, and Value projections simultaneously, the model captures long-range dependencies across GPU threads without gradient decay.\n\n"
-                "Neerja: And the positional encodings ensure sequence order is fully preserved. It really sets a new benchmark for deep understanding."
-            )
-
-        # Transformer / Self-Attention
-        if "transformer" in combined or "attention" in combined or "llm" in combined:
-            return (
-                "## 💡 Scaled Dot-Product Self-Attention Breakdown\n\n"
-                "The core innovation of the Transformer architecture is **Self-Attention**, which allows tokens to dynamically attend to every other position in a single matrix computation.\n\n"
-                "### 📐 Mathematical Formulation:\n"
-                "$$\\text{Attention}(Q, K, V) = \\text{softmax}\\left(\\frac{QK^T}{\\sqrt{d_k}}\\right)V$$\n\n"
-                "- **Query (Q)**: What the current token is searching for.\n"
-                "- **Key (K)**: What each token in the sequence represents.\n"
-                "- **Value (V)**: The actual representation content to be weighted.\n"
-                "- **Scaling by $\\sqrt{d_k}$**: Prevents dot products from growing excessively large, avoiding vanishing gradients in the softmax region.\n\n"
-                "### 🎯 Key Takeaways:\n"
-                "1. Enables $O(1)$ sequential operations for maximum GPU parallelization.\n"
-                "2. Captures long-range syntactic and semantic relationships effortlessly.\n\n"
-                "**Follow-up Question**: How do you think multi-head attention differs from single-head attention when capturing multiple subspace representations?"
-            )
-
-        # Default Socratic Tutor response
-        topic_title = prompt[:50] if prompt else "your research topic"
-        return (
-            f"## 📚 Comprehensive Analysis: {topic_title}\n\n"
-            "Here is a structured explanation of the concept based on foundational principles:\n\n"
-            "### 🔑 Core Principles:\n"
-            "- **State Space & Complexity**: Evaluates input parameters across memory buffers and execution cycles.\n"
-            "- **Mathematical Substructure**: Formulates relationships cleanly to maximize system efficiency.\n"
-            "- **Practical Engineering Application**: Applied in distributed computing, neural networks, and scalable software architectures.\n\n"
-            "### 💡 Key Takeaway:\n"
-            "Understanding the underlying design trade-offs allows you to optimize both time complexity and memory overhead.\n\n"
-            "**Follow-up Question**: Would you like to explore a concrete mathematical proof or see a practical code example?"
-        )
+        # 5. Fail if no AI provider could fulfill the request
+        raise ValueError("No AI provider available or all requests failed. Please configure an API key.")

@@ -1,8 +1,9 @@
-import asyncio, os, httpx, json
+import asyncio, os, httpx, json, pytest
 from dotenv import load_dotenv
 load_dotenv()
 
-async def test():
+@pytest.mark.asyncio
+async def test_gemini_models():
     gemini_key = os.getenv('GEMINI_API_KEY', '')
     print('API Key present:', bool(gemini_key and len(gemini_key) > 10))
     print('API Key prefix:', gemini_key[:8] if gemini_key else 'NONE')
@@ -31,4 +32,5 @@ async def test():
         except Exception as e:
             print(f'{model_id}: Exception: {e}')
 
-asyncio.run(test())
+if __name__ == "__main__":
+    asyncio.run(test_gemini_models())

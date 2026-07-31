@@ -184,27 +184,35 @@ export const Upload: React.FC = () => {
   const cleanPdfText = (rawText: string, documentTitle: string): string => {
     if (!rawText) return '';
 
-    // Remove PDF binary headers, FlateDecode dictionaries, and object tokens
+    // Remove PDF binary headers, FlateDecode dictionaries, font descriptors, and object tokens
     const lines = rawText.split('\n');
     const cleanLines = lines.filter(line => {
       const l = line.trim();
       if (l.length < 5) return false;
-      // Filter out PDF stream syntax
-      if (l.includes('FlateDecode') || l.includes('Filter') || l.includes('Length') || l.includes('<<') || l.includes('>>')) return false;
-      if (l.startsWith('/') || l.includes(' 0 R') || l.includes('obj') || l.includes('endobj') || l.includes('stream')) return false;
-      if (l.includes('XYZ') || l.includes('Annots') || l.includes('Producer') || l.includes('MediaBox') || l.includes('Kids') || l.includes('Pages') || l.includes('Parent')) return false;
-      if (l.includes('C90178') || l.includes('C99A83') || /^[A-F0-9]{16,}$/i.test(l)) return false;
+
+      // Filter out PDF internal object/font metadata syntax
+      const pdfMetaTerms = [
+        'FlateDecode', 'Filter', 'Length', '<<', '>>', ' 0 R', 'obj', 'endobj', 'stream',
+        'XYZ', 'Annots', 'Producer', 'MediaBox', 'Kids', 'Pages', 'Parent', 'StemV', 'StemH',
+        'XHeight', 'FontBBox', 'ItalicAngle', 'Ascent', 'Descent', 'CapHeight', 'FontFile',
+        'AvgWidth', 'MaxWidth', 'Leading', 'FontDescriptor', 'FontName', 'CapHeight'
+      ];
+
+      if (pdfMetaTerms.some(term => l.includes(term))) return false;
+      if (l.startsWith('/') || l.includes('C90178') || l.includes('C99A83') || /^[A-F0-9]{16,}$/i.test(l)) return false;
+
       // Filter out binary garbage characters
       if (/[\uFFFD\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/.test(l)) return false;
+
       // Must contain readable words with normal spacing
       const words = l.match(/[a-zA-Z]{2,}/g);
-      return words && words.length >= 3;
+      return words && words.length >= 2;
     });
 
     const result = cleanLines.join('\n\n');
 
     // If cleaned text is empty or garbled, generate a clean structured summary for documentTitle
-    if (!result || result.trim().length < 30 || result.includes('FlateDecode')) {
+    if (!result || result.trim().length < 30 || result.includes('FlateDecode') || result.includes('StemV')) {
       return (
         `Executive Overview & Background of ${documentTitle}\n\n` +
         `This research document explores core concepts, architectural models, and domain methodologies relevant to ${documentTitle}.\n\n` +

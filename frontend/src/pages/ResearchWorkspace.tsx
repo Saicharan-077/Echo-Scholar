@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { PaperTabs } from '../features/workspace/components/PaperTabs';
 import { LearningJourney } from '../features/workspace/components/LearningJourney';
 import { VoxHeader } from '../features/vox/components/VoxHeader';
@@ -63,7 +65,7 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
           title: p.title,
           authors: `Uploaded PDF: ${p.filename} • ${p.size || '1.5 MB'} • ${p.chunks || 36} Vector Chunks`,
           category: p.category || 'Uploaded Research Document',
-          sections: (p.customSections && Array.isArray(p.customSections) && !p.customSections[0]?.content?.includes('FlateDecode') && !p.customSections[0]?.content?.includes('/Annots'))
+          sections: (p.customSections && Array.isArray(p.customSections) && !p.customSections[0]?.content?.includes('FlateDecode') && !p.customSections[0]?.content?.includes('/Annots') && !p.customSections[0]?.content?.includes('StemV') && !p.customSections[0]?.content?.includes('ItalicAngle'))
             ? p.customSections
             : [
                 {
@@ -139,6 +141,34 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
   // Active workspace state
   const [selectedPaperIdx, setSelectedPaperIdx] = useState(activePaperIndex);
   const [activeDockPanel, setActiveDockPanel] = useState<'graph' | 'podcast' | 'quiz' | 'notes' | null>(null);
+  const [podcastUrl, setPodcastUrl] = useState<string | null>(null);
+  const [podcastLoading, setPodcastLoading] = useState(false);
+  const [podcastStyle, setPodcastStyle] = useState('educational');
+
+  const handleGeneratePodcast = async () => {
+    if (!paper) return;
+    setPodcastLoading(true);
+    setPodcastUrl(null);
+    try {
+      const res = await api.post(`/podcasts/generate`, {
+        paper_id: paper.db_id || parseInt(paper.id),
+        style: podcastStyle,
+        voice_male: 'en-IN-PrabhatNeural',
+        voice_female: 'en-IN-NeerjaNeural'
+      });
+      // Assuming the backend returns the URL to the audio file in res.data.audio_url
+      // The FastAPI static files are usually mounted at /static
+      if (res.data.audio_url) {
+        setPodcastUrl(`http://localhost:8000${res.data.audio_url}`);
+      } else {
+        alert("Podcast generation failed or audio URL not provided.");
+      }
+    } catch (e: any) {
+      alert("Error generating podcast: " + (e.response?.data?.detail || e.message));
+    } finally {
+      setPodcastLoading(false);
+    }
+  };
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [readingProgress, setReadingProgress] = useState(72);
   const [isRelatedOpen, setIsRelatedOpen] = useState(false);
@@ -440,41 +470,69 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
                     ← Back to Paper Reader
                   </button>
                   <h2 className="text-2xl font-extrabold text-gray-900">AI Podcast Studio</h2>
-                  <p className="text-xs text-gray-500">Dual Co-Host Audio Overview: Transformers Explained</p>
+                  <p className="text-xs text-gray-500">Listen to an AI-generated dual-host podcast about this paper.</p>
                 </div>
                 <Badge variant="accent" size="sm">Co-Hosts Prabhat & Neerja</Badge>
               </div>
 
               <div className="p-8 bg-indigo-950 text-white rounded-2xl space-y-6 shadow-xl">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <button className="w-14 h-14 bg-white text-indigo-950 rounded-full flex items-center justify-center font-bold shadow-lg hover:bg-gray-100 transition-transform hover:scale-105 cursor-pointer">
-                      <Play className="w-6 h-6 ml-1 text-indigo-950" />
-                    </button>
-                    <div>
-                      <h3 className="text-lg font-bold text-white">Attention Is All You Need — Audio Breakdown</h3>
-                      <p className="text-xs text-indigo-200">Episode 1 • 14 min 30 sec</p>
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div className="w-full">
+                    <label className="text-xs text-indigo-300 font-bold mb-2 block">Select Podcast Style</label>
+                    <div className="flex items-center gap-2">
+                      <select 
+                        value={podcastStyle}
+                        onChange={(e) => setPodcastStyle(e.target.value)}
+                        className="p-2 rounded bg-indigo-900 border border-indigo-700 text-sm text-white focus:outline-none focus:border-amber-400 w-48"
+                      >
+                        <option value="educational">Educational (Default)</option>
+                        <option value="casual">Casual & Fun</option>
+                        <option value="debate">Debate / Critical</option>
+                        <option value="deep-dive">Technical Deep Dive</option>
+                      </select>
+                      <button 
+                        onClick={handleGeneratePodcast}
+                        disabled={podcastLoading}
+                        className="btn-primary bg-amber-500 hover:bg-amber-600 border-none text-indigo-950"
+                      >
+                        {podcastLoading ? 'Generating Audio (Takes 1-2 mins)...' : 'Generate New Podcast'}
+                      </button>
                     </div>
                   </div>
-                  <span className="text-xs font-mono bg-indigo-900 px-3 py-1 rounded-full border border-indigo-700">1.0x Speed</span>
                 </div>
 
-                <div className="space-y-2">
-                  <div className="w-full bg-indigo-900 rounded-full h-2 overflow-hidden border border-indigo-800">
-                    <div className="bg-amber-400 h-full rounded-full" style={{ width: '35%' }} />
+                {podcastLoading ? (
+                  <div className="p-8 flex flex-col items-center justify-center space-y-4">
+                    <div className="w-12 h-12 border-4 border-indigo-500 border-t-amber-400 rounded-full animate-spin"></div>
+                    <p className="text-sm font-semibold text-indigo-200 animate-pulse">
+                      Prof. Vox is writing the script and recording audio. This requires compiling TTS and FFmpeg merging...
+                    </p>
                   </div>
-                  <div className="flex justify-between text-[11px] text-indigo-300 font-mono">
-                    <span>05:04</span>
-                    <span>14:30</span>
+                ) : podcastUrl ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-white text-indigo-950 rounded-full flex items-center justify-center font-bold shadow-lg shrink-0">
+                        <Headphones className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-white">{paper?.title} — Audio Breakdown</h3>
+                        <p className="text-xs text-indigo-200">Generated in {podcastStyle} style</p>
+                      </div>
+                    </div>
+                    
+                    <div className="w-full mt-4">
+                      <audio controls className="w-full rounded-xl shadow-lg border border-indigo-700" style={{ filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.3))' }}>
+                        <source src={podcastUrl} type="audio/mpeg" />
+                        Your browser does not support the audio element.
+                      </audio>
+                    </div>
                   </div>
-                </div>
-
-                <div className="p-4 bg-indigo-900/60 rounded-xl space-y-2 border border-indigo-800">
-                  <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider">Live Co-Host Transcript</span>
-                  <p className="text-xs text-indigo-100 leading-relaxed italic">
-                    "Welcome back to VoxScholar! Today we are dissecting the famous 2017 Transformer paper. Neerja, why did self-attention completely replace recurrent networks?"
-                  </p>
-                </div>
+                ) : (
+                  <div className="p-8 text-center text-indigo-300 border border-indigo-800 rounded-xl bg-indigo-900/50">
+                    <Headphones className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                    <p>Click "Generate New Podcast" to create an audio episode based on this document.</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -537,22 +595,11 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
                     <h2 className="text-2xl font-bold font-sans text-gray-900 tracking-tight pt-4">
                       {sec.title}
                     </h2>
-                    
-                    {/* Clean Paragraph Flow */}
-                    {sec.content.split('\n\n').map((paragraph, pIdx) => {
-                      if (paragraph.startsWith('Attention(')) {
-                        return (
-                          <div key={pIdx} className="p-5 my-6 bg-gray-50/80 border-l-4 border-indigo-600 rounded-r-2xl font-mono text-base text-indigo-950 shadow-xs">
-                            {paragraph}
-                          </div>
-                        );
-                      }
-                      return (
-                        <p key={pIdx} className="font-normal text-gray-800">
-                          {paragraph}
-                        </p>
-                      );
-                    })}
+                    <div className="prose prose-indigo prose-lg max-w-none font-serif text-gray-800">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {sec.content}
+                      </ReactMarkdown>
+                    </div>
                   </div>
                 ))}
               </div>
