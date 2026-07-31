@@ -242,10 +242,7 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
   return (
     <div className="h-screen w-full bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans flex flex-col overflow-hidden">
       
-      {/* 1. PRIMARY APPLICATION NAVBAR */}
-      {!isFocusMode && <Navbar onOpenSearch={onOpenSearch} />}
-
-      {/* 2. REUSABLE WORKSPACE TOOLBAR & BREADCRUMBS */}
+      {/* REUSABLE WORKSPACE TOOLBAR & BREADCRUMBS */}
       <WorkspaceToolbar>
         <Breadcrumbs
           items={[
