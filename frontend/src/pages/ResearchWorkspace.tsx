@@ -62,26 +62,28 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
           title: p.title,
           authors: `Uploaded PDF: ${p.filename} • ${p.size || '1.5 MB'} • ${p.chunks || 36} Vector Chunks`,
           category: p.category || 'Uploaded Research Document',
-          sections: p.customSections || [
-            {
-              id: 'sec-1',
-              status: 'completed',
-              title: `1. Executive Summary & Overview of ${p.title}`,
-              content: `This workspace section contains vectorized text content extracted from ${p.filename}.\n\nDocument Summary: ${p.summary || 'Uploaded document indexed into high-dimensional vector embeddings.'}\n\nThe document has been parsed into ${p.chunks || 36} vector chunks and synchronized with Professor Vox cognitive twin mentor and AI Learning Studio modes.`
-            },
-            {
-              id: 'sec-2',
-              status: 'active',
-              title: `2. Vector Chunk Extracts & Key Findings`,
-              content: `Extracted Key Concepts from ${p.title}:\n\n- Primary Domain: ${p.category || 'Artificial Intelligence'}\n- Structured Vector Embeddings: ${p.chunks || 36} chunks loaded in memory.\n- AI Learning Studio Integration: Ready for Socratic Active Recall, Audio Podcast Generation, and Knowledge Graph synthesis.`
-            },
-            {
-              id: 'sec-3',
-              status: 'upcoming',
-              title: `3. Interactive AI Learning Studio Synthesis`,
-              content: `Use the top toolbar options (Reader, Graph, Podcast, Quiz, Notes) or ask Professor Vox in the right sidebar to generate interactive learning experiences specifically tailored to ${p.title}.`
-            }
-          ]
+          sections: (p.customSections && Array.isArray(p.customSections) && !p.customSections[0]?.content?.includes('FlateDecode') && !p.customSections[0]?.content?.includes('/Annots'))
+            ? p.customSections
+            : [
+                {
+                  id: 'sec-1',
+                  status: 'completed',
+                  title: `1. Executive Summary & Overview of ${p.title}`,
+                  content: `This workspace section contains vectorized text content extracted from ${p.filename}.\n\nDocument Summary: ${p.summary || 'Uploaded document indexed into high-dimensional vector embeddings.'}\n\nThe document has been parsed into ${p.chunks || 36} vector chunks and synchronized with Professor Vox cognitive twin mentor and AI Learning Studio modes.`
+                },
+                {
+                  id: 'sec-2',
+                  status: 'active',
+                  title: `2. Vector Chunk Extracts & Key Findings`,
+                  content: `Extracted Key Concepts from ${p.title}:\n\n- Primary Domain: ${p.category || 'Artificial Intelligence'}\n- Structured Vector Embeddings: ${p.chunks || 36} chunks loaded in memory.\n- AI Learning Studio Integration: Ready for Socratic Active Recall, Audio Podcast Generation, and Knowledge Graph synthesis.`
+                },
+                {
+                  id: 'sec-3',
+                  status: 'upcoming',
+                  title: `3. Interactive AI Learning Studio Synthesis`,
+                  content: `Use the top toolbar options (Reader, Graph, Podcast, Quiz, Notes) or ask Professor Vox in the right sidebar to generate interactive learning experiences specifically tailored to ${p.title}.`
+                }
+              ]
         }));
       } catch (e) {}
     }
