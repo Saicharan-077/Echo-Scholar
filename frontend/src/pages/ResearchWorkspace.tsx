@@ -150,16 +150,22 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
     setPodcastLoading(true);
     setPodcastUrl(null);
     try {
+      let pId = (paper as any).db_id;
+      if (!pId) {
+        const numId = parseInt(paper.id);
+        pId = isNaN(numId) ? 1 : numId;
+      }
+
       const res = await api.post(`/podcasts/generate`, {
-        paper_id: paper.db_id || parseInt(paper.id),
+        paper_id: pId,
         style: podcastStyle,
         voice_male: 'en-IN-PrabhatNeural',
         voice_female: 'en-IN-NeerjaNeural'
       });
-      // Assuming the backend returns the URL to the audio file in res.data.audio_url
-      // The FastAPI static files are usually mounted at /static
+
       if (res.data.audio_url) {
-        setPodcastUrl(`http://localhost:8000${res.data.audio_url}`);
+        const path = res.data.audio_url.startsWith('/api') ? res.data.audio_url : `/api${res.data.audio_url}`;
+        setPodcastUrl(`http://localhost:8000${path}`);
       } else {
         alert("Podcast generation failed or audio URL not provided.");
       }
@@ -169,6 +175,23 @@ export const ResearchWorkspace: React.FC<ResearchWorkspaceProps> = ({ onOpenSear
       setPodcastLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (activeDockPanel === 'podcast' && paper) {
+      let pId = (paper as any).db_id;
+      if (!pId) {
+        const numId = parseInt(paper.id);
+        pId = isNaN(numId) ? 1 : numId;
+      }
+      api.get(`/podcasts/paper/${pId}/audio`)
+        .then(() => {
+          setPodcastUrl(`http://localhost:8000/api/podcasts/paper/${pId}/audio`);
+        })
+        .catch(() => {
+          // No pre-existing audio found
+        });
+    }
+  }, [activeDockPanel, paper]);
   const [isFocusMode, setIsFocusMode] = useState(false);
   const [readingProgress, setReadingProgress] = useState(72);
   const [isRelatedOpen, setIsRelatedOpen] = useState(false);

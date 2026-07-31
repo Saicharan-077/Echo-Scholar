@@ -63,23 +63,19 @@ async def generate_podcast(
     # Check if podcast already exists
     existing = await podcast_crud.get_podcast_by_paper(db, request.paper_id, current_user.id)
     if existing:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Podcast already exists for this paper"
+        podcast = existing
+    else:
+        # Create podcast record
+        podcast_data = PodcastCreate(
+            paper_id=request.paper_id,
+            title=f"Podcast: {paper.title}",
+            description=f"AI-generated podcast summarizing {paper.title}",
+            voice_male=request.voice_male,
+            voice_female=request.voice_female,
+            speed=request.speed,
+            style=request.style,
         )
-    
-    # Create podcast record
-    podcast_data = PodcastCreate(
-        paper_id=request.paper_id,
-        title=f"Podcast: {paper.title}",
-        description=f"AI-generated podcast summarizing {paper.title}",
-        voice_male=request.voice_male,
-        voice_female=request.voice_female,
-        speed=request.speed,
-        style=request.style,
-    )
-    
-    podcast = await podcast_crud.create_podcast(db, current_user.id, podcast_data)
+        podcast = await podcast_crud.create_podcast(db, current_user.id, podcast_data)
     
     # Update status to generating
     await podcast_crud.update_podcast_status(db, podcast.id, PodcastStatus.GENERATING)
@@ -166,7 +162,7 @@ async def generate_podcast(
             podcast_id=podcast.id,
             status="completed",
             progress=100,
-            audio_url=audio_url,
+            audio_url=f"/podcasts/{podcast.id}/audio",
             message="Podcast generated successfully"
         )
     

@@ -213,7 +213,7 @@ async def delete_paper(
     return MessageResponse(message="Paper deleted successfully")
 
 async def run_processing(paper_id: int, user_id: int, db_session_factory):
-    \"\"\"Background task for processing paper: Document Processing Pipeline.\"\"\"
+    """Background task for processing paper: Document Processing Pipeline."""
     from app.core.database import AsyncSessionLocal
     from app.services.artifact_manager import artifact_manager
     async with AsyncSessionLocal() as db:
