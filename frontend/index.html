@@ -18,8 +18,7 @@
       (function() {
         try {
           var saved = localStorage.getItem('theme');
-          var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          if (saved === 'dark' || (!saved && systemDark) || (saved === 'system' && systemDark)) {
+          if (saved === 'dark') {
             document.documentElement.classList.add('dark');
           } else {
             document.documentElement.classList.remove('dark');
