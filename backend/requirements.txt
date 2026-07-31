@@ -6,6 +6,7 @@ python-multipart==0.0.17
 # Database
 sqlalchemy==2.0.35
 aiosqlite==0.20.0
+greenlet>=3.0.0
 alembic==1.13.3
 
 # Supabase
@@ -26,11 +27,11 @@ edge-tts==6.1.12
 elevenlabs>=1.10.0
 
 # PDF Processing
-pymupdf==1.24.10
+pymupdf>=1.24.0
 
 # Vector search for RAG
-faiss-cpu==1.8.0
-numpy==1.26.4
+faiss-cpu>=1.7.4
+numpy>=1.26.0
 
 # Utilities
 python-dotenv==1.0.1

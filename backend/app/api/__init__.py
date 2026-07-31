@@ -1,4 +1,4 @@
-﻿# API Router
+# API Router
 from fastapi import APIRouter
 from app.api import (
     auth,
@@ -14,6 +14,11 @@ from app.api import (
     adaptive_quiz,
     analytics,
     admin,
+    podcasts,
+    placement,
+    lecture,
+    learning_path,
+    gamification,
 )
 
 api_router = APIRouter(prefix="/api")
@@ -34,3 +39,8 @@ api_router.include_router(professor.router)
 api_router.include_router(adaptive_quiz.router)
 api_router.include_router(analytics.router)
 api_router.include_router(admin.router)
+api_router.include_router(podcasts.router)
+api_router.include_router(placement.router)
+api_router.include_router(lecture.router)
+api_router.include_router(learning_path.router)
+api_router.include_router(gamification.router)
