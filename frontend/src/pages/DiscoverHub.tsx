@@ -14,6 +14,7 @@ import { SearchHero } from '../features/discover/components/SearchHero';
 import { Card } from '../shared/ui/Card';
 import { Badge } from '../shared/ui/Badge';
 import { Button } from '../shared/ui/Button';
+import { useAuth } from '../hooks/useAuth';
 
 interface DiscoverHubProps {
   onOpenSearch?: () => void;
@@ -22,7 +23,9 @@ interface DiscoverHubProps {
 export const DiscoverHub: React.FC<DiscoverHubProps> = ({ onOpenSearch }) => {
   const navigate = useNavigate();
   const [topicQuery, setTopicQuery] = useState('');
-  const userName = localStorage.getItem('user_name') || 'Manikanth';
+  const { user } = useAuth();
+  
+  const userName = user?.full_name?.split(' ')[0] || user?.username || 'Scholar';
 
   const startLearningCards = [
     {
