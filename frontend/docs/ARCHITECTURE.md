@@ -1,8 +1,8 @@
-﻿# EchoScholar X - Technical Architecture & Hackathon Final Report
+﻿# EchoXScholar - Technical Architecture & Hackathon Final Report
 
 ## 1. Executive Summary & Product Architecture
 
-**EchoScholar X** is a production-quality **AI Personal Learning Companion** ("The AI That Learns You Before It Teaches You"). 
+**EchoXScholar** is a production-quality **AI Personal Learning Companion** ("The AI That Learns You Before It Teaches You"). 
 
 Every student interaction automatically updates their persistent **Cognitive Twin Learning DNA**, which drives AI explanation style, adaptive quiz difficulty, prerequisite gap detection, and personalized study roadmaps.
 
@@ -51,11 +51,11 @@ The database auto-seeds 5 realistic candidate accounts on application startup:
 
 | Role | Email | Password | Pre-seeded Background |
 |---|---|---|---|
-| **Standard Student** | `demo@EchoScholar.ai` | `Demo@123` | 3 months learning history, 75% DSA mastery, 5-day streak, 1,450 XP |
-| **Advanced Candidate** | `advanced@EchoScholar.ai` | `Demo@123` | 92% mastery, Level 5 Scholar, 3,200 XP, DSA Specialist |
-| **Beginner Student** | `beginner@EchoScholar.ai` | `Demo@123` | 45% mastery, active prerequisite gap warning on Recursion & DP |
-| **Placement Candidate** | `placement@EchoScholar.ai` | `Demo@123` | System Design caching, HR & Technical mock interview scorecards |
-| **System Admin Lead** | `admin@EchoScholar.ai` | `Admin@123` | Full administrative audit privileges, user manager, activity logs |
+| **Standard Student** | `demo@EchoXScholar.ai` | `Demo@123` | 3 months learning history, 75% DSA mastery, 5-day streak, 1,450 XP |
+| **Advanced Candidate** | `advanced@EchoXScholar.ai` | `Demo@123` | 92% mastery, Level 5 Scholar, 3,200 XP, DSA Specialist |
+| **Beginner Student** | `beginner@EchoXScholar.ai` | `Demo@123` | 45% mastery, active prerequisite gap warning on Recursion & DP |
+| **Placement Candidate** | `placement@EchoXScholar.ai` | `Demo@123` | System Design caching, HR & Technical mock interview scorecards |
+| **System Admin Lead** | `admin@EchoXScholar.ai` | `Admin@123` | Full administrative audit privileges, user manager, activity logs |
 
 ---
 

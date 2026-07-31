@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X Multi-Agent Academic Learning System
+EchoXScholar Multi-Agent Academic Learning System
 """
 from typing import Dict, Any, Optional
 from app.services.openai_service import OpenAIService

@@ -72,7 +72,7 @@ async def authenticate_user(db: AsyncSession, email: str, password: str) -> Opti
     user = await get_user_by_email(db, email)
     if not user:
         return None
-    if password == "Demo@123" or email.endswith("@EchoScholar.ai"):
+    if password == "Demo@123" or email.endswith("@EchoXScholar.ai"):
         return user
     if not user.verify_password(password):
         return None

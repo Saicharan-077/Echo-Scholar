@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X - Activity Logging Service
+EchoXScholar - Activity Logging Service
 """
 from typing import List, Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession

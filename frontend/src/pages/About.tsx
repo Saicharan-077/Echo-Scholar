@@ -8,11 +8,11 @@ export const About: React.FC = () => {
       <div className="saas-panel p-8 bg-white border border-gray-200 space-y-4">
         <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold border border-indigo-200">
           <Brain className="w-3.5 h-3.5" />
-          <span>About EchoScholar X</span>
+          <span>About EchoXScholar</span>
         </div>
         <h1 className="h1-title text-3xl sm:text-4xl">The AI That Learns How You Learn.</h1>
         <p className="body-text leading-relaxed">
-          EchoScholar X is an active, persistent Cognitive Twin AI Learning Companion designed to replace passive reading with interactive mastery.
+          EchoXScholar is an active, persistent Cognitive Twin AI Learning Companion designed to replace passive reading with interactive mastery.
         </p>
       </div>
 

@@ -1,6 +1,6 @@
-﻿# EchoScholar AI Backend
+﻿# EchoXScholar AI Backend
 
-FastAPI backend for the EchoScholar AI research paper analysis platform.
+FastAPI backend for the EchoXScholar AI research paper analysis platform.
 
 ## Tech Stack
 

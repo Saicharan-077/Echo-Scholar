@@ -1,11 +1,11 @@
 """
-EchoScholar X - Unified AI Model Router
+EchoXScholar - Unified AI Model Router
 Handles all AI interactions with support for:
 1. Local Ollama LLM (llama3.2 / mistral / deepseek-r1 / phi3)
 2. Google Gemini API (gemini-2.5-flash / gemini-2.0-flash / gemini-1.5-flash)
 3. OpenAI API (gpt-4o / gpt-4o-mini / gpt-3.5-turbo)
 4. Featherless.ai Llama-3.1
-5. Smart Context-Aware Offline Synthesis Generator (Ensures natural responses even offline)
+5. Smart Context-Aware Offline Synthesis Generator
 """
 import os
 import json

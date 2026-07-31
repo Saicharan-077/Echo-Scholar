@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X - Learning DNA & Cognitive Twin Database Models
+EchoXScholar - Learning DNA & Cognitive Twin Database Models
 """
 import uuid
 from datetime import datetime

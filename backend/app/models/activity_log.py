@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X - Activity Logging Database Model
+EchoXScholar - Activity Logging Database Model
 """
 import uuid
 from datetime import datetime

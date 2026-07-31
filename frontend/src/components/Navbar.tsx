@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Brain, 
@@ -6,9 +6,13 @@ import {
   UserCheck, 
   Settings, 
   Sparkles,
-  Command
+  Command,
+  Sun,
+  Moon,
+  Laptop
 } from 'lucide-react';
 import { JUDGE_PERSONAS, loginWithPersona } from '../services/api';
+import { useTheme, Theme } from '../context/ThemeContext';
 
 interface NavbarProps {
   onOpenSearch?: () => void;
@@ -16,10 +20,13 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
   const location = useLocation();
+  const { theme, setTheme, effectiveTheme } = useTheme();
   const [selectedPersona, setSelectedPersona] = useState<string>('Standard Student');
-  const [selectedModel, setSelectedModel] = useState<string>('gemini-1.5-flash');
   const [isPersonaOpen, setIsPersonaOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isThemeOpen, setIsThemeOpen] = useState(false);
+  
+  const personaRef = useRef<HTMLDivElement>(null);
+  const themeRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const savedEmail = localStorage.getItem('user_email');
@@ -28,6 +35,43 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
       if (match) setSelectedPersona(match.role);
     }
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (personaRef.current && !personaRef.current.contains(event.target as Node)) {
+        setIsPersonaOpen(false);
+      }
+    };
+    
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsPersonaOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, []);
+
+  useEffect(() => {
+    setIsPersonaOpen(false);
+  }, [location.pathname]);
+
+  const toggleDarkMode = () => {
+    if (isDarkMode) {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+      setIsDarkMode(false);
+    } else {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+      setIsDarkMode(true);
+    }
+  };
 
   const handleSwitchPersona = async (persona: typeof JUDGE_PERSONAS[0]) => {
     try {
@@ -41,16 +85,16 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200/80">
+    <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-md border-b border-gray-200/80 dark:border-gray-800">
       <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
         
-        {/* Logo (Minimal Symbol + EchoScholar X) */}
+        {/* Logo (Minimal Symbol + EchoXScholar) */}
         <Link to="/" className="flex items-center gap-3 shrink-0 group">
           <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-sm group-hover:bg-indigo-700 transition-all duration-150 group-hover:scale-105">
             <Command className="w-5 h-5" />
           </div>
-          <span className="font-bold text-gray-900 text-xl tracking-tight">
-            EchoScholar <span className="text-indigo-600 font-extrabold">X</span>
+          <span className="font-bold text-gray-900 dark:text-white text-xl tracking-tight">
+            EchoXScholar <span className="text-indigo-600 dark:text-indigo-400 font-extrabold">X</span>
           </span>
         </Link>
 
@@ -64,6 +108,15 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
             }`}
           >
             Discover
+          </Link>
+
+          <Link
+            to="/dashboard"
+            className={`text-[15px] font-medium tracking-wide transition-colors ${
+              location.pathname === '/dashboard' ? 'text-indigo-600 font-semibold' : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+            }`}
+          >
+            Dashboard
           </Link>
 
           <Link
@@ -109,41 +162,54 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
         {/* Right Section: Profile & Settings */}
         <div className="flex items-center gap-4 shrink-0">
           
-          {/* Settings Modal Toggle */}
-          <button
-            onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-            className="p-2 text-gray-400 hover:text-gray-800 hover:bg-gray-100/80 rounded-lg transition-colors"
-            title="AI Model & Platform Settings"
-          >
-            <Settings className="w-4 h-4" />
-          </button>
+          {/* Theme Selector Dropdown */}
+          <div className="relative" ref={themeRef}>
+            <button
+              onClick={() => setIsThemeOpen(!isThemeOpen)}
+              className="p-2 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors flex items-center gap-1.5"
+              title={`Current Theme: ${theme}`}
+            >
+              {effectiveTheme === 'dark' ? <Moon className="w-4 h-4 text-indigo-400" /> : <Sun className="w-4 h-4 text-amber-500" />}
+              <span className="text-xs font-medium capitalize hidden md:inline text-gray-700 dark:text-gray-300">
+                {theme}
+              </span>
+            </button>
 
-          {/* AI Settings Modal */}
-          {isSettingsOpen && (
-            <div className="absolute right-12 top-16 w-80 bg-white border border-gray-200 rounded-xl shadow-xl p-4 z-50 space-y-3">
-              <div className="flex items-center justify-between border-b border-gray-100 pb-2.5">
-                <span className="text-sm font-semibold text-gray-900">AI Model Settings</span>
-                <button onClick={() => setIsSettingsOpen(false)} className="text-xs text-gray-400 hover:text-gray-600">✕</button>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-medium text-gray-600">Active LLM Engine:</label>
-                <select
-                  value={selectedModel}
-                  onChange={(e) => setSelectedModel(e.target.value)}
-                  className="saas-input w-full text-xs"
+            {isThemeOpen && (
+              <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl p-1.5 z-50 animate-in fade-in duration-150 space-y-1">
+                <button
+                  onClick={() => { setTheme('light'); setIsThemeOpen(false); }}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs rounded-lg transition-colors ${
+                    theme === 'light' ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
                 >
-                  <option value="gemini-1.5-flash">Gemini 1.5 Flash (Default)</option>
-                  <option value="meta-llama/Meta-Llama-3.1-70B-Instruct">Featherless Llama-3.1-70B</option>
-                  <option value="llama-3.3-70b-versatile">Groq Llama 3.3 (Fast)</option>
-                  <option value="deepseek-r1">DeepSeek R1 (Ollama)</option>
-                </select>
+                  <Sun className="w-4 h-4 text-amber-500" />
+                  <span>Light</span>
+                </button>
+                <button
+                  onClick={() => { setTheme('dark'); setIsThemeOpen(false); }}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs rounded-lg transition-colors ${
+                    theme === 'dark' ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <Moon className="w-4 h-4 text-indigo-400" />
+                  <span>Dark</span>
+                </button>
+                <button
+                  onClick={() => { setTheme('system'); setIsThemeOpen(false); }}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs rounded-lg transition-colors ${
+                    theme === 'system' ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 font-semibold' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  <Laptop className="w-4 h-4 text-gray-400" />
+                  <span>System</span>
+                </button>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* De-emphasized Persona Switcher (Secondary Subtle Outline) */}
-          <div className="relative">
+          <div className="relative" ref={personaRef}>
             <button
               onClick={() => setIsPersonaOpen(!isPersonaOpen)}
               className="px-3 py-1.5 text-xs text-gray-600 hover:text-gray-900 border border-gray-200 rounded-lg bg-gray-50/60 hover:bg-gray-100/80 transition-all flex items-center gap-1.5"

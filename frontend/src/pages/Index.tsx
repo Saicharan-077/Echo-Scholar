@@ -36,7 +36,7 @@ export const Index: React.FC = () => {
           
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-sm font-semibold shadow-xs">
             <Sparkles className="w-4 h-4" />
-            <span>EchoScholar X — Cognitive Twin AI Learning Companion</span>
+            <span>EchoXScholar — Cognitive Twin AI Learning Companion</span>
           </div>
 
           {/* Scannable, High-Impact Headline (72–80px, Weight 800, Line Height 1.05, Max-Width 900px) */}
@@ -86,7 +86,7 @@ export const Index: React.FC = () => {
         </div>
       </section>
 
-      {/* 2. KEY VALUE PROPOSITIONS (3 Columns with 32px Internal Card Padding) */}
+      {/* 2. AI LEARNING TOOLS (Comprehensive Suite) */}
       <section className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 space-y-12">
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <span className="badge-accent text-sm px-4 py-1.5">Workflow-Driven Platform</span>
@@ -94,11 +94,11 @@ export const Index: React.FC = () => {
             Built for Active Learning & Technical Mastery
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-[1.7]">
-            Designed to minimize cognitive load while maximizing long-term retention.
+            Designed to minimize cognitive load while maximizing long-term retention using advanced AI generation.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           
           <div className="saas-card p-8 space-y-5 rounded-2xl">
             <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-200/80 flex items-center justify-center text-indigo-600">
@@ -106,7 +106,7 @@ export const Index: React.FC = () => {
             </div>
             <h3 className="text-2xl font-semibold text-gray-900">Cognitive Twin DNA</h3>
             <p className="text-base text-gray-600 leading-[1.7]">
-              Tracks memory decay rates ($\lambda$), vernacular preferences (*Teluglish/Hinglish*), and active misconception points in real-time.
+              Tracks memory decay rates, vernacular preferences, and active misconception points in real-time.
             </p>
           </div>
 
@@ -116,7 +116,7 @@ export const Index: React.FC = () => {
             </div>
             <h3 className="text-2xl font-semibold text-gray-900">Interruptible AI Podcasts</h3>
             <p className="text-base text-gray-600 leading-[1.7]">
-              Dual AI co-hosts (*Prabhat & Neerja*) with mid-audio interruption portal and active recall pop quizzes.
+              Dual AI co-hosts with mid-audio interruption portal and active recall pop quizzes.
             </p>
           </div>
 
@@ -124,9 +124,39 @@ export const Index: React.FC = () => {
             <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-200/80 flex items-center justify-center text-indigo-600">
               <Network className="w-6 h-6" />
             </div>
-            <h3 className="text-2xl font-semibold text-gray-900">Knowledge Map DAG</h3>
+            <h3 className="text-2xl font-semibold text-gray-900">Interactive Mind Maps</h3>
             <p className="text-base text-gray-600 leading-[1.7]">
-              Parses research documents into directed prerequisite graphs, highlighting knowledge gaps in red before exams.
+              Automatically generates explorable node-based mind maps and flowcharts from uploaded PDFs.
+            </p>
+          </div>
+
+          <div className="saas-card p-8 space-y-5 rounded-2xl">
+            <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-200/80 flex items-center justify-center text-indigo-600">
+              <Check className="w-6 h-6" />
+            </div>
+            <h3 className="text-2xl font-semibold text-gray-900">Smart Flashcards & Quizzes</h3>
+            <p className="text-base text-gray-600 leading-[1.7]">
+              Spaced-repetition flashcards and dynamic pop-quizzes adapted to your current mastery level.
+            </p>
+          </div>
+
+          <div className="saas-card p-8 space-y-5 rounded-2xl">
+            <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-200/80 flex items-center justify-center text-indigo-600">
+              <Globe className="w-6 h-6" />
+            </div>
+            <h3 className="text-2xl font-semibold text-gray-900">Community Study Groups</h3>
+            <p className="text-base text-gray-600 leading-[1.7]">
+              Join specialized study pods based on algorithmic recommendations of your current focus topics.
+            </p>
+          </div>
+
+          <div className="saas-card p-8 space-y-5 rounded-2xl">
+            <div className="w-12 h-12 rounded-xl bg-indigo-50 border border-indigo-200/80 flex items-center justify-center text-indigo-600">
+              <Zap className="w-6 h-6" />
+            </div>
+            <h3 className="text-2xl font-semibold text-gray-900">Proactive Copilot</h3>
+            <p className="text-base text-gray-600 leading-[1.7]">
+              A persistent AI companion that nudges you to review weak topics before you forget them.
             </p>
           </div>
 

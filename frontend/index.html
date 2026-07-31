@@ -1,19 +1,33 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EchoScholar AI</title>
+    <title>EchoXScholar AI</title>
     <meta name="description" content="AI Research Assistant & Podcast Generator" />
-    <meta name="author" content="EchoScholar" />
+    <meta name="author" content="EchoXScholar" />
 
-    <meta property="og:title" content="EchoScholar AI" />
+    <meta property="og:title" content="EchoXScholar AI" />
     <meta property="og:description" content="Turn research papers into engaging AI podcasts and insightful study resources instantly." />
     <meta property="og:type" content="website" />
 
     <meta name="twitter:card" content="summary_large_image" />
 
-  <body>
+    <!-- Anti-flicker Theme Initialization -->
+    <script>
+      (function() {
+        try {
+          var saved = localStorage.getItem('theme');
+          var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (saved === 'dark' || (!saved && systemDark) || (saved === 'system' && systemDark)) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
+  </head>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

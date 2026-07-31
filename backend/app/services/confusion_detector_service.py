@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X - AI Confusion Detector Service
+EchoXScholar - AI Confusion Detector Service
 """
 from typing import List, Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession

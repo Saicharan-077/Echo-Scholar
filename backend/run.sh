@@ -1,6 +1,6 @@
 ﻿#!/bin/bash
 
-# EchoScholar AI Backend Startup Script
+# EchoXScholar AI Backend Startup Script
 
 # Navigate to backend directory
 cd "$(dirname "$0")"
@@ -29,6 +29,6 @@ fi
 # alembic upgrade head
 
 # Start the server
-echo "Starting EchoScholar AI Backend..."
+echo "Starting EchoXScholar AI Backend..."
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 

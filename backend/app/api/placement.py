@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X - Placement Preparation Mode API Routes
+EchoXScholar - Placement Preparation Mode API Routes
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession

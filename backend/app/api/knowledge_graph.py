@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X - Concept Dependency Knowledge Graph API Routes
+EchoXScholar - Concept Dependency Knowledge Graph API Routes
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession

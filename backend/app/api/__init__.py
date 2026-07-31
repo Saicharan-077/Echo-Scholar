@@ -33,7 +33,7 @@ api_router.include_router(chat.router)
 api_router.include_router(test.router)
 api_router.include_router(services.router)
 
-# EchoScholar X feature routes
+# EchoXScholar feature routes
 api_router.include_router(learning_dna.router)
 api_router.include_router(knowledge_graph.router)
 api_router.include_router(professor.router)

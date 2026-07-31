@@ -1,5 +1,5 @@
 """
-EchoScholar X - AI Professor Chat Endpoint
+EchoXScholar - AI Professor Chat Endpoint
 Document-grounded Q&A using RAG pipeline + Gemini.
 Every answer is based ONLY on retrieved document chunks.
 """

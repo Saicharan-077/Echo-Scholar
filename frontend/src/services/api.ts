@@ -22,35 +22,35 @@ api.interceptors.request.use((config) => {
 export const JUDGE_PERSONAS = [
   {
     role: 'Standard Student',
-    email: 'demo@EchoScholar.ai',
+    email: 'demo@EchoXScholar.ai',
     password: 'Demo@123',
     badge: '5-Day Streak • 1,450 XP',
     desc: '3 months learning history, 75% DSA mastery'
   },
   {
     role: 'Beginner Student',
-    email: 'beginner@EchoScholar.ai',
+    email: 'beginner@EchoXScholar.ai',
     password: 'Demo@123',
     badge: '⚠️ Active Prerequisite Gap',
     desc: '45% mastery, confusion warning on Recursion & DP'
   },
   {
     role: 'Placement Candidate',
-    email: 'placement@EchoScholar.ai',
+    email: 'placement@EchoXScholar.ai',
     password: 'Demo@123',
     badge: 'Mock Interview Scorecards',
     desc: 'System Design Caching & HR Interview feedback'
   },
   {
     role: 'Advanced Scholar',
-    email: 'advanced@EchoScholar.ai',
+    email: 'advanced@EchoXScholar.ai',
     password: 'Demo@123',
     badge: '92% Mastery • Level 5',
     desc: '3,200 XP, System Design Specialist'
   },
   {
     role: 'System Admin Lead',
-    email: 'admin@EchoScholar.ai',
+    email: 'admin@EchoXScholar.ai',
     password: 'Admin@123',
     badge: 'Admin Privileges',
     desc: 'System audit logs & user database manager'

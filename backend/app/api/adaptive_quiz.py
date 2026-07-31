@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X - Document-Grounded Adaptive Quiz Engine
+EchoXScholar - Document-Grounded Adaptive Quiz Engine
 Generates quiz questions ONLY from the uploaded document using RAG pipeline.
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
