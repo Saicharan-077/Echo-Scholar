@@ -56,56 +56,7 @@ export const Upload: React.FC = () => {
     if (saved) {
       try { return JSON.parse(saved); } catch (e) {}
     }
-    return [
-      {
-        id: 'transformer-1',
-        title: 'Attention Is All You Need — Transformer Architecture',
-        filename: 'transformer_attention.pdf',
-        category: 'Artificial Intelligence',
-        status: 'LEARNING_GENERATED',
-        chunks: 48,
-        size: '2.4 MB',
-        indexedAt: '2026-07-30',
-        summary: 'Introduces the Transformer model based entirely on self-attention mechanisms without recurrent layers.',
-        sessionsCount: 2
-      },
-      {
-        id: 'resnet-2',
-        title: 'Deep Residual Learning for Image Recognition (ResNet)',
-        filename: 'resnet_paper.pdf',
-        category: 'Computer Vision',
-        status: 'LEARNING_GENERATED',
-        chunks: 36,
-        size: '1.8 MB',
-        indexedAt: '2026-07-28',
-        summary: 'Presents residual learning frameworks to solve vanishing gradients in extremely deep neural networks.',
-        sessionsCount: 1
-      },
-      {
-        id: 'raft-3',
-        title: 'Distributed Consensus & Raft Algorithm Breakdown',
-        filename: 'raft_consensus.pdf',
-        category: 'Distributed Systems',
-        status: 'READY_TO_LEARN',
-        chunks: 52,
-        size: '3.1 MB',
-        indexedAt: '2026-07-25',
-        summary: 'Deconstructs the Raft consensus algorithm for fault-tolerant state machine replication.',
-        sessionsCount: 0
-      },
-      {
-        id: 'caching-4',
-        title: 'System Design Patterns: Distributed Caching & Sharding',
-        filename: 'caching_patterns.pdf',
-        category: 'System Architecture',
-        status: 'READY_TO_LEARN',
-        chunks: 29,
-        size: '1.5 MB',
-        indexedAt: '2026-07-22',
-        summary: 'Covers consistent hashing, LRU eviction, and write-through vs write-back caching strategies.',
-        sessionsCount: 0
-      }
-    ];
+    return [];
   });
 
   // 2. Decoupled Learning Sessions State with localStorage persistence
@@ -114,48 +65,7 @@ export const Upload: React.FC = () => {
     if (saved) {
       try { return JSON.parse(saved); } catch (e) {}
     }
-    return [
-      {
-        id: 'session-101',
-        documentId: 'transformer-1',
-        paperTitle: 'Attention Is All You Need — Transformer Architecture',
-        mode: 'story_mode',
-        modeTitle: 'Story Mode',
-        emoji: '📖',
-        language: 'English',
-        difficulty: 'Practitioner / Engineer',
-        progress: 85,
-        status: 'In Progress',
-        createdAt: '10 mins ago',
-        lastStudiedSection: 'Section 3: Multi-Head Attention'
-      },
-      {
-        id: 'session-102',
-        documentId: 'transformer-1',
-        paperTitle: 'Attention Is All You Need — Transformer Architecture',
-        mode: 'debate_mode',
-        modeTitle: 'Debate Mode',
-        emoji: '🗣️',
-        language: 'English',
-        difficulty: 'Researcher / PhD',
-        progress: 40,
-        status: 'In Progress',
-        createdAt: 'Yesterday'
-      },
-      {
-        id: 'session-103',
-        documentId: 'resnet-2',
-        paperTitle: 'Deep Residual Learning for Image Recognition (ResNet)',
-        mode: 'literature_review',
-        modeTitle: 'Literature Review',
-        emoji: '📚',
-        language: 'English',
-        difficulty: 'Practitioner / Engineer',
-        progress: 100,
-        status: 'Completed',
-        createdAt: '3 days ago'
-      }
-    ];
+    return [];
   });
 
   useEffect(() => {

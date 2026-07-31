@@ -22,44 +22,7 @@ import { Button } from '../shared/ui/Button';
 export const Learning: React.FC = () => {
   const navigate = useNavigate();
 
-  const activeSessions = [
-    {
-      id: 'transformer-1',
-      title: 'Attention Is All You Need — Transformer Architecture',
-      category: 'Artificial Intelligence & Deep Learning',
-      progress: 72,
-      lastStudied: '10 mins ago',
-      currentSection: 'Section 2: Key Vector Chunks & Scaled Dot-Product Attention',
-      totalChunks: 38,
-      readChunks: 27,
-      route: '/workspace/transformer-1',
-      badge: 'Active Workstation'
-    },
-    {
-      id: 'resnet-2',
-      title: 'Deep Residual Learning for Image Recognition (ResNet)',
-      category: 'Computer Vision & Convolutional Nets',
-      progress: 45,
-      lastStudied: '2 hours ago',
-      currentSection: 'Section 1: Residual Mapping & Degenerate Identity Functions',
-      totalChunks: 42,
-      readChunks: 19,
-      route: '/workspace/resnet-2',
-      badge: 'In Progress'
-    },
-    {
-      id: 'raft-3',
-      title: 'Raft Consensus Algorithm for Fault-Tolerant Systems',
-      category: 'Distributed Systems & Databases',
-      progress: 90,
-      lastStudied: 'Yesterday',
-      currentSection: 'Section 4: Log Compaction & Snapshotting',
-      totalChunks: 30,
-      readChunks: 27,
-      route: '/workspace/raft-3',
-      badge: 'Near Mastery'
-    }
-  ];
+  const activeSessions: any[] = [];
 
   const timelineSteps = [
     {
@@ -114,68 +77,77 @@ export const Learning: React.FC = () => {
       </section>
 
       {/* 2. HERO PRIORITY ACTIVE WORKSPACE CARD */}
-      <section className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-        <div className="bg-white border border-gray-200/80 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-50/50 rounded-full blur-3xl -z-10 pointer-events-none"></div>
+      {activeSessions.length > 0 ? (
+        <section className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="bg-white border border-gray-200/80 rounded-2xl p-6 sm:p-8 shadow-xs space-y-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-50/50 rounded-full blur-3xl -z-10 pointer-events-none"></div>
 
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="badge-accent text-xs px-3 py-1 font-semibold">
-              🔥 Active Workstation
-            </span>
-            <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
-              <Clock className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Last active 10 minutes ago</span>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <span className="badge-accent text-xs px-3 py-1 font-semibold">
+                🔥 Active Workstation
+              </span>
+              <div className="flex items-center gap-2 text-xs font-semibold text-gray-500">
+                <Clock className="w-3.5 h-3.5 text-indigo-600" />
+                <span>Last active 10 minutes ago</span>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider">
+                {activeSessions[0].category}
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">
+                {activeSessions[0].title}
+              </h2>
+              <p className="text-sm text-gray-600 flex items-center gap-2 font-medium">
+                <Target className="w-4 h-4 text-indigo-600 shrink-0" />
+                <span>Current Focus: {activeSessions[0].currentSection}</span>
+              </p>
+            </div>
+
+            {/* Progress Bar */}
+            <div className="space-y-2 pt-2">
+              <div className="flex items-center justify-between text-xs font-semibold">
+                <span className="text-gray-700">Overall Mastery Progress</span>
+                <span className="text-indigo-600 font-extrabold">{activeSessions[0].progress}% Complete</span>
+              </div>
+              <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden p-0.5 border border-gray-200/60">
+                <div 
+                  className="bg-gradient-to-r from-indigo-600 to-blue-600 h-full rounded-full transition-all duration-500" 
+                  style={{ width: `${activeSessions[0].progress}%` }}
+                ></div>
+              </div>
+              <div className="flex items-center justify-between text-[11px] text-gray-500 pt-0.5">
+                <span>{activeSessions[0].readChunks} of {activeSessions[0].totalChunks} Vector Chunks Processed</span>
+                <span>Target Score: 90%+</span>
+              </div>
+            </div>
+
+            {/* Quick Action Buttons */}
+            <div className="pt-4 border-t border-gray-100 flex flex-wrap items-center gap-3">
+              <Link to={activeSessions[0].route} className="btn-primary px-6 py-2.5 text-xs font-bold flex items-center gap-2 shadow-xs">
+                <Play className="w-4 h-4 fill-white" /> Resume Workspace Reader
+              </Link>
+              <Link to="/quiz" className="btn-secondary px-5 py-2.5 text-xs font-semibold flex items-center gap-2">
+                <HelpCircle className="w-4 h-4 text-indigo-600" /> Take Concept Quiz
+              </Link>
+              <Link to="/podcasts" className="btn-secondary px-5 py-2.5 text-xs font-semibold flex items-center gap-2">
+                <Headphones className="w-4 h-4 text-indigo-600" /> Audio Overview
+              </Link>
+              <Link to="/graph" className="btn-secondary px-5 py-2.5 text-xs font-semibold flex items-center gap-2">
+                <Layers className="w-4 h-4 text-indigo-600" /> Mind Map
+              </Link>
             </div>
           </div>
-
-          <div className="space-y-3">
-            <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider">
-              {activeSessions[0].category}
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-gray-900 leading-tight">
-              {activeSessions[0].title}
-            </h2>
-            <p className="text-sm text-gray-600 flex items-center gap-2 font-medium">
-              <Target className="w-4 h-4 text-indigo-600 shrink-0" />
-              <span>Current Focus: {activeSessions[0].currentSection}</span>
-            </p>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="space-y-2 pt-2">
-            <div className="flex items-center justify-between text-xs font-semibold">
-              <span className="text-gray-700">Overall Mastery Progress</span>
-              <span className="text-indigo-600 font-extrabold">{activeSessions[0].progress}% Complete</span>
-            </div>
-            <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden p-0.5 border border-gray-200/60">
-              <div 
-                className="bg-gradient-to-r from-indigo-600 to-blue-600 h-full rounded-full transition-all duration-500" 
-                style={{ width: `${activeSessions[0].progress}%` }}
-              ></div>
-            </div>
-            <div className="flex items-center justify-between text-[11px] text-gray-500 pt-0.5">
-              <span>{activeSessions[0].readChunks} of {activeSessions[0].totalChunks} Vector Chunks Processed</span>
-              <span>Target Score: 90%+</span>
-            </div>
-          </div>
-
-          {/* Quick Action Buttons */}
-          <div className="pt-4 border-t border-gray-100 flex flex-wrap items-center gap-3">
-            <Link to={activeSessions[0].route} className="btn-primary px-6 py-2.5 text-xs font-bold flex items-center gap-2 shadow-xs">
-              <Play className="w-4 h-4 fill-white" /> Resume Workspace Reader
-            </Link>
-            <Link to="/quiz" className="btn-secondary px-5 py-2.5 text-xs font-semibold flex items-center gap-2">
-              <HelpCircle className="w-4 h-4 text-indigo-600" /> Take Concept Quiz
-            </Link>
-            <Link to="/podcasts" className="btn-secondary px-5 py-2.5 text-xs font-semibold flex items-center gap-2">
-              <Headphones className="w-4 h-4 text-indigo-600" /> Audio Overview
-            </Link>
-            <Link to="/graph" className="btn-secondary px-5 py-2.5 text-xs font-semibold flex items-center gap-2">
-              <Layers className="w-4 h-4 text-indigo-600" /> Mind Map
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
+      ) : (
+        <section className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 text-center py-16 bg-white rounded-2xl border border-gray-200 shadow-sm">
+          <BookOpen className="w-12 h-12 text-indigo-300 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-gray-900 mb-2">No Active Workspaces</h2>
+          <p className="text-gray-500 mb-6 max-w-sm mx-auto">You don't have any active learning sessions yet. Upload a document to get started.</p>
+          <Button variant="primary" onClick={() => navigate('/upload')}>Start Learning</Button>
+        </section>
+      )}
 
       {/* 3. TIMELINE & RECENT WORKSPACES GRID */}
       <section className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12 grid grid-cols-1 lg:grid-cols-3 gap-8">

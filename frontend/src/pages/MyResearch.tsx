@@ -24,77 +24,9 @@ export const MyResearch: React.FC = () => {
   const navigate = useNavigate();
   const activeTab = searchParams.get('tab') || 'projects';
 
-  const projects = [
-    {
-      id: 'proj-1',
-      title: 'Large Language Models Architecture Study',
-      category: 'Artificial Intelligence',
-      currentWorkspace: 'Transformer Architecture Literature Review',
-      currentPaper: 'Attention Is All You Need',
-      todaysGoal: 'Section 3.2 Multi-Head Attention & Scaled Dot-Product',
-      lastActivity: 'Yesterday • Section 3.1 Completed',
-      progress: 68,
-      readTime: '18 min',
-      workspaceId: 'transformer-1'
-    },
-    {
-      id: 'proj-2',
-      title: 'Distributed Consensus & Fault Tolerant Storage',
-      category: 'Distributed Systems',
-      currentWorkspace: 'Raft Consensus Algorithm Implementation Study',
-      currentPaper: 'In Search of an Understandable Consensus Algorithm (Raft)',
-      todaysGoal: 'Leader Election & Heartbeat Timers',
-      lastActivity: '3 days ago • Section 2 Completed',
-      progress: 82,
-      readTime: '12 min',
-      workspaceId: 'raft-3'
-    },
-    {
-      id: 'proj-3',
-      title: 'Computer Vision & Deep Residual Networks',
-      category: 'Computer Vision',
-      currentWorkspace: 'ResNet Whiteboard & Interview Preparation',
-      currentPaper: 'Deep Residual Learning for Image Recognition',
-      todaysGoal: 'Residual Skip Connections & Gradient Vanishing',
-      lastActivity: '4 days ago • Section 1 Completed',
-      progress: 45,
-      readTime: '25 min',
-      workspaceId: 'resnet-2'
-    }
-  ];
+  const projects: any[] = [];
 
-  const workspaces = [
-    {
-      id: 'transformer-1',
-      title: 'Transformer Architecture Literature Review',
-      template: 'Literature Review',
-      currentPaper: 'Attention Is All You Need',
-      todaysGoal: 'Section 3.2 Multi-Head Attention',
-      progress: 68,
-      readTime: '18 min',
-      lastActivity: 'Yesterday'
-    },
-    {
-      id: 'resnet-2',
-      title: 'ResNet Interview Preparation & Whiteboard Scenarios',
-      template: 'Interview Prep',
-      currentPaper: 'Deep Residual Learning for Image Recognition',
-      todaysGoal: 'Residual Skip Connections',
-      progress: 90,
-      readTime: '12 min',
-      lastActivity: '2 days ago'
-    },
-    {
-      id: 'raft-3',
-      title: 'Raft Consensus Algorithm Implementation Study',
-      template: 'Implementation Study',
-      currentPaper: 'Raft Consensus Breakdown',
-      todaysGoal: 'Leader Election Timers',
-      progress: 55,
-      readTime: '25 min',
-      lastActivity: '4 days ago'
-    }
-  ];
+  const workspaces: any[] = [];
 
   return (
     <div className="min-h-screen bg-gray-50/60 text-gray-900 p-6 sm:p-8 lg:p-12 space-y-10 max-w-7xl mx-auto">
@@ -138,7 +70,8 @@ export const MyResearch: React.FC = () => {
         </div>
 
         {/* Professor Vox Continuity Card */}
-        <div className="p-6 bg-indigo-900 text-white rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-md border border-indigo-800">
+        {projects.length > 0 && (
+          <div className="p-6 bg-indigo-900 text-white rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-md border border-indigo-800">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 rounded-xl bg-indigo-800 border border-indigo-700 flex items-center justify-center shrink-0">
               <Brain className="w-6 h-6 text-white" />
@@ -161,6 +94,7 @@ export const MyResearch: React.FC = () => {
             Continue Learning →
           </button>
         </div>
+        )}
       </div>
 
       {/* 2. TAB 1: PROJECTS HUB (WORKSPACE PREVIEWS) */}
