@@ -67,9 +67,18 @@ export const Navbar: React.FC<NavbarProps> = ({ onOpenSearch }) => {
           </Link>
 
           <Link
+            to="/upload"
+            className={`text-[15px] font-medium tracking-wide transition-colors ${
+              location.pathname.startsWith('/upload') ? 'text-indigo-600 font-semibold' : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            Upload PDF
+          </Link>
+
+          <Link
             to="/research"
             className={`text-[15px] font-medium tracking-wide transition-colors ${
-              location.pathname.startsWith('/research') || location.pathname.startsWith('/upload')
+              location.pathname.startsWith('/research')
                 ? 'text-indigo-600 font-semibold'
                 : 'text-gray-600 hover:text-gray-900'
             }`}

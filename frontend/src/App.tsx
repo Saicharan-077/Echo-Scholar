@@ -18,6 +18,7 @@ import { KnowledgeGraph } from './pages/KnowledgeGraph';
 import { PlacementMode } from './pages/PlacementMode';
 import { Analytics } from './pages/Analytics';
 import { About } from './pages/About';
+import { Upload } from './pages/Upload';
 
 export const App: React.FC = () => {
   const location = useLocation();
@@ -50,6 +51,7 @@ export const App: React.FC = () => {
             <Route path="/" element={<PageTransition><DiscoverHub onOpenSearch={() => setIsSearchOpen(true)} /></PageTransition>} />
             <Route path="/discover" element={<PageTransition><DiscoverHub onOpenSearch={() => setIsSearchOpen(true)} /></PageTransition>} />
             <Route path="/research" element={<PageTransition><MyResearch /></PageTransition>} />
+            <Route path="/upload" element={<PageTransition><Upload /></PageTransition>} />
             <Route path="/workspace" element={<PageTransition><ResearchWorkspace onOpenSearch={() => setIsSearchOpen(true)} /></PageTransition>} />
             <Route path="/workspace/:id" element={<PageTransition><ResearchWorkspace onOpenSearch={() => setIsSearchOpen(true)} /></PageTransition>} />
             <Route path="/community" element={<PageTransition><CommunityHub /></PageTransition>} />

@@ -45,7 +45,7 @@ export const DiscoverHub: React.FC<DiscoverHubProps> = ({ onOpenSearch }) => {
       title: 'Upload Your Own Paper',
       desc: 'Import PDFs, DOCX, or PPTX to generate RAG vector embeddings.',
       icon: Upload,
-      action: () => navigate('/research?tab=library&sub=upload'),
+      action: () => navigate('/upload'),
       badge: 'PDF Vector Store'
     },
     {

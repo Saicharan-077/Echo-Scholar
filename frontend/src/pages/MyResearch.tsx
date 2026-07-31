@@ -134,16 +134,6 @@ export const MyResearch: React.FC = () => {
               <BookOpen className="w-4 h-4" />
               <span>Workspaces ({workspaces.length})</span>
             </button>
-
-            <button
-              onClick={() => setSearchParams({ tab: 'library' })}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${
-                activeTab === 'library' ? 'bg-white text-indigo-600 shadow-xs' : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <FileText className="w-4 h-4" />
-              <span>Library</span>
-            </button>
           </div>
         </div>
 
@@ -285,11 +275,6 @@ export const MyResearch: React.FC = () => {
             ))}
           </div>
         </div>
-      )}
-
-      {/* 4. TAB 3: LIBRARY HUB */}
-      {activeTab === 'library' && (
-        <Upload />
       )}
 
     </div>
