@@ -83,23 +83,42 @@ export const DiscoverHub: React.FC<DiscoverHubProps> = ({ onOpenSearch }) => {
             How can I help you learn today?
           </h1>
 
-          {/* Universal Search Spotlight Input Bar */}
-          <div className="relative max-w-2xl mx-auto">
-            <div 
-              onClick={onOpenSearch}
-              className="w-full bg-white border-2 border-indigo-200 hover:border-indigo-500 rounded-2xl p-4 shadow-md flex items-center justify-between cursor-pointer transition-all group"
-            >
-              <div className="flex items-center gap-3 text-gray-500">
-                <Search className="w-5 h-5 text-indigo-600 group-hover:scale-110 transition-transform" />
-                <span className="text-base text-gray-500 font-normal">
-                  Search topics, research papers, or press <kbd className="font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded border border-gray-300">Cmd + K</kbd>...
-                </span>
-              </div>
-              <span className="btn-primary text-xs px-4 py-2 font-semibold rounded-xl">
+          {/* Real Interactive Search Bar Form */}
+          <form 
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (topicQuery.trim()) {
+                navigate(`/workspace/transformer-1`);
+              } else if (onOpenSearch) {
+                onOpenSearch();
+              }
+            }}
+            className="relative max-w-2xl mx-auto"
+          >
+            <div className="w-full bg-white border-2 border-indigo-200 focus-within:border-indigo-600 rounded-2xl p-2.5 sm:p-3 shadow-md flex items-center gap-3 transition-all">
+              <Search className="w-5 h-5 text-indigo-600 shrink-0 ml-2" />
+              <input
+                type="text"
+                value={topicQuery}
+                onChange={(e) => setTopicQuery(e.target.value)}
+                placeholder="Search topics, research papers (e.g. 'Transformers')..."
+                className="w-full bg-transparent text-base text-gray-900 font-medium outline-none placeholder:text-gray-400"
+              />
+              <kbd 
+                onClick={onOpenSearch}
+                className="hidden sm:inline-flex items-center gap-1 font-semibold text-xs text-gray-400 bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded border border-gray-300 cursor-pointer shrink-0 transition-colors"
+                title="Open Spotlight Search"
+              >
+                Cmd + K
+              </kbd>
+              <button 
+                type="submit" 
+                className="btn-primary text-xs px-5 py-2.5 font-semibold rounded-xl shrink-0 cursor-pointer"
+              >
                 Search →
-              </span>
+              </button>
             </div>
-          </div>
+          </form>
 
           {/* Popular Topic Pills */}
           <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
@@ -107,7 +126,10 @@ export const DiscoverHub: React.FC<DiscoverHubProps> = ({ onOpenSearch }) => {
             {popularTopics.map((topic) => (
               <button
                 key={topic}
-                onClick={() => navigate('/workspace/transformer-1')}
+                onClick={() => {
+                  setTopicQuery(topic);
+                  navigate('/workspace/transformer-1');
+                }}
                 className="px-3 py-1.5 rounded-full bg-gray-100 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 border border-transparent text-xs font-medium text-gray-600 transition-all cursor-pointer"
               >
                 {topic}

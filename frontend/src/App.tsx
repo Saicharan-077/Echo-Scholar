@@ -35,9 +35,11 @@ export const App: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
+  const isWorkspaceRoute = location.pathname.startsWith('/workspace');
+
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900 selection:bg-indigo-600 selection:text-white font-sans">
-      <Navbar onOpenSearch={() => setIsSearchOpen(true)} />
+      {!isWorkspaceRoute && <Navbar onOpenSearch={() => setIsSearchOpen(true)} />}
       
       <UniversalSearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
 

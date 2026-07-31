@@ -13,7 +13,9 @@ import {
   Headphones, 
   Layers,
   ArrowRight,
-  Sparkles
+  Sparkles,
+  Zap,
+  Check
 } from 'lucide-react';
 import { Upload } from './Upload';
 
@@ -27,124 +29,157 @@ export const MyResearch: React.FC = () => {
       id: 'proj-1',
       title: 'Large Language Models Architecture Study',
       category: 'Artificial Intelligence',
+      currentWorkspace: 'Transformer Architecture Literature Review',
+      currentPaper: 'Attention Is All You Need',
+      todaysGoal: 'Section 3.2 Multi-Head Attention & Scaled Dot-Product',
+      lastActivity: 'Yesterday • Section 3.1 Completed',
       progress: 68,
-      paperCount: 14,
-      conceptCount: 128,
-      noteCount: 52,
-      updatedAt: '2 hours ago'
+      readTime: '18 min',
+      workspaceId: 'transformer-1'
     },
     {
       id: 'proj-2',
       title: 'Distributed Consensus & Fault Tolerant Storage',
       category: 'Distributed Systems',
+      currentWorkspace: 'Raft Consensus Algorithm Implementation Study',
+      currentPaper: 'In Search of an Understandable Consensus Algorithm (Raft)',
+      todaysGoal: 'Leader Election & Heartbeat Timers',
+      lastActivity: '3 days ago • Section 2 Completed',
       progress: 82,
-      paperCount: 8,
-      conceptCount: 64,
-      noteCount: 29,
-      updatedAt: 'Yesterday'
+      readTime: '12 min',
+      workspaceId: 'raft-3'
     },
     {
       id: 'proj-3',
       title: 'Computer Vision & Deep Residual Networks',
       category: 'Computer Vision',
+      currentWorkspace: 'ResNet Whiteboard & Interview Preparation',
+      currentPaper: 'Deep Residual Learning for Image Recognition',
+      todaysGoal: 'Residual Skip Connections & Gradient Vanishing',
+      lastActivity: '4 days ago • Section 1 Completed',
       progress: 45,
-      paperCount: 6,
-      conceptCount: 42,
-      noteCount: 18,
-      updatedAt: '3 days ago'
+      readTime: '25 min',
+      workspaceId: 'resnet-2'
     }
   ];
 
   const workspaces = [
     {
       id: 'transformer-1',
-      title: 'Transformer Architecture & Self-Attention Literature Review',
+      title: 'Transformer Architecture Literature Review',
       template: 'Literature Review',
-      papers: 3,
+      currentPaper: 'Attention Is All You Need',
+      todaysGoal: 'Section 3.2 Multi-Head Attention',
       progress: 68,
-      lastSection: 'Section 3.2 Multi-Head Attention',
-      readTime: 18,
-      updatedAt: 'Active Session'
+      readTime: '18 min',
+      lastActivity: 'Yesterday'
     },
     {
       id: 'resnet-2',
       title: 'ResNet Interview Preparation & Whiteboard Scenarios',
       template: 'Interview Prep',
-      papers: 2,
+      currentPaper: 'Deep Residual Learning for Image Recognition',
+      todaysGoal: 'Residual Skip Connections',
       progress: 90,
-      lastSection: 'Residual Connections & Gradient Vanishing',
-      readTime: 12,
-      updatedAt: '2 days ago'
+      readTime: '12 min',
+      lastActivity: '2 days ago'
     },
     {
       id: 'raft-3',
       title: 'Raft Consensus Algorithm Implementation Study',
-      template: 'Implementation',
-      papers: 4,
+      template: 'Implementation Study',
+      currentPaper: 'Raft Consensus Breakdown',
+      todaysGoal: 'Leader Election Timers',
       progress: 55,
-      lastSection: 'Leader Election & Heartbeat Timers',
-      readTime: 25,
-      updatedAt: '4 days ago'
+      readTime: '25 min',
+      lastActivity: '4 days ago'
     }
   ];
 
   return (
     <div className="min-h-screen bg-gray-50/60 text-gray-900 p-6 sm:p-8 lg:p-12 space-y-10 max-w-7xl mx-auto">
       
-      {/* Header */}
-      <div className="saas-panel p-8 bg-white border border-gray-200/80 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm">
-        <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-sm font-semibold border border-indigo-200">
-            <BookOpen className="w-4 h-4" />
-            <span>Personal Knowledge Repository</span>
+      {/* 1. SYNCHRONIZED HEADER & PROFESSOR VOX CONTINUITY BANNER */}
+      <div className="space-y-6">
+        <div className="saas-panel p-8 bg-white border border-gray-200/80 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xs">
+          <div className="space-y-2">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-sm font-semibold border border-indigo-200">
+              <BookOpen className="w-4 h-4" />
+              <span>Personal Learning Workspace</span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">My Research</h1>
+            <p className="text-base text-gray-600 max-w-2xl leading-relaxed">
+              Your active research projects and workspaces. Continue learning where you left off.
+            </p>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight">My Research Workspace Hub</h1>
-          <p className="text-base text-gray-600 max-w-2xl leading-relaxed">
-            Manage your long-term research projects, active study workspaces, and indexed document library in one place.
-          </p>
+
+          {/* Navigation Tab Pills */}
+          <div className="flex items-center gap-1.5 p-1.5 bg-gray-100/80 rounded-xl border border-gray-200/60 shrink-0">
+            <button
+              onClick={() => setSearchParams({ tab: 'projects' })}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${
+                activeTab === 'projects' ? 'bg-white text-indigo-600 shadow-xs' : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <FolderKanban className="w-4 h-4" />
+              <span>Projects ({projects.length})</span>
+            </button>
+
+            <button
+              onClick={() => setSearchParams({ tab: 'workspaces' })}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${
+                activeTab === 'workspaces' ? 'bg-white text-indigo-600 shadow-xs' : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>Workspaces ({workspaces.length})</span>
+            </button>
+
+            <button
+              onClick={() => setSearchParams({ tab: 'library' })}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${
+                activeTab === 'library' ? 'bg-white text-indigo-600 shadow-xs' : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              <FileText className="w-4 h-4" />
+              <span>Library</span>
+            </button>
+          </div>
         </div>
 
-        {/* Tab Pills */}
-        <div className="flex items-center gap-1.5 p-1.5 bg-gray-100/80 rounded-xl border border-gray-200/60 shrink-0">
-          <button
-            onClick={() => setSearchParams({ tab: 'projects' })}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${
-              activeTab === 'projects' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            <FolderKanban className="w-4 h-4" />
-            <span>Projects ({projects.length})</span>
-          </button>
+        {/* Professor Vox Continuity Card */}
+        <div className="p-6 bg-indigo-900 text-white rounded-2xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6 shadow-md border border-indigo-800">
+          <div className="flex items-start gap-4">
+            <div className="w-12 h-12 rounded-xl bg-indigo-800 border border-indigo-700 flex items-center justify-center shrink-0">
+              <Brain className="w-6 h-6 text-white" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-base">Professor Vox</span>
+                <span className="badge-accent text-[10px] bg-indigo-800 text-indigo-200 border-indigo-700">Cognitive Twin</span>
+              </div>
+              <p className="text-sm text-indigo-100 leading-relaxed">
+                Welcome back, Manikanth! In your <strong>Large Language Models Architecture Study</strong>, today's goal is <strong>Section 3.2: Multi-Head Attention</strong> (18 min).
+              </p>
+            </div>
+          </div>
 
           <button
-            onClick={() => setSearchParams({ tab: 'workspaces' })}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${
-              activeTab === 'workspaces' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-            }`}
+            onClick={() => navigate('/workspace/transformer-1')}
+            className="btn-primary bg-white text-indigo-950 hover:bg-gray-100 text-sm px-6 py-3 font-extrabold rounded-xl shrink-0 w-full md:w-auto text-center"
           >
-            <BookOpen className="w-4 h-4" />
-            <span>Workspaces ({workspaces.length})</span>
-          </button>
-
-          <button
-            onClick={() => setSearchParams({ tab: 'library' })}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all flex items-center gap-2 ${
-              activeTab === 'library' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            <FileText className="w-4 h-4" />
-            <span>Library</span>
+            Continue Learning →
           </button>
         </div>
       </div>
 
-      {/* TAB 1: PROJECTS HUB */}
+      {/* 2. TAB 1: PROJECTS HUB (WORKSPACE PREVIEWS) */}
       {activeTab === 'projects' && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Research Projects</h2>
-              <p className="text-sm text-gray-600">High-level containers organizing multiple papers, notes, and workspaces.</p>
+              <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Active Research Projects</h2>
+              <p className="text-sm text-gray-600">Select a project to enter its workspace and continue your learning journey.</p>
             </div>
             <button
               onClick={() => navigate('/workspace/transformer-1')}
@@ -156,42 +191,49 @@ export const MyResearch: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {projects.map((proj) => (
-              <div key={proj.id} className="saas-card p-6 space-y-5 rounded-2xl flex flex-col justify-between hover:border-indigo-300 transition-all">
-                <div className="space-y-3">
-                  <span className="badge-accent text-xs">{proj.category}</span>
-                  <h3 className="font-bold text-gray-900 text-lg leading-snug">{proj.title}</h3>
+              <div key={proj.id} className="saas-card p-6 space-y-5 rounded-2xl flex flex-col justify-between hover:border-indigo-400 transition-all bg-white border border-gray-200/80 shadow-xs">
+                
+                {/* Project Header */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="badge-accent text-xs">{proj.category}</span>
+                    <span className="text-xs text-gray-400 font-mono">{proj.lastActivity}</span>
+                  </div>
+
+                  <h3 className="font-extrabold text-gray-900 text-xl leading-snug tracking-tight">{proj.title}</h3>
                   
-                  <div className="grid grid-cols-3 gap-2 text-center py-2 bg-gray-50 rounded-xl border border-gray-100 text-xs font-semibold text-gray-700">
+                  {/* Rich Workspace Preview Box */}
+                  <div className="p-4 rounded-xl bg-gray-50 border border-gray-100 space-y-2.5 text-xs">
                     <div>
-                      <span className="block text-gray-400 text-[10px] font-normal">Papers</span>
-                      <span>{proj.paperCount}</span>
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Active Paper</span>
+                      <span className="font-bold text-gray-900 block line-clamp-1">{proj.currentPaper}</span>
                     </div>
+
                     <div>
-                      <span className="block text-gray-400 text-[10px] font-normal">Concepts</span>
-                      <span>{proj.conceptCount}</span>
+                      <span className="text-[10px] font-bold text-indigo-600 uppercase tracking-wider block">Today's Goal</span>
+                      <span className="font-semibold text-gray-800 block line-clamp-1">{proj.todaysGoal}</span>
                     </div>
-                    <div>
-                      <span className="block text-gray-400 text-[10px] font-normal">Notes</span>
-                      <span>{proj.noteCount}</span>
+
+                    <div className="flex items-center justify-between text-gray-500 pt-1 border-t border-gray-200/60 font-mono text-[11px]">
+                      <span>Est. Read Time: {proj.readTime}</span>
+                      <span className="font-bold text-indigo-600">{proj.progress}% Complete</span>
                     </div>
                   </div>
 
-                  <div className="space-y-1 pt-1">
-                    <div className="flex justify-between text-xs font-semibold text-gray-600">
-                      <span>Overall Progress</span>
-                      <span>{proj.progress}%</span>
-                    </div>
+                  {/* Progress Bar */}
+                  <div className="space-y-1">
                     <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
                       <div className="bg-indigo-600 h-2 rounded-full" style={{ width: `${proj.progress}%` }} />
                     </div>
                   </div>
                 </div>
 
+                {/* Outcome-Based Action Button */}
                 <button
-                  onClick={() => navigate('/workspace/transformer-1')}
-                  className="btn-secondary w-full text-center py-2.5 text-xs font-bold rounded-xl mt-2"
+                  onClick={() => navigate(`/workspace/${proj.workspaceId}`)}
+                  className="btn-primary w-full text-center py-3 text-xs font-bold rounded-xl"
                 >
-                  Open Project Workspace →
+                  Resume Workspace →
                 </button>
               </div>
             ))}
@@ -199,13 +241,13 @@ export const MyResearch: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 2: WORKSPACES HUB */}
+      {/* 3. TAB 2: WORKSPACES HUB */}
       {activeTab === 'workspaces' && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">Active Workspaces</h2>
-              <p className="text-sm text-gray-600">Interactive study environments configured with specific research templates.</p>
+              <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Active Workspaces</h2>
+              <p className="text-sm text-gray-600">Dedicated interactive study environments configured for specific learning goals.</p>
             </div>
             <button
               onClick={() => navigate('/workspace/transformer-1')}
@@ -217,27 +259,27 @@ export const MyResearch: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {workspaces.map((ws) => (
-              <div key={ws.id} className="saas-card p-6 space-y-5 rounded-2xl flex flex-col justify-between hover:border-indigo-300 transition-all">
-                <div className="space-y-3">
+              <div key={ws.id} className="saas-card p-6 space-y-5 rounded-2xl flex flex-col justify-between hover:border-indigo-400 transition-all bg-white border border-gray-200/80 shadow-xs">
+                <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="badge-warning text-xs">{ws.template}</span>
-                    <span className="text-xs text-indigo-600 font-semibold">{ws.updatedAt}</span>
+                    <span className="text-xs text-indigo-600 font-semibold">{ws.lastActivity}</span>
                   </div>
 
-                  <h3 className="font-bold text-gray-900 text-base leading-snug">{ws.title}</h3>
-                  <p className="text-xs text-gray-500">Last Section: <strong className="text-gray-800">{ws.lastSection}</strong></p>
+                  <h3 className="font-extrabold text-gray-900 text-lg leading-snug tracking-tight">{ws.title}</h3>
                   
-                  <div className="flex items-center gap-4 text-xs text-gray-500 pt-1">
-                    <span>📄 {ws.papers} Papers</span>
-                    <span>⏱️ {ws.readTime} min read</span>
+                  <div className="p-3.5 rounded-xl bg-gray-50 border border-gray-100 space-y-2 text-xs">
+                    <p className="text-gray-500">Paper: <strong className="text-gray-900">{ws.currentPaper}</strong></p>
+                    <p className="text-gray-500">Goal: <strong className="text-indigo-700">{ws.todaysGoal}</strong></p>
+                    <p className="text-gray-400 text-[11px] font-mono">Read time remaining: {ws.readTime}</p>
                   </div>
                 </div>
 
                 <button
                   onClick={() => navigate(`/workspace/${ws.id}`)}
-                  className="btn-primary w-full text-center py-2.5 text-xs font-bold rounded-xl"
+                  className="btn-primary w-full text-center py-3 text-xs font-bold rounded-xl"
                 >
-                  Launch Studio →
+                  Continue Learning →
                 </button>
               </div>
             ))}
@@ -245,7 +287,7 @@ export const MyResearch: React.FC = () => {
         </div>
       )}
 
-      {/* TAB 3: LIBRARY HUB */}
+      {/* 4. TAB 3: LIBRARY HUB */}
       {activeTab === 'library' && (
         <Upload />
       )}
