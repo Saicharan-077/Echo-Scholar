@@ -271,9 +271,22 @@ async def submit_quiz(
 
     for idx, q in enumerate(payload.questions):
         user_ans = payload.user_answers.get(idx)
-        correct_ans = q.get("correct_option") or q.get("correct")
-        if user_ans == correct_ans:
-            correct += 1
+        if user_ans is None:
+            user_ans = payload.user_answers.get(str(idx)) # type: ignore
+
+        raw_correct = q.get("correct_option") if q.get("correct_option") is not None else q.get("correct")
+
+        if user_ans is not None and raw_correct is not None:
+            try:
+                if int(user_ans) == int(raw_correct):
+                    correct += 1
+                else:
+                    wrong_topics.append(q.get("question", f"Question {idx+1}")[:60])
+            except (ValueError, TypeError):
+                if str(user_ans).strip().lower() == str(raw_correct).strip().lower():
+                    correct += 1
+                else:
+                    wrong_topics.append(q.get("question", f"Question {idx+1}")[:60])
         else:
             wrong_topics.append(q.get("question", f"Question {idx+1}")[:60])
 

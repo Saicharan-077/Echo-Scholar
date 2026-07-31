@@ -288,8 +288,11 @@ export const InteractiveQuiz: React.FC<InteractiveQuizProps> = ({
 
   // Quiz Finished Results Screen
   if (isFinished) {
-    const scorePct = resultData?.score_percentage ?? Math.round((Object.keys(selectedAnswers).filter(k => selectedAnswers[Number(k)] === questions[Number(k)].correct).length / questions.length) * 100);
-    const correctCount = resultData?.correct_count ?? Object.keys(selectedAnswers).filter(k => selectedAnswers[Number(k)] === questions[Number(k)].correct).length;
+    const localCorrect = Object.keys(selectedAnswers).filter(k => Number(selectedAnswers[Number(k)]) === Number(questions[Number(k)]?.correct)).length;
+    const localPct = questions.length > 0 ? Math.round((localCorrect / questions.length) * 100) : 0;
+    
+    const correctCount = (resultData?.correct_count !== undefined && resultData?.correct_count !== null && resultData?.correct_count > 0) ? resultData.correct_count : localCorrect;
+    const scorePct = (resultData?.score_percentage !== undefined && resultData?.score_percentage !== null && resultData?.score_percentage > 0) ? Math.round(resultData.score_percentage) : localPct;
 
     return (
       <div className="space-y-6 max-w-3xl mx-auto py-4 animate-fadeIn">
