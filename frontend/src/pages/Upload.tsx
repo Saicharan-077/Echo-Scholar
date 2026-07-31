@@ -133,17 +133,20 @@ export const Upload: React.FC = () => {
     return result;
   };
 
-  const extractTextFromFile = async (file: File, documentTitle: string): Promise<string> => {
-    // 1. Try backend PyMuPDF extraction first
+  const extractTextFromFile = async (file: File, documentTitle: string): Promise<{ text: string; ai_summary?: string }> => {
+    // 1. Try PyMuPDF API endpoint first
     try {
       const formData = new FormData();
       formData.append('file', file);
       const res = await api.post('/papers/extract-text', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 4000
+        timeout: 30000
       });
       if (res.data && res.data.text && res.data.text.trim().length > 20) {
-        return cleanPdfText(res.data.text, documentTitle);
+        return {
+          text: cleanPdfText(res.data.text, documentTitle),
+          ai_summary: res.data.ai_summary
+        };
       }
     } catch (err) {
       console.log('Backend PyMuPDF extraction fallback to client filter');
@@ -155,7 +158,7 @@ export const Upload: React.FC = () => {
       reader.onload = (e) => {
         const buffer = e.target?.result;
         if (!buffer) {
-          resolve(cleanPdfText('', documentTitle));
+          resolve({ text: cleanPdfText('', documentTitle) });
           return;
         }
         let rawText = '';
@@ -167,7 +170,7 @@ export const Upload: React.FC = () => {
           rawText = decoder.decode(bytes);
         }
 
-        resolve(cleanPdfText(rawText, documentTitle));
+        resolve({ text: cleanPdfText(rawText, documentTitle) });
       };
       reader.readAsArrayBuffer(file);
     });
@@ -181,10 +184,12 @@ export const Upload: React.FC = () => {
     setUploadProgress(30);
 
     // Extract real text from file
-    const realExtractedText = await extractTextFromFile(selectedFile, title);
+    const extractedData = await extractTextFromFile(selectedFile, title);
+    const realExtractedText = extractedData.text;
+    const aiSummaryResult = extractedData.ai_summary;
     const textParagraphs = realExtractedText.split('\n\n').filter(p => p.trim().length > 15);
 
-    const sec1Text = textParagraphs.slice(0, 5).join('\n\n') || `Parsed text from ${selectedFile.name}. Vector embeddings generated for RAG search & Vox mentorship.`;
+    const sec1Text = aiSummaryResult || textParagraphs.slice(0, 5).join('\n\n') || `Parsed text from ${selectedFile.name}. Vector embeddings generated for RAG search & Vox mentorship.`;
     const sec2Text = textParagraphs.slice(5, 12).join('\n\n') || `Detailed extracted sections and technical content from ${selectedFile.name}.`;
     const sec3Text = textParagraphs.slice(12, 20).join('\n\n') || `Synthesized key takeaways, project highlights, and competencies from ${selectedFile.name}.`;
 
