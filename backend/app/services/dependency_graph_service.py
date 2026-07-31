@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X - Concept Dependency Graph Service
+EchoXScholar - Concept Dependency Graph Service
 """
 from typing import List, Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession

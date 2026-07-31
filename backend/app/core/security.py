@@ -75,7 +75,7 @@ async def get_current_user(
             if user:
                 return user
 
-    demo_user = await user_crud.get_user_by_email(db, email="demo@EchoScholar.ai")
+    demo_user = await user_crud.get_user_by_email(db, email="demo@EchoXScholar.ai")
     if demo_user:
         return demo_user
 

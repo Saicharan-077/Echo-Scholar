@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X - AI Generation Service
+EchoXScholar - AI Generation Service
 Handles all document-grounded AI generation: summaries, notes, flashcards, quizzes, flowcharts.
 All generation functions pass actual document text to Gemini with proper system instructions.
 """
@@ -331,7 +331,7 @@ TEXT:
 
     async def chat(self, message: str, context: str, chat_history: Optional[List[Dict[str, str]]] = None) -> tuple:
         """Answer questions grounded in the document context."""
-        system = f"""You are EchoScholar AI, an expert research assistant.
+        system = f"""You are EchoXScholar AI, an expert research assistant.
 Answer questions ONLY based on the provided document context.
 If the answer is not in the context, say: "This specific information is not covered in the uploaded document."
 Be precise and cite specific parts of the context when possible.

@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X - Personalized Learning Path API Routes
+EchoXScholar - Personalized Learning Path API Routes
 """
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession

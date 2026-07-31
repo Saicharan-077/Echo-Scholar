@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X - Learning DNA & Cognitive Twin Engine
+EchoXScholar - Learning DNA & Cognitive Twin Engine
 """
 from typing import Dict, Any, Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession

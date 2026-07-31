@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar AI Backend - FastAPI Application
+EchoXScholar AI Backend - FastAPI Application
 """
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
@@ -19,7 +19,7 @@ from app.services.seed_data_service import SeedDataService
 async def lifespan(app: FastAPI):
     """Application lifespan handler."""
     # Startup
-    print("Starting EchoScholar AI Backend...")
+    print("Starting EchoXScholar AI Backend...")
     await init_db()
     
     # Auto-seed production demo user accounts
@@ -32,14 +32,14 @@ async def lifespan(app: FastAPI):
         
     yield
     # Shutdown
-    print("Shutting down EchoScholar AI Backend...")
+    print("Shutting down EchoXScholar AI Backend...")
 
 
 # Create FastAPI app
 app = FastAPI(
-    title="EchoScholar X API",
+    title="EchoXScholar API",
     description="""
-    Backend API for EchoScholar X - Cognitive Twin AI Personal Learning Companion
+    Backend API for EchoXScholar - Cognitive Twin AI Personal Learning Companion
     """,
     version="2.0.0",
     lifespan=lifespan,
@@ -64,7 +64,7 @@ async def health_check():
     """Health check endpoint."""
     return {
         "status": "healthy",
-        "service": "EchoScholar X API",
+        "service": "EchoXScholar API",
         "version": "2.0.0"
     }
 
@@ -74,7 +74,7 @@ async def health_check():
 async def root():
     """Root endpoint."""
     return {
-        "message": "Welcome to EchoScholar X API",
+        "message": "Welcome to EchoXScholar API",
         "docs": "/docs",
         "health": "/health"
     }

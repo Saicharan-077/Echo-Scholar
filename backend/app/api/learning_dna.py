@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X - Learning DNA API Routes
+EchoXScholar - Learning DNA API Routes
 """
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession

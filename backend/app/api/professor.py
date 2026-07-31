@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X - Voice AI Professor API Routes
+EchoXScholar - Voice AI Professor API Routes
 """
 from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.ext.asyncio import AsyncSession

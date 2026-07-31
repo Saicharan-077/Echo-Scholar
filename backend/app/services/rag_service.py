@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X - Local Vector RAG Engine
+EchoXScholar - Local Vector RAG Engine
 Implements: chunking → embedding → storage → cosine similarity search
 Uses Google Gemini text-embedding-004 model (available in v1beta).
 """

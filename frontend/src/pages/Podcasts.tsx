@@ -21,7 +21,7 @@ export const Podcasts: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'audio' | 'transcript' | 'quiz'>('audio');
 
   const demoScript = [
-    { time: '0:05', speaker: 'Prabhat', text: "Welcome back to EchoScholar AI! Today we're breaking down Transformer Architecture and Self-Attention mechanisms." },
+    { time: '0:05', speaker: 'Prabhat', text: "Welcome back to EchoXScholar AI! Today we're breaking down Transformer Architecture and Self-Attention mechanisms." },
     { time: '0:24', speaker: 'Neerja', text: "That's right, Prabhat. Multi-Head Attention allows the model to jointly attend to information from different representation subspaces." },
     { time: '0:45', speaker: 'Prabhat', text: "Notice how matrix multiplication converts query and key vectors into attention weight matrices!" },
     { time: '1:10', speaker: 'Neerja', text: "Exactly. Without positional encoding, the Transformer would treat sequences as an unordered bag of words." },

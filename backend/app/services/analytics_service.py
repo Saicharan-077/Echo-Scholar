@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X - Learning Analytics Engine
+EchoXScholar - Learning Analytics Engine
 """
 from typing import Dict, Any
 from datetime import datetime, timedelta

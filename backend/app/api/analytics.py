@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X - Learning Analytics API Routes
+EchoXScholar - Learning Analytics API Routes
 """
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession

@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X - Vector Memory & RAG Retrieval Engine
+EchoXScholar - Vector Memory & RAG Retrieval Engine
 """
 from typing import List, Dict, Any, Optional
 from sqlalchemy.ext.asyncio import AsyncSession

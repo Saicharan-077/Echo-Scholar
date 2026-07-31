@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     port: int = 8000
     
     # Database
-    database_url: str = "sqlite+aiosqlite:///./EchoScholar.db"
+    database_url: str = "sqlite+aiosqlite:///./EchoXScholar.db"
     
     # Supabase (Optional APIs and DB Configuration)
     supabase_url: str = ""

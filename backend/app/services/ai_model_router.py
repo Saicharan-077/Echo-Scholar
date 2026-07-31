@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X - Unified AI Model Router
+EchoXScholar - Unified AI Model Router
 Handles all AI interactions with proper Gemini API calls.
 System instruction and user prompt are always separated properly.
 """

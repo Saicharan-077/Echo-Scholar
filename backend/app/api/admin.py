@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X - Admin Management API Routes
+EchoXScholar - Admin Management API Routes
 """
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,7 +16,7 @@ router = APIRouter(prefix="/admin", tags=["Admin Oversight"])
 
 
 def require_admin(current_user: User = Depends(get_current_user)):
-    if current_user.role != UserRole.ADMIN and current_user.email != "admin@EchoScholar.ai":
+    if current_user.role != UserRole.ADMIN and current_user.email != "admin@EchoXScholar.ai":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin privileges required"

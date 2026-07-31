@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X - Data Seeding Service for Demo Accounts
+EchoXScholar - Data Seeding Service for Demo Accounts
 """
 from datetime import datetime, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,11 +28,11 @@ class SeedDataService:
     @staticmethod
     async def seed_all_demo_data(db: AsyncSession):
         demo_accounts = [
-            ("demo@EchoScholar.ai", "Demo Student", "Current Semester", "Computer Science & AI", 1450, 3, 5, 240, 75.0, 68.0),
-            ("advanced@EchoScholar.ai", "Advanced Student", "Final Year", "Computer Science & Engineering", 3200, 5, 14, 520, 92.0, 88.0),
-            ("beginner@EchoScholar.ai", "Beginner Student", "First Year", "Information Technology", 450, 1, 2, 80, 45.0, 50.0),
-            ("placement@EchoScholar.ai", "Placement Candidate", "Final Year", "AI & Data Science", 2100, 4, 8, 380, 84.0, 82.0),
-            ("admin@EchoScholar.ai", "Admin Quality Lead", "Administration", "System Admin", 5000, 10, 30, 990, 99.0, 99.0),
+            ("demo@EchoXScholar.ai", "Demo Student", "Current Semester", "Computer Science & AI", 1450, 3, 5, 240, 75.0, 68.0),
+            ("advanced@EchoXScholar.ai", "Advanced Student", "Final Year", "Computer Science & Engineering", 3200, 5, 14, 520, 92.0, 88.0),
+            ("beginner@EchoXScholar.ai", "Beginner Student", "First Year", "Information Technology", 450, 1, 2, 80, 45.0, 50.0),
+            ("placement@EchoXScholar.ai", "Placement Candidate", "Final Year", "AI & Data Science", 2100, 4, 8, 380, 84.0, 82.0),
+            ("admin@EchoXScholar.ai", "Admin Quality Lead", "Administration", "System Admin", 5000, 10, 30, 990, 99.0, 99.0),
         ]
 
         for email, full_name, sem, branch, xp, level, streak, coins, knowledge, readiness in demo_accounts:

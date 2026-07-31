@@ -17,7 +17,7 @@ async def test_chat(request: TestChatRequest):
         # Use Groq to respond
         response, _ = await openai_service.chat(
             message=request.message,
-            context="This is a test. You are EchoScholar AI assistant.",
+            context="This is a test. You are EchoXScholar AI assistant.",
             chat_history=[]
         )
         return TestChatResponse(message=response)

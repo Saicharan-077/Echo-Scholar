@@ -75,7 +75,7 @@ export const DiscoverHub: React.FC<DiscoverHubProps> = ({ onOpenSearch }) => {
           
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-sm font-semibold shadow-xs">
             <Sparkles className="w-4 h-4" />
-            <span>EchoScholar AI — Research & Learning Operating System</span>
+            <span>EchoXScholar AI — Research & Learning Operating System</span>
           </div>
 
           <h1 className="text-4xl sm:text-6xl font-extrabold text-gray-900 tracking-tight leading-[1.1]">

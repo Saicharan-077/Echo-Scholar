@@ -1,5 +1,5 @@
 ﻿"""
-EchoScholar X - Live Lecture Assistant API Routes
+EchoXScholar - Live Lecture Assistant API Routes
 """
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession

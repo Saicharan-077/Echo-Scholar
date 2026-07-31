@@ -1,4 +1,4 @@
-﻿# 🎙️ EchoScholar AI
+﻿# 🎙️ EchoXScholar AI
 
 > **An AI-powered research platform that transforms academic papers into interactive audio podcasts and enables intelligent Q&A with your documents.**
 
@@ -19,7 +19,7 @@
 
 ## Overview
 
-EchoScholar AI allows researchers, students, and academics to:
+EchoXScholar AI allows researchers, students, and academics to:
 - Upload PDF research papers
 - Automatically generate AI-narrated audio podcasts from those papers
 - Ask questions and get intelligent answers grounded in the paper content (RAG-based Q&A)
@@ -141,7 +141,7 @@ HOST=0.0.0.0
 PORT=8000
 
 # Database
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/EchoScholar
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/EchoXScholar
 # Or use Supabase connection string
 
 # JWT Authentication
